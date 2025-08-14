@@ -1,0 +1,111 @@
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create families table
+CREATE TABLE IF NOT EXISTS families (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create family_members table
+CREATE TABLE IF NOT EXISTS family_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    date_of_birth DATE,
+    gender VARCHAR(20) CHECK (gender IN ('male', 'female', 'other', 'prefer_not_to_say')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create family_relationships table for multiple relationships
+CREATE TABLE IF NOT EXISTS family_relationships (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    related_member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    relationship_type VARCHAR(50) NOT NULL CHECK (relationship_type IN (
+        'Self', 'Mother', 'Father', 'Daughter', 'Son', 'Sister', 'Brother',
+        'Husband', 'Wife', 'Grandmother', 'Grandfather', 'Granddaughter', 'Grandson',
+        'Aunt', 'Uncle', 'Cousin', 'Spouse'
+    )),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(member_id, related_member_id, relationship_type)
+);
+
+-- Create health_vitals table
+CREATE TABLE IF NOT EXISTS health_vitals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    vital_type VARCHAR(50) NOT NULL CHECK (vital_type IN ('blood_pressure', 'blood_sugar', 'oxygen', 'weight', 'temperature', 'heart_rate', 'other')),
+    value DECIMAL(10,2) NOT NULL,
+    unit VARCHAR(20) NOT NULL,
+    notes TEXT,
+    recorded_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create medical_reports table
+CREATE TABLE IF NOT EXISTS medical_reports (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    report_type VARCHAR(50) NOT NULL CHECK (report_type IN ('blood_test', 'x_ray', 'prescription', 'vaccination', 'consultation', 'other')),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    file_path VARCHAR(500) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_size BIGINT NOT NULL,
+    report_date DATE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_family_id ON users(family_id);
+CREATE INDEX IF NOT EXISTS idx_family_members_family_id ON family_members(family_id);
+CREATE INDEX IF NOT EXISTS idx_family_members_user_id ON family_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_family_relationships_family_id ON family_relationships(family_id);
+CREATE INDEX IF NOT EXISTS idx_family_relationships_member_id ON family_relationships(member_id);
+CREATE INDEX IF NOT EXISTS idx_family_relationships_related_member_id ON family_relationships(related_member_id);
+CREATE INDEX IF NOT EXISTS idx_family_relationships_type ON family_relationships(relationship_type);
+CREATE INDEX IF NOT EXISTS idx_health_vitals_member_id ON health_vitals(member_id);
+CREATE INDEX IF NOT EXISTS idx_health_vitals_recorded_at ON health_vitals(recorded_at);
+CREATE INDEX IF NOT EXISTS idx_health_vitals_vital_type ON health_vitals(vital_type);
+CREATE INDEX IF NOT EXISTS idx_medical_reports_member_id ON medical_reports(member_id);
+CREATE INDEX IF NOT EXISTS idx_medical_reports_report_date ON medical_reports(report_date);
+CREATE INDEX IF NOT EXISTS idx_medical_reports_report_type ON medical_reports(report_type);
+
+-- Create updated_at trigger function
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create triggers for updated_at
+CREATE TRIGGER update_families_updated_at BEFORE UPDATE ON families FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_family_members_updated_at BEFORE UPDATE ON family_members FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_family_relationships_updated_at BEFORE UPDATE ON family_relationships FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_health_vitals_updated_at BEFORE UPDATE ON health_vitals FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_medical_reports_updated_at BEFORE UPDATE ON medical_reports FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

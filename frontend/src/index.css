@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-aqua-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  }
+  
+  .input-field {
+    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  }
+  
+  .vital-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .health-indicator {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .health-good {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .health-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .health-danger {
+    @apply bg-red-100 text-red-800;
+  }
+}
+
+/* Custom styles */
+.btn-primary {
+  @apply bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent;
+}
+
+/* Custom styles for clickable member cards */
+.member-card {
+  @apply bg-white border border-gray-200 rounded shadow-sm h-full p-2 transition-all duration-200;
+}
+
+.member-card:hover {
+  @apply shadow-md border-gray-300 transform scale-105;
+}
+
+.member-card.selected {
+  @apply ring-2 ring-teal-500 ring-offset-2 shadow-lg;
+}
+
+/* Canvas container styles */
+.canvas-container {
+  @apply relative overflow-auto;
+  min-height: 400px;
+}
+
+/* Member card positioning */
+.member-card-container {
+  @apply absolute cursor-pointer transition-all duration-200;
+}
+
+.member-card-container:hover {
+  @apply z-10;
+}
+
+.member-card-container.selected {
+  @apply z-20;
+}
+
+/* Circular avatar styles */
+.avatar-circle {
+  @apply w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md border-2 transition-all duration-200;
+}
+
+.avatar-circle:hover {
+  @apply transform scale-110 shadow-lg;
+}
+
+.avatar-circle.self {
+  @apply border-4 border-yellow-400;
+}
+
+.avatar-circle.selected {
+  @apply ring-2 ring-teal-500 ring-offset-2;
+}
+
+/* Gender color schemes */
+.gender-male {
+  background-color: #DBEAFE;
+  color: #3B82F6;
+}
+
+.gender-female {
+  background-color: #FCE7F3;
+  color: #EC4899;
+}
+
+.gender-other {
+  background-color: #EDE9FE;
+  color: #8B5CF6;
+}
+
+.gender-default {
+  background-color: #F3F4F6;
+  color: #6B7280;
+}
