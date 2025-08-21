@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -284,6 +284,7 @@ const REPORT_TYPES = {
 const MemberPage = () => {
   const { memberName } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -593,7 +594,12 @@ const MemberPage = () => {
   const [allMembers, setAllMembers] = useState([]);
   const [healthVitals, setHealthVitals] = useState([]);
   const [medicalReports, setMedicalReports] = useState([]);
-  const [activeTab, setActiveTab] = useState('vitals');
+  // Initialize activeTab based on URL parameter
+  const tabParam = searchParams.get('tab');
+  const initialTab = tabParam === 'medical-reports' ? 'reports' : 
+                    tabParam === 'documents' ? 'documents' : 
+                    tabParam === 'health-vitals' ? 'vitals' : 'vitals';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [activeVitalSubTab, setActiveVitalSubTab] = useState('all');
   const [activeReportSubTab, setActiveReportSubTab] = useState('all');
   const [documents, setDocuments] = useState([]);
