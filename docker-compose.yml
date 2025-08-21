@@ -10,15 +10,16 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
     networks:
       - family-health-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d family_health_tracker"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   backend:
     build:
@@ -41,6 +42,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        while ! pg_isready -h postgres -U postgres -d family_health_tracker; do
+          sleep 2;
+        done &&
+        echo 'Database is ready!' &&
+        npm start
+      "
     networks:
       - family-health-network
     restart: unless-stopped
