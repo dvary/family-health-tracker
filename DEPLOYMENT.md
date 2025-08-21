@@ -71,7 +71,7 @@ This guide covers deploying the Family Health Tracker application on Ubuntu serv
 
 5. **Deploy the application:**
    ```bash
-   docker-compose -f docker-compose.prod.yml up -d --build
+   docker-compose up -d --build
    ```
 
 ## 🐳 Portainer Deployment
@@ -85,7 +85,7 @@ This guide covers deploying the Family Health Tracker application on Ubuntu serv
    - Build method: `Repository`
    - Repository URL: `https://github.com/dvary/family-health-tracker.git`
    - Repository reference: `main`
-   - Compose path: `docker-compose.prod.yml`
+   - Compose path: `docker-compose.yml`
 
 3. **Add environment variables:**
    ```yaml
@@ -108,7 +108,7 @@ This guide covers deploying the Family Health Tracker application on Ubuntu serv
    Build method: Repository
    Repository URL: https://github.com/dvary/family-health-tracker.git
    Repository reference: main
-   Compose path: docker-compose.prod.yml
+   Compose path: docker-compose.yml
    ```
 
 3. **Add environment variables in the web interface**
@@ -159,7 +159,7 @@ For production, replace the self-signed certificates with real ones:
 
 3. **Restart the stack:**
    ```bash
-   docker-compose -f docker-compose.prod.yml restart nginx
+   docker-compose restart nginx
    ```
 
 ## 🔒 Security Considerations
@@ -196,7 +196,7 @@ BACKUP_DIR="/backups/family-health-tracker"
 mkdir -p $BACKUP_DIR
 
 # Backup database
-docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U postgres family_health_tracker > $BACKUP_DIR/db_backup_$DATE.sql
+docker-compose exec -T postgres pg_dump -U postgres family_health_tracker > $BACKUP_DIR/db_backup_$DATE.sql
 
 # Backup uploads
 tar -czf $BACKUP_DIR/uploads_backup_$DATE.tar.gz uploads/
@@ -218,19 +218,19 @@ Add to crontab:
 The application includes health checks for all services. Monitor them with:
 
 ```bash
-docker-compose -f docker-compose.prod.yml ps
+docker-compose ps
 ```
 
 ### Logs
 
 View logs for all services:
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose logs -f
 ```
 
 View logs for specific service:
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f backend
+docker-compose logs -f backend
 ```
 
 ### Updates
@@ -242,8 +242,8 @@ To update the application:
 git pull origin main
 
 # Rebuild and restart
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose down
+docker-compose up -d --build
 ```
 
 ## 🆘 Troubleshooting
@@ -253,12 +253,12 @@ docker-compose -f docker-compose.prod.yml up -d --build
 1. **Database connection errors:**
    - Check if PostgreSQL container is running
    - Verify environment variables
-   - Check database logs: `docker-compose -f docker-compose.prod.yml logs postgres`
+   - Check database logs: `docker-compose logs postgres`
 
 2. **Frontend not loading:**
    - Check if frontend container is running
    - Verify REACT_APP_API_URL environment variable
-   - Check nginx logs: `docker-compose -f docker-compose.prod.yml logs nginx`
+   - Check nginx logs: `docker-compose logs nginx`
 
 3. **File upload issues:**
    - Check upload directory permissions
@@ -269,19 +269,19 @@ docker-compose -f docker-compose.prod.yml up -d --build
 
 ```bash
 # Check container status
-docker-compose -f docker-compose.prod.yml ps
+docker-compose ps
 
 # View logs
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose logs -f
 
 # Restart specific service
-docker-compose -f docker-compose.prod.yml restart backend
+docker-compose restart backend
 
 # Access database
-docker-compose -f docker-compose.prod.yml exec postgres psql -U postgres -d family_health_tracker
+docker-compose exec postgres psql -U postgres -d family_health_tracker
 
 # Backup database
-docker-compose -f docker-compose.prod.yml exec postgres pg_dump -U postgres family_health_tracker > backup.sql
+docker-compose exec postgres pg_dump -U postgres family_health_tracker > backup.sql
 ```
 
 ## 📞 Support
