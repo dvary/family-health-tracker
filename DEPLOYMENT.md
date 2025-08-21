@@ -85,7 +85,7 @@ This guide covers deploying the Family Health Tracker application on Ubuntu serv
    - Build method: `Repository`
    - Repository URL: `https://github.com/dvary/family-health-tracker.git`
    - Repository reference: `main`
-   - Compose path: `portainer-stack.yml`
+   - Compose path: `docker-compose.prod.yml`
 
 3. **Add environment variables:**
    ```yaml
@@ -108,7 +108,7 @@ This guide covers deploying the Family Health Tracker application on Ubuntu serv
    Build method: Repository
    Repository URL: https://github.com/dvary/family-health-tracker.git
    Repository reference: main
-   Compose path: portainer-stack.yml
+   Compose path: docker-compose.prod.yml
    ```
 
 3. **Add environment variables in the web interface**
