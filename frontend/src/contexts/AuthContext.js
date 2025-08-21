@@ -24,9 +24,11 @@ export const AuthProvider = ({ children }) => {
     }
     
     // Set base URL for axios
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-    axios.defaults.baseURL = apiUrl;
-    console.log('API Base URL set to:', apiUrl);
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    // Ensure no trailing slash to prevent double slashes
+    const cleanApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+    axios.defaults.baseURL = cleanApiUrl;
+    console.log('API Base URL set to:', cleanApiUrl);
   }, []);
 
   // Check if user is logged in on app start
@@ -35,7 +37,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('/api/auth/profile');
+          const response = await axios.get('/auth/profile');
           setUser(response.data.user);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       console.log('Attempting login with:', email);
-      const response = await axios.post('/api/auth/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password
       });
@@ -90,7 +92,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await axios.post('/auth/register', userData);
       
       const { token, user } = response.data;
       

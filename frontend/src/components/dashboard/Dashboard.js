@@ -3,33 +3,176 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Vital types configuration with units
+// Vital types configuration with units and reference ranges
 const VITAL_TYPES = {
-  blood_pressure: { label: 'Blood Pressure', unit: 'mmHg', placeholder: '120/80' },
-  blood_sugar: { label: 'Blood Sugar', unit: 'mg/dL', placeholder: '100' },
-  oxygen: { label: 'Oxygen Saturation', unit: '%', placeholder: '98' },
-  weight: { label: 'Weight', unit: 'kg', placeholder: '70' },
-  height: { label: 'Height', unit: 'cm', placeholder: '170' },
-  temperature: { label: 'Temperature', unit: '°C', placeholder: '37' },
-  heart_rate: { label: 'Heart Rate', unit: 'bpm', placeholder: '72' },
-  bmi: { label: 'BMI', unit: 'kg/m²', placeholder: '24.2' },
-  cholesterol: { label: 'Cholesterol', unit: 'mg/dL', placeholder: '200' },
-  hemoglobin: { label: 'Hemoglobin', unit: 'g/dL', placeholder: '14' },
-  platelet_count: { label: 'Platelet Count', unit: '/μL', placeholder: '250000' },
-  white_blood_cells: { label: 'White Blood Cells', unit: '/μL', placeholder: '7000' },
-  red_blood_cells: { label: 'Red Blood Cells', unit: 'M/μL', placeholder: '5.0' },
-  creatinine: { label: 'Creatinine', unit: 'mg/dL', placeholder: '1.0' },
-  urea: { label: 'Urea', unit: 'mg/dL', placeholder: '20' },
-  bilirubin: { label: 'Bilirubin', unit: 'mg/dL', placeholder: '0.8' },
-  sodium: { label: 'Sodium', unit: 'mEq/L', placeholder: '140' },
-  potassium: { label: 'Potassium', unit: 'mEq/L', placeholder: '4.0' },
-  calcium: { label: 'Calcium', unit: 'mg/dL', placeholder: '9.5' },
-  vitamin_d: { label: 'Vitamin D', unit: 'ng/mL', placeholder: '30' },
-  vitamin_b12: { label: 'Vitamin B12', unit: 'pg/mL', placeholder: '500' },
-  thyroid_tsh: { label: 'Thyroid TSH', unit: 'μIU/mL', placeholder: '2.5' },
-  thyroid_t3: { label: 'Thyroid T3', unit: 'ng/dL', placeholder: '120' },
-  thyroid_t4: { label: 'Thyroid T4', unit: 'μg/dL', placeholder: '1.2' },
-  other: { label: 'Other', unit: '', placeholder: 'Enter value' }
+  height: { 
+    label: 'Height', 
+    unit: 'cm', 
+    placeholder: '170',
+    ranges: {
+      normal: { min: 140, max: 200 },
+      display: '140-200'
+    }
+  },
+  weight: { 
+    label: 'Weight', 
+    unit: 'kg', 
+    placeholder: '70',
+    ranges: {
+      normal: { min: 40, max: 120 },
+      display: '40-120'
+    }
+  },
+  bmi: { 
+    label: 'BMI', 
+    unit: 'kg/m²', 
+    placeholder: '24.2', 
+    calculated: true,
+    ranges: {
+      underweight: { min: 0, max: 18.4 },
+      normal: { min: 18.5, max: 24.9 },
+      overweight: { min: 25, max: 29.9 },
+      obese: { min: 30, max: 100 },
+      display: '18.5-24.9'
+    }
+  },
+  cholesterol: { 
+    label: 'Cholesterol', 
+    unit: 'mg/dL', 
+    placeholder: '200',
+    ranges: {
+      optimal: { min: 0, max: 199 },
+      borderline: { min: 200, max: 239 },
+      high: { min: 240, max: 500 },
+      display: '<200'
+    }
+  },
+  hemoglobin: { 
+    label: 'Hemoglobin', 
+    unit: 'g/dL', 
+    placeholder: '14',
+    ranges: {
+      male: { min: 13.8, max: 17.2 },
+      female: { min: 12.1, max: 15.1 },
+      display: 'M: 13.8-17.2, F: 12.1-15.1'
+    }
+  },
+  sgpt: { 
+    label: 'S.G.P.T.', 
+    unit: 'U/L', 
+    placeholder: '40',
+    ranges: {
+      normal: { min: 7, max: 56 },
+      display: '7-56'
+    }
+  },
+  sgot: { 
+    label: 'S.G.O.T.', 
+    unit: 'U/L', 
+    placeholder: '40',
+    ranges: {
+      normal: { min: 10, max: 40 },
+      display: '10-40'
+    }
+  },
+  vitamin_d: { 
+    label: 'Vitamin D', 
+    unit: 'ng/mL', 
+    placeholder: '30',
+    ranges: {
+      deficient: { min: 0, max: 19 },
+      insufficient: { min: 20, max: 29 },
+      sufficient: { min: 30, max: 100 },
+      display: '30-100'
+    }
+  },
+  thyroid_tsh: { 
+    label: 'Thyroid TSH', 
+    unit: 'μIU/mL', 
+    placeholder: '2.5',
+    ranges: {
+      normal: { min: 0.27, max: 4.2 },
+      display: '0.27-4.2'
+    }
+  },
+  thyroid_t3: { 
+    label: 'Thyroid T3', 
+    unit: 'ng/dL', 
+    placeholder: '120',
+    ranges: {
+      normal: { min: 80, max: 200 },
+      display: '80-200'
+    }
+  },
+  thyroid_t4: { 
+    label: 'Thyroid T4', 
+    unit: 'μg/dL', 
+    placeholder: '1.2',
+    ranges: {
+      normal: { min: 5.1, max: 14.1 },
+      display: '5.1-14.1'
+    }
+  },
+  vitamin_b12: { 
+    label: 'Vitamin B12', 
+    unit: 'pg/mL', 
+    placeholder: '500',
+    ranges: {
+      deficient: { min: 0, max: 199 },
+      low: { min: 200, max: 299 },
+      normal: { min: 300, max: 900 },
+      display: '300-900'
+    }
+  },
+  calcium: { 
+    label: 'Calcium', 
+    unit: 'mg/dL', 
+    placeholder: '9.5',
+    ranges: {
+      normal: { min: 8.5, max: 10.2 },
+      display: '8.5-10.2'
+    }
+  },
+  hba1c: { 
+    label: 'HbA1c', 
+    unit: '%', 
+    placeholder: '5.7',
+    ranges: {
+      normal: { min: 0, max: 5.6 },
+      prediabetic: { min: 5.7, max: 6.4 },
+      diabetic: { min: 6.5, max: 15 },
+      display: '<5.7'
+    }
+  },
+  urea: { 
+    label: 'Urea', 
+    unit: 'mg/dL', 
+    placeholder: '20',
+    ranges: {
+      normal: { min: 6, max: 24 },
+      display: '6-24'
+    }
+  },
+  fasting_blood_glucose: { 
+    label: 'Fasting Blood Glucose', 
+    unit: 'mg/dL', 
+    placeholder: '100',
+    ranges: {
+      normal: { min: 70, max: 99 },
+      prediabetic: { min: 100, max: 125 },
+      diabetic: { min: 126, max: 300 },
+      display: '70-99'
+    }
+  },
+  creatinine: { 
+    label: 'Creatinine', 
+    unit: 'mg/dL', 
+    placeholder: '1.0',
+    ranges: {
+      normal: { min: 0.6, max: 1.4 },
+      display: '0.6-1.4'
+    }
+  }
 };
 
 // Report types configuration
@@ -88,6 +231,7 @@ const Dashboard = () => {
   const [editingMember, setEditingMember] = useState(null);
   const [showAddVitalModal, setShowAddVitalModal] = useState(false);
   const [showUploadReportModal, setShowUploadReportModal] = useState(false);
+  const [showUploadDocumentModal, setShowUploadDocumentModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -107,9 +251,15 @@ const Dashboard = () => {
   const [reportFormData, setReportFormData] = useState({
     reportType: '',
     reportSubType: '',
-    title: '',
     description: '',
     reportDate: new Date().toISOString().split('T')[0],
+    file: null
+  });
+
+  const [documentFormData, setDocumentFormData] = useState({
+    title: '',
+    description: '',
+    uploadDate: new Date().toISOString().split('T')[0],
     file: null
   });
   const navigate = useNavigate();
@@ -141,16 +291,47 @@ const Dashboard = () => {
     const age = ageData.age;
     const unit = ageData.unit;
     
+    // Calculate birth year based on age
+    const currentYear = new Date().getFullYear();
+    const birthYear = currentYear - age;
+    
     if (unit === 'month' || (unit === 'year' && age < 18)) {
-      return { group: 'Child', color: '#10B981', bgColor: '#D1FAE5', icon: '👶' };
-    } else if (age < 30) {
-      return { group: 'Young Adult', color: '#3B82F6', bgColor: '#DBEAFE', icon: '👨‍🎓' };
-    } else if (age < 50) {
-      return { group: 'Adult', color: '#8B5CF6', bgColor: '#EDE9FE', icon: '👨‍💼' };
-    } else if (age < 65) {
-      return { group: 'Middle Age', color: '#F59E0B', bgColor: '#FEF3C7', icon: '👨‍🦳' };
+      if (birthYear >= 2013) {
+        return { group: 'Generation Alpha', color: '#10B981', bgColor: '#D1FAE5', icon: '👶' };
+      } else if (birthYear >= 1997) {
+        return { group: 'Generation Z', color: '#3B82F6', bgColor: '#DBEAFE', icon: '👨‍🎓' };
+      } else if (birthYear >= 1981) {
+        return { group: 'Millennials', color: '#8B5CF6', bgColor: '#EDE9FE', icon: '👨‍💼' };
+      } else if (birthYear >= 1965) {
+        return { group: 'Generation X', color: '#F59E0B', bgColor: '#FEF3C7', icon: '👨‍🦳' };
+      } else if (birthYear >= 1946) {
+        return { group: 'Baby Boomers', color: '#EF4444', bgColor: '#FEE2E2', icon: '👴' };
+      } else if (birthYear >= 1928) {
+        return { group: 'Silent Generation', color: '#6B7280', bgColor: '#F3F4F6', icon: '👴' };
+      } else if (birthYear >= 1901) {
+        return { group: 'Greatest Generation', color: '#8B5CF6', bgColor: '#EDE9FE', icon: '👴' };
+      } else {
+        return { group: 'Lost Generation', color: '#6B7280', bgColor: '#F3F4F6', icon: '👴' };
+      }
     } else {
-      return { group: 'Senior', color: '#EF4444', bgColor: '#FEE2E2', icon: '👴' };
+      // For adults, use birth year directly
+      if (birthYear >= 2013) {
+        return { group: 'Generation Alpha', color: '#10B981', bgColor: '#D1FAE5', icon: '👶' };
+      } else if (birthYear >= 1997) {
+        return { group: 'Generation Z', color: '#3B82F6', bgColor: '#DBEAFE', icon: '👨‍🎓' };
+      } else if (birthYear >= 1981) {
+        return { group: 'Millennials', color: '#8B5CF6', bgColor: '#EDE9FE', icon: '👨‍💼' };
+      } else if (birthYear >= 1965) {
+        return { group: 'Generation X', color: '#F59E0B', bgColor: '#FEF3C7', icon: '👨‍🦳' };
+      } else if (birthYear >= 1946) {
+        return { group: 'Baby Boomers', color: '#EF4444', bgColor: '#FEE2E2', icon: '👴' };
+      } else if (birthYear >= 1928) {
+        return { group: 'Silent Generation', color: '#6B7280', bgColor: '#F3F4F6', icon: '👴' };
+      } else if (birthYear >= 1901) {
+        return { group: 'Greatest Generation', color: '#8B5CF6', bgColor: '#EDE9FE', icon: '👴' };
+      } else {
+        return { group: 'Lost Generation', color: '#6B7280', bgColor: '#F3F4F6', icon: '👴' };
+      }
     }
   }, []);
 
@@ -198,11 +379,14 @@ const Dashboard = () => {
   // Group members by age group
   const groupMembersByAge = useCallback((members) => {
     const groups = {
-      'Child': [],
-      'Young Adult': [],
-      'Adult': [],
-      'Middle Age': [],
-      'Senior': [],
+      'Generation Alpha': [],
+      'Generation Z': [],
+      'Millennials': [],
+      'Generation X': [],
+      'Baby Boomers': [],
+      'Silent Generation': [],
+      'Greatest Generation': [],
+      'Lost Generation': [],
       'Unknown': []
     };
 
@@ -228,7 +412,7 @@ const Dashboard = () => {
 
   const fetchMembers = async () => {
     try {
-      const response = await axios.get('/api/family/members');
+      const response = await axios.get('/family/members');
       setMembers(response.data.members);
     } catch (error) {
       toast.error('Failed to fetch family members');
@@ -241,19 +425,19 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       if (editingMember) {
-        await axios.put(`/api/family/members/${editingMember.id}`, formData);
+        await axios.put(`/family/members/${editingMember.id}`, formData);
         toast.success('Family member updated successfully');
         setEditingMember(null);
       } else {
         if (members.length === 0) {
-          await axios.post('/api/family/members/initial', {
+          await axios.post('/family/members/initial', {
             name: formData.name,
             dateOfBirth: formData.dateOfBirth,
             gender: formData.gender
           });
           toast.success('Initial family member added successfully');
         } else {
-          await axios.post('/api/family/members', formData);
+          await axios.post('/family/members', formData);
           toast.success('Family member added successfully');
         }
         setShowAddForm(false);
@@ -286,10 +470,15 @@ const Dashboard = () => {
     setShowUploadReportModal(true);
   };
 
+  const handleUploadDocumentFromDashboard = (member) => {
+    setSelectedMember(member);
+    setShowUploadDocumentModal(true);
+  };
+
   const handleAddVital = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/health/vitals', {
+      await axios.post('/health/vitals', {
         memberId: selectedMember.id,
         vitalType: vitalFormData.vitalType,
         value: parseFloat(vitalFormData.value),
@@ -321,12 +510,12 @@ const Dashboard = () => {
       if (reportFormData.reportSubType) {
         formData.append('reportSubType', reportFormData.reportSubType);
       }
-      formData.append('title', reportFormData.title);
+
       formData.append('description', reportFormData.description);
       formData.append('reportDate', reportFormData.reportDate);
       formData.append('file', reportFormData.file);
 
-      await axios.post('/api/health/reports', formData, {
+      await axios.post('/health/reports', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -347,6 +536,34 @@ const Dashboard = () => {
     }
   };
 
+  const handleUploadDocument = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('title', documentFormData.title);
+      formData.append('description', documentFormData.description);
+      formData.append('uploadDate', documentFormData.uploadDate);
+      formData.append('file', documentFormData.file);
+
+      await axios.post(`/health/documents/${selectedMember.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      toast.success('Document uploaded successfully');
+      setShowUploadDocumentModal(false);
+      setSelectedMember(null);
+      setDocumentFormData({
+        title: '',
+        description: '',
+        uploadDate: new Date().toISOString().split('T')[0],
+        file: null
+      });
+    } catch (error) {
+      toast.error('Failed to upload document');
+    }
+  };
+
   const handleEditMember = (member) => {
     setEditingMember(member);
     setFormData({
@@ -361,7 +578,7 @@ const Dashboard = () => {
   const handleDeleteMember = async (memberId) => {
     if (window.confirm('Are you sure you want to delete this family member?')) {
       try {
-        await axios.delete(`/api/family/members/${memberId}`);
+        await axios.delete(`/family/members/${memberId}`);
         toast.success('Family member deleted successfully');
         fetchMembers();
         setEditingMember(null);
@@ -381,7 +598,7 @@ const Dashboard = () => {
   }
 
   const groupedMembers = groupMembersByAge(members);
-  const ageGroupOrder = ['Child', 'Young Adult', 'Adult', 'Middle Age', 'Senior', 'Unknown'];
+  const ageGroupOrder = ['Generation Alpha', 'Generation Z', 'Millennials', 'Generation X', 'Baby Boomers', 'Silent Generation', 'Greatest Generation', 'Lost Generation', 'Unknown'];
 
   return (
     <div className="space-y-8">
@@ -478,9 +695,9 @@ const Dashboard = () => {
         <div className="space-y-8">
           {ageGroupOrder.map(groupName => {
             const groupMembers = groupedMembers[groupName];
-            if (groupMembers.length === 0) return null;
+            if (!groupMembers || groupMembers.length === 0) return null;
 
-                         const ageGroupInfo = getAgeGroupInfo(groupMembers[0]?.ageData);
+            const ageGroupInfo = getAgeGroupInfo(groupMembers[0]?.ageData);
             
             return (
               <div key={groupName} className="space-y-4">
@@ -490,7 +707,7 @@ const Dashboard = () => {
                   <span className="text-sm text-gray-500">({groupMembers.length} member{groupMembers.length !== 1 ? 's' : ''})</span>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                                      {groupMembers.map((member) => {
                      const ageData = member.ageData;
                      const ageGroupInfo = getAgeGroupInfo(ageData);
@@ -499,7 +716,7 @@ const Dashboard = () => {
                      return (
                        <div
                          key={member.id}
-                         className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                         className="bg-white rounded-xl shadow-md border border-gray-200 p-4 md:p-6 hover:shadow-xl transition-all duration-200 cursor-pointer hover:border-gray-300 transform hover:scale-[1.02]"
                          onClick={() => handleMemberClick(member)}
                        >
                          <div className="flex flex-col items-center text-center space-y-3">
@@ -519,11 +736,6 @@ const Dashboard = () => {
                              {member.name}
                            </div>
                            
-                           {/* Age */}
-                           <div className="text-sm text-gray-600">
-                             {ageData && ageData.display ? ageData.display : 'Age not set'}
-                           </div>
-                           
                            {/* Age Group Badge */}
                            <div 
                              className="px-3 py-1 rounded-full text-xs font-medium"
@@ -536,24 +748,42 @@ const Dashboard = () => {
                            </div>
                            
                            {/* Action Buttons */}
-                           <div className="flex space-x-2 mt-3">
+                           <div className="flex flex-wrap gap-2 mt-3">
                              <button
                                onClick={(e) => {
                                  e.stopPropagation();
                                  handleAddVitalFromDashboard(member);
                                }}
-                               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium"
+                               className="flex items-center space-x-1 bg-gradient-to-r from-teal-300 to-teal-400 hover:from-teal-400 hover:to-teal-500 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                              >
-                               Add Vital
+                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                               </svg>
+                               <span>Vitals</span>
                              </button>
                              <button
                                onClick={(e) => {
                                  e.stopPropagation();
                                  handleUploadReportFromDashboard(member);
                                }}
-                               className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium"
+                               className="flex items-center space-x-1 bg-gradient-to-r from-amber-300 to-amber-400 hover:from-amber-400 hover:to-amber-500 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                              >
-                               Add Report
+                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                               </svg>
+                               <span>Report</span>
+                             </button>
+                             <button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleUploadDocumentFromDashboard(member);
+                               }}
+                               className="flex items-center space-x-1 bg-gradient-to-r from-rose-300 to-rose-400 hover:from-rose-400 hover:to-rose-500 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                             >
+                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                               </svg>
+                               <span>Document</span>
                              </button>
                            </div>
                            
@@ -722,17 +952,7 @@ const Dashboard = () => {
                   </select>
                 </div>
               )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input
-                  type="text"
-                  value={reportFormData.title}
-                  onChange={(e) => setReportFormData({...reportFormData, title: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="Report title"
-                  required
-                />
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
                 <input
@@ -776,9 +996,82 @@ const Dashboard = () => {
                     setReportFormData({
                       reportType: '',
                       reportSubType: '',
-                      title: '',
                       description: '',
                       reportDate: new Date().toISOString().split('T')[0],
+                      file: null
+                    });
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Document Modal */}
+      {showUploadDocumentModal && selectedMember && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Upload Document for {selectedMember.name}</h2>
+            <form onSubmit={handleUploadDocument} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  value={documentFormData.title}
+                  onChange={(e) => setDocumentFormData({...documentFormData, title: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  placeholder="Document title"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload Date</label>
+                <input
+                  type="date"
+                  value={documentFormData.uploadDate}
+                  onChange={(e) => setDocumentFormData({...documentFormData, uploadDate: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+                <input
+                  type="file"
+                  onChange={(e) => setDocumentFormData({...documentFormData, file: e.target.files[0]})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  accept=".pdf"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Only PDF files are accepted (max 10MB)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                <textarea
+                  value={documentFormData.description}
+                  onChange={(e) => setDocumentFormData({...documentFormData, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  rows="3"
+                  placeholder="Document description..."
+                />
+              </div>
+              <div className="flex space-x-3">
+                <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
+                  Upload Document
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUploadDocumentModal(false);
+                    setSelectedMember(null);
+                    setDocumentFormData({
+                      title: '',
+                      description: '',
+                      uploadDate: new Date().toISOString().split('T')[0],
                       file: null
                     });
                   }}

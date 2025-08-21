@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS family_relationships (
 CREATE TABLE IF NOT EXISTS health_vitals (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
-    vital_type VARCHAR(50) NOT NULL CHECK (vital_type IN ('blood_pressure', 'blood_sugar', 'oxygen', 'weight', 'temperature', 'heart_rate', 'other')),
+    vital_type VARCHAR(50) NOT NULL CHECK (vital_type IN ('height', 'weight', 'cholesterol', 'hemoglobin', 'sgpt', 'sgot', 'vitamin_d', 'thyroid_tsh', 'thyroid_t3', 'thyroid_t4', 'vitamin_b12', 'calcium', 'hba1c', 'urea', 'fasting_blood_glucose', 'creatinine')),
     value DECIMAL(10,2) NOT NULL,
     unit VARCHAR(20) NOT NULL,
     notes TEXT,
@@ -66,13 +66,28 @@ CREATE TABLE IF NOT EXISTS health_vitals (
 CREATE TABLE IF NOT EXISTS medical_reports (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
-    report_type VARCHAR(50) NOT NULL CHECK (report_type IN ('blood_test', 'x_ray', 'prescription', 'vaccination', 'consultation', 'other')),
+    report_type VARCHAR(50) NOT NULL CHECK (report_type IN ('lab_report', 'prescription_consultation', 'vaccination', 'hospital_records')),
+    report_sub_type VARCHAR(100),
     title VARCHAR(255) NOT NULL,
     description TEXT,
     file_path VARCHAR(500) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_size BIGINT NOT NULL,
     report_date DATE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create documents table
+CREATE TABLE IF NOT EXISTS documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    file_path VARCHAR(500) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_size BIGINT NOT NULL,
+    upload_date DATE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -92,6 +107,8 @@ CREATE INDEX IF NOT EXISTS idx_health_vitals_vital_type ON health_vitals(vital_t
 CREATE INDEX IF NOT EXISTS idx_medical_reports_member_id ON medical_reports(member_id);
 CREATE INDEX IF NOT EXISTS idx_medical_reports_report_date ON medical_reports(report_date);
 CREATE INDEX IF NOT EXISTS idx_medical_reports_report_type ON medical_reports(report_type);
+CREATE INDEX IF NOT EXISTS idx_documents_member_id ON documents(member_id);
+CREATE INDEX IF NOT EXISTS idx_documents_upload_date ON documents(upload_date);
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -109,3 +126,4 @@ CREATE TRIGGER update_family_members_updated_at BEFORE UPDATE ON family_members 
 CREATE TRIGGER update_family_relationships_updated_at BEFORE UPDATE ON family_relationships FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_health_vitals_updated_at BEFORE UPDATE ON health_vitals FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_medical_reports_updated_at BEFORE UPDATE ON medical_reports FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

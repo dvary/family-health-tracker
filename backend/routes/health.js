@@ -100,10 +100,8 @@ router.post('/vitals', [
   authenticateToken,
   body('memberId').isUUID(),
   body('vitalType').isIn([
-    'blood_pressure', 'blood_sugar', 'oxygen', 'weight', 'height', 'temperature', 
-    'heart_rate', 'bmi', 'cholesterol', 'hemoglobin', 'platelet_count', 'white_blood_cells',
-    'red_blood_cells', 'creatinine', 'urea', 'bilirubin', 'sodium', 'potassium', 'calcium',
-    'vitamin_d', 'vitamin_b12', 'thyroid_tsh', 'thyroid_t3', 'thyroid_t4', 'other'
+    'height', 'weight', 'cholesterol', 'hemoglobin', 'sgpt', 'sgot', 'vitamin_d', 'thyroid_tsh', 
+    'thyroid_t3', 'thyroid_t4', 'vitamin_b12', 'calcium', 'hba1c', 'urea', 'fasting_blood_glucose', 'creatinine'
   ]),
   body('value').isNumeric(),
   body('unit').notEmpty().trim(),
@@ -159,10 +157,8 @@ router.post('/vitals', [
 router.put('/vitals/:vitalId', [
   authenticateToken,
   body('vitalType').optional().isIn([
-    'blood_pressure', 'blood_sugar', 'oxygen', 'weight', 'height', 'temperature', 
-    'heart_rate', 'bmi', 'cholesterol', 'hemoglobin', 'platelet_count', 'white_blood_cells',
-    'red_blood_cells', 'creatinine', 'urea', 'bilirubin', 'sodium', 'potassium', 'calcium',
-    'vitamin_d', 'vitamin_b12', 'thyroid_tsh', 'thyroid_t3', 'thyroid_t4', 'other'
+    'height', 'weight', 'cholesterol', 'hemoglobin', 'sgpt', 'sgot', 'vitamin_d', 'thyroid_tsh', 
+    'thyroid_t3', 'thyroid_t4', 'vitamin_b12', 'calcium', 'hba1c', 'urea', 'fasting_blood_glucose', 'creatinine'
   ]),
   body('value').optional().isNumeric(),
   body('unit').optional().notEmpty().trim(),
@@ -299,6 +295,7 @@ router.get('/reports/:memberId', [authenticateToken, authorizeFamilyMember], asy
         id, 
         member_id, 
         report_type, 
+        report_sub_type,
         title, 
         description, 
         file_path, 
@@ -343,7 +340,6 @@ router.post('/reports', [
   body('memberId').isUUID(),
   body('reportType').isIn(['lab_report', 'prescription_consultation', 'vaccination', 'hospital_records']),
   body('reportSubType').optional().isString(),
-  body('title').notEmpty().trim(),
   body('description').optional().trim(),
   body('reportDate').optional().isISO8601()
 ], async (req, res) => {
@@ -363,7 +359,7 @@ router.post('/reports', [
       });
     }
 
-    const { memberId, reportType, reportSubType, title, description, reportDate } = req.body;
+    const { memberId, reportType, reportSubType, description, reportDate } = req.body;
 
     // Check if member belongs to family
     const memberCheck = await query(
@@ -387,7 +383,7 @@ router.post('/reports', [
         memberId, 
         reportType, 
         reportSubType || null, 
-        title, 
+        req.file.originalname.replace(/\.[^/.]+$/, ''), 
         description, 
         req.file.filename, 
         req.file.originalname, 
@@ -563,6 +559,57 @@ router.delete('/reports/:reportId', authenticateToken, async (req, res) => {
 });
 
 // Download medical report
+// View medical report (for PDFs in iframe)
+router.get('/reports/:reportId/view', authenticateToken, async (req, res) => {
+  try {
+    const { reportId } = req.params;
+
+    // Check if report exists and belongs to user's family
+    const checkResult = await query(
+      `SELECT mr.id, mr.file_path, mr.file_name FROM medical_reports mr 
+       JOIN family_members fm ON mr.member_id = fm.id 
+       WHERE mr.id = $1 AND fm.family_id = $2`,
+      [reportId, req.user.family_id]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Report not found', 
+        message: 'Report does not exist' 
+      });
+    }
+
+    const fileName = checkResult.rows[0].file_path;
+    const originalName = checkResult.rows[0].file_name;
+    const uploadDir = process.env.UPLOAD_PATH || '/app/uploads';
+    const filePath = path.join(uploadDir, fileName);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ 
+        error: 'File not found', 
+        message: 'Report file does not exist' 
+      });
+    }
+
+    const ext = path.extname(originalName).toLowerCase();
+    if (ext === '.pdf') {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${originalName}"`);
+      res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+      return res.sendFile(filePath);
+    }
+    
+    // For non-PDF files, redirect to download
+    return res.redirect(`/api/health/reports/${reportId}/download`);
+  } catch (error) {
+    console.error('View report error:', error);
+    res.status(500).json({ 
+      error: 'Failed to view report', 
+      message: 'Could not view report file' 
+    });
+  }
+});
+
 router.get('/reports/:reportId/download', authenticateToken, async (req, res) => {
   try {
     const { reportId } = req.params;
@@ -594,7 +641,13 @@ router.get('/reports/:reportId/download', authenticateToken, async (req, res) =>
       });
     }
 
-    res.download(filePath, originalName);
+    const ext = path.extname(originalName).toLowerCase();
+    if (ext === '.pdf') {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${originalName}"`);
+      return res.sendFile(filePath);
+    }
+    return res.download(filePath, originalName);
   } catch (error) {
     console.error('Download report error:', error);
     res.status(500).json({ 
@@ -682,6 +735,334 @@ router.get('/history/:memberId', [authenticateToken, authorizeFamilyMember], asy
     res.status(500).json({ 
       error: 'Failed to fetch health history', 
       message: 'Could not retrieve health history' 
+    });
+  }
+});
+
+// Document Routes
+
+// Get documents for a family member
+router.get('/documents/:memberId', [
+  authenticateToken
+], async (req, res) => {
+  try {
+    const { memberId } = req.params;
+
+    // Check if member belongs to family
+    const memberCheck = await query(
+      'SELECT id FROM family_members WHERE id = $1 AND family_id = $2',
+      [memberId, req.user.family_id]
+    );
+
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ 
+        error: 'Access denied', 
+        message: 'You can only access documents for your family members' 
+      });
+    }
+
+    const result = await query(
+      `SELECT id, member_id, title, description, file_path, file_name, file_size, upload_date, created_at 
+       FROM documents 
+       WHERE member_id = $1 
+       ORDER BY upload_date DESC, created_at DESC`,
+      [memberId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Get documents error:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch documents', 
+      message: 'Could not retrieve documents' 
+    });
+  }
+});
+
+// Upload document
+router.post('/documents/:memberId', [
+  authenticateToken,
+  upload.single('file'),
+  body('title').notEmpty().trim(),
+  body('description').optional().trim(),
+  body('uploadDate').optional().isISO8601()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: errors.array() 
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ 
+        error: 'File required', 
+        message: 'Please upload a PDF file' 
+      });
+    }
+
+    // Check if file is PDF
+    if (!req.file.mimetype.includes('pdf')) {
+      return res.status(400).json({ 
+        error: 'Invalid file type', 
+        message: 'Only PDF files are allowed' 
+      });
+    }
+
+    const { memberId } = req.params;
+    const { title, description, uploadDate } = req.body;
+
+    // Check if member belongs to family
+    const memberCheck = await query(
+      'SELECT id FROM family_members WHERE id = $1 AND family_id = $2',
+      [memberId, req.user.family_id]
+    );
+
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ 
+        error: 'Access denied', 
+        message: 'You can only upload documents for your family members' 
+      });
+    }
+
+    const result = await query(
+      `INSERT INTO documents 
+        (member_id, title, description, file_path, file_name, file_size, upload_date) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING id, member_id, title, description, file_path, file_name, file_size, upload_date, created_at`,
+      [
+        memberId, 
+        title, 
+        description, 
+        req.file.filename,
+        req.file.originalname,
+        req.file.size,
+        uploadDate || new Date()
+      ]
+    );
+
+    res.status(201).json({
+      message: 'Document uploaded successfully',
+      document: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Upload document error:', error);
+    res.status(500).json({ 
+      error: 'Failed to upload document', 
+      message: 'Could not save document' 
+    });
+  }
+});
+
+// Get document file
+router.get('/documents/file/:documentId', [
+  authenticateToken
+], async (req, res) => {
+  try {
+    const { documentId } = req.params;
+
+    // Get document info and verify access
+    const result = await query(
+      `SELECT d.*, fm.family_id 
+       FROM documents d
+       JOIN family_members fm ON d.member_id = fm.id
+       WHERE d.id = $1 AND fm.family_id = $2`,
+      [documentId, req.user.family_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Document not found', 
+        message: 'Document does not exist or you do not have access' 
+      });
+    }
+
+    const document = result.rows[0];
+    const uploadDir = process.env.UPLOAD_PATH || '/app/uploads';
+    const filePath = path.join(uploadDir, document.file_path);
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ 
+        error: 'File not found', 
+        message: 'Document file does not exist on server' 
+      });
+    }
+
+    // Set appropriate headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${document.file_name}"`);
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Get document file error:', error);
+    res.status(500).json({ 
+      error: 'Failed to retrieve document file', 
+      message: 'Could not access document file' 
+    });
+  }
+});
+
+// Update document
+router.put('/documents/:documentId', [
+  authenticateToken,
+  upload.single('file'),
+  body('title').optional().notEmpty().trim(),
+  body('description').optional().trim(),
+  body('uploadDate').optional().isISO8601()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: errors.array() 
+      });
+    }
+
+    const { documentId } = req.params;
+    const { title, description, uploadDate } = req.body;
+
+    // Check if document exists and belongs to user's family
+    const checkResult = await query(
+      `SELECT d.*, fm.family_id 
+       FROM documents d
+       JOIN family_members fm ON d.member_id = fm.id
+       WHERE d.id = $1 AND fm.family_id = $2`,
+      [documentId, req.user.family_id]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Document not found', 
+        message: 'Document does not exist or you do not have access' 
+      });
+    }
+
+    // Build update query
+    const updateFields = [];
+    const updateValues = [];
+    let paramCount = 1;
+
+    if (title !== undefined) {
+      updateFields.push(`title = $${paramCount++}`);
+      updateValues.push(title);
+    }
+    if (description !== undefined) {
+      updateFields.push(`description = $${paramCount++}`);
+      updateValues.push(description);
+    }
+    if (uploadDate !== undefined) {
+      updateFields.push(`upload_date = $${paramCount++}`);
+      updateValues.push(uploadDate);
+    }
+
+    // Handle file upload if provided
+    if (req.file) {
+      // Check if file is PDF
+      if (!req.file.mimetype.includes('pdf')) {
+        return res.status(400).json({ 
+          error: 'Invalid file type', 
+          message: 'Only PDF files are allowed' 
+        });
+      }
+
+      // Delete old file
+      const oldFileName = checkResult.rows[0].file_path;
+      const uploadDir = process.env.UPLOAD_PATH || '/app/uploads';
+      const oldFilePath = path.join(uploadDir, oldFileName);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+
+      updateFields.push(`file_path = $${paramCount++}`);
+      updateValues.push(req.file.filename);
+      updateFields.push(`file_name = $${paramCount++}`);
+      updateValues.push(req.file.originalname);
+      updateFields.push(`file_size = $${paramCount++}`);
+      updateValues.push(req.file.size);
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ 
+        error: 'No fields to update', 
+        message: 'Please provide at least one field to update' 
+      });
+    }
+
+    updateValues.push(documentId);
+
+    const result = await query(
+      `UPDATE documents 
+       SET ${updateFields.join(', ')}, updated_at = NOW() 
+       WHERE id = $${paramCount++} 
+       RETURNING id, member_id, title, description, file_path, file_name, file_size, upload_date, created_at, updated_at`,
+      updateValues
+    );
+
+    res.json({
+      message: 'Document updated successfully',
+      document: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Update document error:', error);
+    res.status(500).json({ 
+      error: 'Failed to update document', 
+      message: 'Could not update document' 
+    });
+  }
+});
+
+// Delete document
+router.delete('/documents/:documentId', [
+  authenticateToken
+], async (req, res) => {
+  try {
+    const { documentId } = req.params;
+
+    // Check if document exists and belongs to user's family
+    const checkResult = await query(
+      `SELECT d.*, fm.family_id 
+       FROM documents d
+       JOIN family_members fm ON d.member_id = fm.id
+       WHERE d.id = $1 AND fm.family_id = $2`,
+      [documentId, req.user.family_id]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Document not found', 
+        message: 'Document does not exist or you do not have access' 
+      });
+    }
+
+    const document = checkResult.rows[0];
+
+    // Delete the file from filesystem
+    const uploadDir = process.env.UPLOAD_PATH || '/app/uploads';
+    const filePath = path.join(uploadDir, document.file_path);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    // Delete from database
+    await query(
+      'DELETE FROM documents WHERE id = $1',
+      [documentId]
+    );
+
+    res.json({
+      message: 'Document deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete document error:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete document', 
+      message: 'Could not delete document' 
     });
   }
 });
