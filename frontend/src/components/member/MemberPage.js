@@ -595,6 +595,88 @@ const MemberPage = () => {
     return grouped;
   };
 
+  // Get report status based on report type and sub-type
+  const getReportStatus = (report) => {
+    // For medical reports, we'll use a simple status system based on report date
+    const reportDate = new Date(report.report_date);
+    const currentDate = new Date();
+    const daysDiff = Math.floor((currentDate - reportDate) / (1000 * 60 * 60 * 24));
+    
+    // Recent reports (within 30 days) are considered "Normal"
+    if (daysDiff <= 30) {
+      return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+    }
+    // Reports between 30-90 days are "Borderline"
+    else if (daysDiff <= 90) {
+      return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Borderline', level: 'warning', priority: 1 };
+    }
+    // Older reports are "Outdated"
+    else {
+      return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Outdated', level: 'high', priority: 2 };
+    }
+  };
+
+  // Get document status based on document type and upload date
+  const getDocumentStatus = (document) => {
+    const uploadDate = new Date(document.upload_date);
+    const currentDate = new Date();
+    const daysDiff = Math.floor((currentDate - uploadDate) / (1000 * 60 * 60 * 24));
+    
+    // Recent documents (within 60 days) are considered "Normal"
+    if (daysDiff <= 60) {
+      return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+    }
+    // Documents between 60-180 days are "Borderline"
+    else if (daysDiff <= 180) {
+      return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Borderline', level: 'warning', priority: 1 };
+    }
+    // Older documents are "Outdated"
+    else {
+      return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Outdated', level: 'high', priority: 2 };
+    }
+  };
+
+  // Get gradient class based on status level
+  const getGradientClass = (status) => {
+    switch (status.level) {
+      case 'high':
+      case 'low':
+        return 'bg-gradient-to-br from-rose-50 via-rose-25 to-white';
+      case 'warning':
+        return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
+      case 'normal':
+        return 'bg-gradient-to-br from-teal-50 via-teal-25 to-white';
+      default:
+        return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
+    }
+  };
+
+  // Get sub-card gradient class based on status level
+  const getSubCardGradientClass = (status) => {
+    switch (status.level) {
+      case 'high':
+      case 'low':
+        return 'bg-gradient-to-r from-rose-50 to-rose-100 border border-rose-200';
+      case 'warning':
+        return 'bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200';
+      case 'normal':
+        return 'bg-gradient-to-r from-teal-50 to-teal-100 border border-teal-200';
+      default:
+        return 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200';
+    }
+  };
+
+  // Get main card status based on latest record
+  const getMainCardStatus = (records, statusFunction) => {
+    if (!records || records.length === 0) {
+      return { color: 'text-gray-600', bgColor: 'bg-gray-100', status: 'Unknown', level: 'unknown', priority: 0 };
+    }
+    
+    // Get the latest record (first in the array since they're sorted by date)
+    const latestRecord = records[0];
+    return statusFunction(latestRecord);
+  };
+
   // Toggle expanded state for vital types
   const toggleVitalTypeExpansion = (vitalType) => {
     setExpandedVitalTypes(prev => {
