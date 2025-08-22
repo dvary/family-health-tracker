@@ -891,13 +891,14 @@ router.get('/documents/file/:documentId', [
       });
     }
 
-    // Set appropriate headers
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${document.file_name}"`);
-    
-    // Stream the file
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
+    // Set appropriate headers and download
+    const ext = path.extname(document.file_name).toLowerCase();
+    if (ext === '.pdf') {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${document.file_name}"`);
+      return res.sendFile(filePath);
+    }
+    return res.download(filePath, document.file_name);
   } catch (error) {
     console.error('Get document file error:', error);
     res.status(500).json({ 

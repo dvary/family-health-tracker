@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import ProfilePicture from '../common/ProfilePicture';
 import ProfilePictureUpload from '../common/ProfilePictureUpload';
+import { VITAL_ICONS } from './VitalIcons';
 
 // Icon components
 const EyeIcon = () => (
@@ -284,6 +285,8 @@ const REPORT_TYPES = {
   }
 };
 
+
+
 const MemberPage = () => {
   const { memberName } = useParams();
   const navigate = useNavigate();
@@ -299,8 +302,7 @@ const MemberPage = () => {
   const [expandedReportTypes, setExpandedReportTypes] = useState(new Set());
   const [showUploadReportModal, setShowUploadReportModal] = useState(false);
   const [showEditReportModal, setShowEditReportModal] = useState(false);
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
-  const [selectedReport, setSelectedReport] = useState(null);
+
   const [editingReport, setEditingReport] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -345,8 +347,7 @@ const MemberPage = () => {
 
   // Document upload states
   const [showUploadDocumentModal, setShowUploadDocumentModal] = useState(false);
-  const [showDocumentViewer, setShowDocumentViewer] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState(null);
+
   const [showEditDocumentModal, setShowEditDocumentModal] = useState(false);
   const [editingDocument, setEditingDocument] = useState(null);
   const [editDocumentFormData, setEditDocumentFormData] = useState({
@@ -1108,13 +1109,8 @@ const MemberPage = () => {
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       
-      // Open PDF in new tab for better mobile experience
-      const newWindow = window.open(url, '_blank');
-      if (!newWindow) {
-        // Fallback if popup is blocked
-        setSelectedDocument({ ...document, pdfUrl: url });
-        setShowDocumentViewer(true);
-      }
+      // Always open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Error viewing document:', error);
       toast.error('Failed to view document');
@@ -1270,14 +1266,8 @@ const MemberPage = () => {
       const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      // Open PDF in new tab for better mobile experience
-      const newWindow = window.open(pdfUrl, '_blank');
-      if (!newWindow) {
-        // Fallback if popup is blocked
-        setSelectedReport(report);
-        setShowPdfViewer(true);
-        setSelectedReport(prev => ({ ...prev, pdfUrl }));
-      }
+      // Always open in new tab
+      window.open(pdfUrl, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Error loading PDF:', error);
       toast.error('Failed to load PDF');
@@ -1643,7 +1633,7 @@ const MemberPage = () => {
                         case 'warning':
                           return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
                         case 'normal':
-                          return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
+                          return 'bg-gradient-to-br from-green-50 via-green-25 to-white';
                         default:
                           return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
                       }
@@ -1799,6 +1789,10 @@ const MemberPage = () => {
                             )}
                           </div>
                           <div className="flex items-center space-x-2">
+                            {/* Vital Icon */}
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200">
+                              {VITAL_ICONS[vitalType] && React.createElement(VITAL_ICONS[vitalType])}
+                            </div>
 								{/* Add Vital inside this type */}
 								<button
 									onClick={(e) => { e.stopPropagation(); openAddVitalForType(vitalType); }}
@@ -2104,7 +2098,7 @@ const MemberPage = () => {
                                 e.stopPropagation();
                                 handleDownloadDocument(document);
                               }}
-                              className="text-blue-600 hover:text-blue-800 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
+                              className="text-teal-600 hover:text-teal-800 p-1.5 bg-teal-50 hover:bg-teal-100 rounded transition-colors"
                               title="Download"
                             >
                               <DownloadIcon />
@@ -2597,57 +2591,7 @@ const MemberPage = () => {
           </div>
         )}
 
-        {/* Document Viewer Modal */}
-        {showDocumentViewer && selectedDocument && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
-            <div className="bg-white rounded-lg w-full h-full max-w-7xl flex flex-col shadow-2xl pdf-viewer-container"> 
-              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
-                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
-                  <span className="truncate block">{selectedDocument.title}</span>
-                </h2>
-                <div className="flex space-x-2 flex-shrink-0">
-                  <button
-                    onClick={() => handleDownloadDocument(selectedDocument)}
-                    className="text-teal-600 hover:text-teal-800 text-sm bg-teal-50 hover:bg-teal-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
-                  >
-                    Download
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (selectedDocument?.pdfUrl) {
-                        URL.revokeObjectURL(selectedDocument.pdfUrl);
-                      }
-                      setShowDocumentViewer(false);
-                      setSelectedDocument(null);
-                    }}
-                    className="text-gray-600 hover:text-gray-800 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                {selectedDocument.pdfUrl ? (
-                  <iframe
-                    src={`${selectedDocument.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=Fit&zoom=page-width`}
-                    className="w-full h-full border-0 pdf-viewer-iframe"
-                    title={selectedDocument.title}
-                    allowFullScreen
-                    style={{ 
-                      minHeight: '100%',
-                      maxHeight: '100%',
-                      overflow: 'auto'
-                    }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-64">
-                    <div className="text-gray-500">Loading PDF...</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* Edit Document Modal */}
         {showEditDocumentModal && (
@@ -2723,70 +2667,7 @@ const MemberPage = () => {
           </div>
         )}
 
-        {/* PDF Viewer Modal */}
-        {showPdfViewer && selectedReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
-            <div className="bg-white rounded-lg w-full h-full max-w-7xl flex flex-col shadow-2xl pdf-viewer-container">
-              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
-                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
-                  <span className="truncate block">
-                    {(() => {
-                      const reportConfig = REPORT_TYPES[selectedReport.report_type] || { label: selectedReport.report_type?.replace(/_/g, ' ').toUpperCase() };
-                      const subTypeValue = selectedReport.report_sub_type || '';
-                      const subTypeConfig = REPORT_TYPES[selectedReport.report_type]?.subTypes?.find(st => st.value === subTypeValue);
-                      const subTypeLabel = subTypeConfig?.label || (subTypeValue ? subTypeValue.replace(/_/g, ' ').toUpperCase() : '');
-                      
-                      if (subTypeLabel) {
-                        return `${reportConfig.label} : ${subTypeLabel}`;
-                      } else {
-                        return reportConfig.label;
-                      }
-                    })()}
-                  </span>
-                </h2>
-                <div className="flex space-x-2 flex-shrink-0">
-                  <button
-                    onClick={() => handleDownloadReport(selectedReport)}
-                    className="text-teal-600 hover:text-teal-800 text-sm bg-teal-50 hover:bg-teal-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
-                  >
-                    Download
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (selectedReport?.pdfUrl) {
-                        URL.revokeObjectURL(selectedReport.pdfUrl);
-                      }
-                      setShowPdfViewer(false);
-                      setSelectedReport(null);
-                    }}
-                    className="text-gray-600 hover:text-gray-800 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                {selectedReport.pdfUrl ? (
-                  <iframe
-                    src={`${selectedReport.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=Fit&zoom=page-width`}
-                    className="w-full h-full border-0 pdf-viewer-iframe"
-                    title={selectedReport.title}
-                    allowFullScreen
-                    style={{ 
-                      minHeight: '100%',
-                      maxHeight: '100%',
-                      overflow: 'auto'
-                    }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-64">
-                    <div className="text-gray-500">Loading PDF...</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* Profile Picture Upload Modal */}
         {showProfileUploadModal && member && (
