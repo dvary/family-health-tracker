@@ -685,18 +685,18 @@ const Dashboard = () => {
       <div className="p-6 space-y-8">
         {/* Header */}
         <div className="flex justify-end">
-            {isAdmin() && (
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                Add Family Member
-              </button>
-            )}
-          </div>
+          {isAdmin() && (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              Add Family Member
+            </button>
+          )}
+        </div>
 
-      {/* Add/Edit Form */}
-      {(showAddForm || editingMember) && (
+        {/* Add/Edit Form */}
+        {(showAddForm || editingMember) && (
         <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
           <h2 className="text-lg font-semibold mb-4 text-gray-900">
             {editingMember ? 'Edit Family Member' : 'Add Family Member'}
@@ -831,8 +831,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Family Members by Age Group */}
-      {members.length > 0 ? (
+        {/* Family Members by Age Group */}
+        {members.length > 0 ? (
         <div className="space-y-8">
           {ageGroupOrder.map(groupName => {
             const groupMembers = groupedMembers[groupName];
@@ -949,8 +949,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Add Vital Modal */}
-      {showAddVitalModal && selectedMember && (
+        {/* Add Vital Modal */}
+        {showAddVitalModal && selectedMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Add Health Vital for {selectedMember.name}</h2>
@@ -1047,7 +1047,7 @@ const Dashboard = () => {
       )}
 
       {/* Upload Report Modal */}
-      {showUploadReportModal && selectedMember && (
+        {showUploadReportModal && selectedMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold mb-4">Upload Medical Report for {selectedMember.name}</h2>
@@ -1154,8 +1154,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Upload Document Modal */}
-      {showUploadDocumentModal && selectedMember && (
+        {/* Upload Document Modal */}
+        {showUploadDocumentModal && selectedMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Upload Document for {selectedMember.name}</h2>
@@ -1235,8 +1235,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Profile Picture Upload Modal */}
-      {showProfileUploadModal && selectedMemberForProfile && (
+        {/* Profile Picture Upload Modal */}
+        {showProfileUploadModal && selectedMemberForProfile && (
         <ProfilePictureUpload
           member={selectedMemberForProfile}
           onUploadSuccess={handleProfileUploadSuccess}
@@ -1246,6 +1246,7 @@ const Dashboard = () => {
           }}
         />
       )}
+      </div>
     </div>
   );
 };
