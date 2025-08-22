@@ -1186,7 +1186,7 @@ const MemberPage = () => {
   return (
     <div className="space-y-6">
       {/* Header with Edit button prominently displayed */}
-      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+      <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-3 sm:space-y-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <button
@@ -1238,7 +1238,7 @@ const MemberPage = () => {
 
       {/* Edit Form */}
       {showEditForm && (
-        <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
           <h2 className="text-lg font-semibold mb-4">Edit Family Member</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -1373,7 +1373,7 @@ const MemberPage = () => {
       )}
 
       {/* Main Content - Health Records and Vitals */}
-      <div className="bg-white shadow rounded-lg p-6">
+              <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
