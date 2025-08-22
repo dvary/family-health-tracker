@@ -238,8 +238,7 @@ const Dashboard = () => {
     dateOfBirth: '',
     gender: '',
     email: '',
-    password: '',
-    relationships: []
+    password: ''
   });
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
@@ -442,7 +441,7 @@ const Dashboard = () => {
         }
         setShowAddForm(false);
       }
-      setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '', relationships: [] });
+      setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
       fetchMembers();
     } catch (error) {
       toast.error(editingMember ? 'Failed to update family member' : 'Failed to add family member');
@@ -452,7 +451,7 @@ const Dashboard = () => {
   const handleCancel = () => {
     setShowAddForm(false);
     setEditingMember(null);
-    setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '', relationships: [] });
+    setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
   };
 
   const handleMemberClick = (member) => {
@@ -569,8 +568,7 @@ const Dashboard = () => {
     setFormData({
       name: member.name,
       dateOfBirth: member.date_of_birth ? member.date_of_birth.split('T')[0] : '',
-      gender: member.gender || '',
-      relationships: member.relationships || []
+      gender: member.gender || ''
     });
     setShowAddForm(true);
   };

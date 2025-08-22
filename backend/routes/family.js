@@ -6,7 +6,7 @@ const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Create initial family member (first member without relationships)
+// Create initial family member
 router.post('/members/initial', [
   authenticateToken,
   body('name').notEmpty().trim(),
@@ -84,7 +84,7 @@ router.post('/members/initial', [
   }
 });
 
-// Get all family members with their relationships
+// Get all family members
 router.get('/members', authenticateToken, async (req, res) => {
   try {
     if (!req.user || !req.user.family_id) {
@@ -108,42 +108,8 @@ router.get('/members', authenticateToken, async (req, res) => {
       [req.user.family_id]
     );
 
-    // Get relationships for all members
-    const relationshipsResult = await query(
-      `SELECT 
-        fr.member_id,
-        fr.related_member_id,
-        fr.relationship_type,
-        fm1.name as member_name,
-        fm2.name as related_member_name
-      FROM family_relationships fr
-      JOIN family_members fm1 ON fr.member_id = fm1.id
-      JOIN family_members fm2 ON fr.related_member_id = fm2.id
-      WHERE fr.family_id = $1`,
-      [req.user.family_id]
-    );
-
-    // Group relationships by member
-    const relationshipsMap = {};
-    relationshipsResult.rows.forEach(rel => {
-      if (!relationshipsMap[rel.member_id]) {
-        relationshipsMap[rel.member_id] = [];
-      }
-      relationshipsMap[rel.member_id].push({
-        relatedMemberId: rel.related_member_id,
-        relationshipType: rel.relationship_type,
-        relatedMemberName: rel.related_member_name
-      });
-    });
-
-    // Add relationships to members
-    const members = result.rows.map(member => ({
-      ...member,
-      relationships: relationshipsMap[member.id] || []
-    }));
-
     res.json({
-      members: members
+      members: result.rows
     });
   } catch (error) {
     console.error('Get family members error:', error);
@@ -154,15 +120,14 @@ router.get('/members', authenticateToken, async (req, res) => {
   }
 });
 
-// Add new family member with relationships
+// Add new family member
 router.post('/members', [
   authenticateToken,
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
-  body('relationships').isArray().withMessage('Relationships must be an array')
+  body('password').isLength({ min: 6 })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -173,7 +138,7 @@ router.post('/members', [
       });
     }
 
-    const { name, dateOfBirth, gender, email, password, relationships } = req.body;
+    const { name, dateOfBirth, gender, email, password } = req.body;
 
     // Check if email already exists
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
@@ -183,9 +148,6 @@ router.post('/members', [
         message: 'This email is already registered' 
       });
     }
-
-    // Start transaction
-    await query('BEGIN');
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -211,54 +173,11 @@ router.post('/members', [
       [req.user.family_id, userId, name, dateOfBirth, gender]
     );
 
-    const newMemberId = memberResult.rows[0].id;
-
-    // Insert relationships
-    if (relationships && relationships.length > 0) {
-      for (const rel of relationships) {
-        // Verify related member exists and belongs to family
-        const relatedMemberCheck = await query(
-          'SELECT id FROM family_members WHERE id = $1 AND family_id = $2',
-          [rel.relatedMemberId, req.user.family_id]
-        );
-        
-        if (relatedMemberCheck.rows.length === 0) {
-          await query('ROLLBACK');
-          return res.status(400).json({
-            error: 'Invalid related member',
-            message: `Related member ${rel.relatedMemberId} does not exist in this family`
-          });
-        }
-
-        // Insert relationship
-        await query(
-          `INSERT INTO family_relationships 
-            (family_id, member_id, related_member_id, relationship_type) 
-           VALUES ($1, $2, $3, $4)`,
-          [req.user.family_id, newMemberId, rel.relatedMemberId, rel.relationshipType]
-        );
-
-        // Insert reverse relationship if needed
-        if (rel.relationshipType === 'Husband' || rel.relationshipType === 'Wife') {
-          const reverseType = rel.relationshipType === 'Husband' ? 'Wife' : 'Husband';
-          await query(
-            `INSERT INTO family_relationships 
-              (family_id, member_id, related_member_id, relationship_type) 
-             VALUES ($1, $2, $3, $4)`,
-            [req.user.family_id, rel.relatedMemberId, newMemberId, reverseType]
-          );
-        }
-      }
-    }
-
-    await query('COMMIT');
-
     res.status(201).json({
       message: 'Family member added successfully',
       member: memberResult.rows[0]
     });
   } catch (error) {
-    await query('ROLLBACK');
     console.error('Add family member error:', error);
     res.status(500).json({ 
       error: 'Failed to add family member', 
@@ -267,7 +186,7 @@ router.post('/members', [
   }
 });
 
-// Get specific family member with relationships
+// Get specific family member
 router.get('/members/:memberId', authenticateToken, async (req, res) => {
   try {
     const { memberId } = req.params;
@@ -293,25 +212,8 @@ router.get('/members/:memberId', authenticateToken, async (req, res) => {
       });
     }
 
-    // Get relationships for this member
-    const relationshipsResult = await query(
-      `SELECT 
-        fr.related_member_id,
-        fr.relationship_type,
-        fm.name as related_member_name
-      FROM family_relationships fr
-      JOIN family_members fm ON fr.related_member_id = fm.id
-      WHERE fr.member_id = $1 AND fr.family_id = $2`,
-      [memberId, req.user.family_id]
-    );
-
-    const member = {
-      ...result.rows[0],
-      relationships: relationshipsResult.rows
-    };
-
     res.json({
-      member: member
+      member: result.rows[0]
     });
   } catch (error) {
     console.error('Get family member error:', error);
@@ -402,61 +304,6 @@ router.put('/members/:memberId', [
   }
 });
 
-// Add relationship between members
-router.post('/relationships', [
-  authenticateToken,
-  body('memberId').isUUID(),
-  body('relatedMemberId').isUUID(),
-  body('relationshipType').isIn([
-    'Self', 'Mother', 'Father', 'Daughter', 'Son', 'Sister', 'Brother',
-    'Husband', 'Wife', 'Grandmother', 'Grandfather', 'Granddaughter', 'Grandson',
-    'Aunt', 'Uncle', 'Cousin', 'Spouse'
-  ])
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        details: errors.array() 
-      });
-    }
-
-    const { memberId, relatedMemberId, relationshipType } = req.body;
-
-    // Verify both members exist and belong to family
-    const memberCheck = await query(
-      'SELECT id FROM family_members WHERE id IN ($1, $2) AND family_id = $3',
-      [memberId, relatedMemberId, req.user.family_id]
-    );
-
-    if (memberCheck.rows.length !== 2) {
-      return res.status(400).json({
-        error: 'Invalid members',
-        message: 'Both members must exist in this family'
-      });
-    }
-
-    // Insert relationship
-    await query(
-      `INSERT INTO family_relationships 
-        (family_id, member_id, related_member_id, relationship_type) 
-       VALUES ($1, $2, $3, $4)`,
-      [req.user.family_id, memberId, relatedMemberId, relationshipType]
-    );
-
-    res.status(201).json({
-      message: 'Relationship added successfully'
-    });
-  } catch (error) {
-    console.error('Add relationship error:', error);
-    res.status(500).json({ 
-      error: 'Failed to add relationship', 
-      message: 'Could not add relationship' 
-    });
-  }
-});
-
 // Delete family member
 router.delete('/members/:memberId', authenticateToken, async (req, res) => {
   try {
@@ -475,12 +322,10 @@ router.delete('/members/:memberId', authenticateToken, async (req, res) => {
       });
     }
 
-    // Delete associated relationships first
-    await query('DELETE FROM family_relationships WHERE member_id = $1 OR related_member_id = $1', [memberId]);
-    
     // Delete associated health data
     await query('DELETE FROM health_vitals WHERE member_id = $1', [memberId]);
     await query('DELETE FROM medical_reports WHERE member_id = $1', [memberId]);
+    await query('DELETE FROM documents WHERE member_id = $1', [memberId]);
 
     // Delete family member
     await query(

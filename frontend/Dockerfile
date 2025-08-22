@@ -1,5 +1,12 @@
 FROM node:18-alpine
 
+# Install timezone data
+RUN apk add --no-cache tzdata
+
+# Set timezone to India
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Set working directory
 WORKDIR /app
 

@@ -301,8 +301,7 @@ const MemberPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     dateOfBirth: '',
-    gender: '',
-    relationships: []
+    gender: ''
   });
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
@@ -587,10 +586,7 @@ const MemberPage = () => {
       return `${years} year${years !== 1 ? 's' : ''}`;
     }
   };
-  const [newRelationship, setNewRelationship] = useState({
-    relatedMemberId: '',
-    relationshipType: ''
-  });
+
   const [allMembers, setAllMembers] = useState([]);
   const [healthVitals, setHealthVitals] = useState([]);
   const [medicalReports, setMedicalReports] = useState([]);
@@ -633,7 +629,7 @@ const MemberPage = () => {
         name: foundMember.name,
         dateOfBirth: foundMember.date_of_birth ? foundMember.date_of_birth.split('T')[0] : '',
         gender: foundMember.gender || '',
-        relationships: foundMember.relationships || []
+
       });
       
       // Fetch health vitals
@@ -704,26 +700,11 @@ const MemberPage = () => {
       name: member.name,
       dateOfBirth: member.date_of_birth ? member.date_of_birth.split('T')[0] : '',
       gender: member.gender || '',
-      relationships: member.relationships || []
+      
     });
   };
 
-  const addRelationship = () => {
-    if (newRelationship.relatedMemberId && newRelationship.relationshipType) {
-      setFormData({
-        ...formData,
-        relationships: [...formData.relationships, newRelationship]
-      });
-      setNewRelationship({ relatedMemberId: '', relationshipType: '' });
-    }
-  };
 
-  const removeRelationship = (index) => {
-    setFormData({
-      ...formData,
-      relationships: formData.relationships.filter((_, i) => i !== index)
-    });
-  };
 
   const handleDeleteMember = async () => {
     if (window.confirm('Are you sure you want to delete this family member?')) {
@@ -1231,110 +1212,7 @@ const MemberPage = () => {
               </select>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="font-medium">Relationships</h3>
-              {formData.relationships.map((rel, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <select
-                    value={rel.relatedMemberId}
-                    onChange={(e) => {
-                      const newRels = [...formData.relationships];
-                      newRels[index].relatedMemberId = e.target.value;
-                      setFormData({...formData, relationships: newRels});
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 flex-1"
-                    required
-                  >
-                    <option value="">Select Member</option>
-                    {allMembers.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={rel.relationshipType}
-                    onChange={(e) => {
-                      const newRels = [...formData.relationships];
-                      newRels[index].relationshipType = e.target.value;
-                      setFormData({...formData, relationships: newRels});
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 flex-1"
-                    required
-                  >
-                    <option value="">Select Relation</option>
-                    <option value="Self">Self</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Father">Father</option>
-                    <option value="Daughter">Daughter</option>
-                    <option value="Son">Son</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Husband">Husband</option>
-                    <option value="Wife">Wife</option>
-                    <option value="Grandmother">Grandmother</option>
-                    <option value="Grandfather">Grandfather</option>
-                    <option value="Granddaughter">Granddaughter</option>
-                    <option value="Grandson">Grandson</option>
-                    <option value="Aunt">Aunt</option>
-                    <option value="Uncle">Uncle</option>
-                    <option value="Cousin">Cousin</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => removeRelationship(index)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              
-              <div className="flex items-center space-x-2">
-                <select
-                  value={newRelationship.relatedMemberId}
-                  onChange={(e) => setNewRelationship({...newRelationship, relatedMemberId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 flex-1"
-                >
-                  <option value="">Select Member</option>
-                  {allMembers.map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={newRelationship.relationshipType}
-                  onChange={(e) => setNewRelationship({...newRelationship, relationshipType: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 flex-1"
-                >
-                  <option value="">Select Relation</option>
-                  <option value="Self">Self</option>
-                  <option value="Mother">Mother</option>
-                  <option value="Father">Father</option>
-                  <option value="Daughter">Daughter</option>
-                  <option value="Son">Son</option>
-                  <option value="Sister">Sister</option>
-                  <option value="Brother">Brother</option>
-                  <option value="Husband">Husband</option>
-                  <option value="Wife">Wife</option>
-                  <option value="Grandmother">Grandmother</option>
-                  <option value="Grandfather">Grandfather</option>
-                  <option value="Granddaughter">Granddaughter</option>
-                  <option value="Grandson">Grandson</option>
-                  <option value="Aunt">Aunt</option>
-                  <option value="Uncle">Uncle</option>
-                  <option value="Cousin">Cousin</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={addRelationship}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
+
 
             <div className="flex space-x-3">
               <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">

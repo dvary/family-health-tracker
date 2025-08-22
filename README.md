@@ -202,7 +202,7 @@ The application uses PostgreSQL with the following main tables:
 
 ### Family Management
 - Create and manage family member profiles
-- Assign relationships (Dad, Mom, Kids, Grandparents, etc.)
+
 - Store basic information (name, date of birth, gender)
 
 ### Health Vitals Tracking

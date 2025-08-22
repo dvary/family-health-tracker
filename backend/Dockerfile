@@ -1,7 +1,11 @@
 FROM node:18-alpine
 
-# Install PostgreSQL client for health checks
-RUN apk add --no-cache postgresql-client
+# Install PostgreSQL client for health checks and timezone data
+RUN apk add --no-cache postgresql-client tzdata
+
+# Set timezone to India
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Set working directory
 WORKDIR /app

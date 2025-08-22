@@ -5,7 +5,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 DROP TABLE IF EXISTS documents CASCADE;
 DROP TABLE IF EXISTS medical_reports CASCADE;
 DROP TABLE IF EXISTS health_vitals CASCADE;
-DROP TABLE IF EXISTS family_relationships CASCADE;
 DROP TABLE IF EXISTS family_members CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS families CASCADE;
@@ -40,22 +39,6 @@ CREATE TABLE family_members (
     gender VARCHAR(20) CHECK (gender IN ('male', 'female', 'other', 'prefer_not_to_say')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create family_relationships table for multiple relationships
-CREATE TABLE family_relationships (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-    member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
-    related_member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE,
-    relationship_type VARCHAR(50) NOT NULL CHECK (relationship_type IN (
-        'Self', 'Mother', 'Father', 'Daughter', 'Son', 'Sister', 'Brother',
-        'Husband', 'Wife', 'Grandmother', 'Grandfather', 'Granddaughter', 'Grandson',
-        'Aunt', 'Uncle', 'Cousin', 'Spouse'
-    )),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(member_id, related_member_id, relationship_type)
 );
 
 -- Create health_vitals table
@@ -106,9 +89,6 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_family_id ON users(family_id);
 CREATE INDEX idx_family_members_family_id ON family_members(family_id);
 CREATE INDEX idx_family_members_user_id ON family_members(user_id);
-CREATE INDEX idx_family_relationships_family_id ON family_relationships(family_id);
-CREATE INDEX idx_family_relationships_member_id ON family_relationships(member_id);
-CREATE INDEX idx_family_relationships_related_member_id ON family_relationships(related_member_id);
 CREATE INDEX idx_health_vitals_member_id ON health_vitals(member_id);
 CREATE INDEX idx_health_vitals_vital_type ON health_vitals(vital_type);
 CREATE INDEX idx_health_vitals_recorded_at ON health_vitals(recorded_at);
@@ -131,7 +111,6 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_families_updated_at BEFORE UPDATE ON families FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_family_members_updated_at BEFORE UPDATE ON family_members FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_family_relationships_updated_at BEFORE UPDATE ON family_relationships FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_health_vitals_updated_at BEFORE UPDATE ON health_vitals FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_medical_reports_updated_at BEFORE UPDATE ON medical_reports FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -145,5 +124,5 @@ ON CONFLICT DO NOTHING;
 DO $$
 BEGIN
     RAISE NOTICE 'Database initialization completed successfully!';
-    RAISE NOTICE 'Tables created: families, users, family_members, family_relationships, health_vitals, medical_reports, documents';
+    RAISE NOTICE 'Tables created: families, users, family_members, health_vitals, medical_reports, documents';
 END $$;
