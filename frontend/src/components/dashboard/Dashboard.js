@@ -788,7 +788,9 @@ const Dashboard = () => {
                 required
               />
               {/* Date of Birth Dropdowns */}
-              <div className="flex space-x-2">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                <div className="flex space-x-2">
                 <select
                   value={editingMember ? editDateComponents.day : dateComponents.day}
                   onChange={(e) => {
@@ -854,6 +856,7 @@ const Dashboard = () => {
                   <option value="">Year</option>
                   {generateYearOptions()}
                 </select>
+                </div>
               </div>
               <select
                 value={editingMember ? editFormData.gender : formData.gender}
