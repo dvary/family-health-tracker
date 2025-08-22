@@ -95,8 +95,8 @@ router.post('/members/initial', [
     const lastName = nameParts.slice(1).join(' ') || '';
 
     const userResult = await query(
-      'INSERT INTO users (email, original_email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName]
+      'INSERT INTO users (email, original_email, password, family_id, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName, 'admin']
     );
 
     const userId = userResult.rows[0].id;
@@ -158,7 +158,8 @@ router.get('/members', authenticateToken, async (req, res) => {
         fm.profile_picture,
         fm.created_at,
         COALESCE(u.original_email, u.email) as user_email,
-        u.id as user_id
+        u.id as user_id,
+        u.role
       FROM family_members fm 
       LEFT JOIN users u ON fm.user_id = u.id 
       WHERE fm.family_id = $1 
@@ -217,8 +218,8 @@ router.post('/members', [
     const lastName = nameParts.slice(1).join(' ') || '';
 
     const userResult = await query(
-      'INSERT INTO users (email, original_email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName]
+      'INSERT INTO users (email, original_email, password, family_id, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName, 'non_admin']
     );
 
     const userId = userResult.rows[0].id;
@@ -275,7 +276,8 @@ router.get('/members/:memberId', authenticateToken, async (req, res) => {
         fm.date_of_birth, 
         fm.gender,
         fm.created_at,
-        u.email as user_email
+        u.email as user_email,
+        u.role
       FROM family_members fm 
       LEFT JOIN users u ON fm.user_id = u.id 
       WHERE fm.id = $1 AND fm.family_id = $2`,

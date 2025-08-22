@@ -288,6 +288,7 @@ const MemberPage = () => {
   const { memberName } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { isAdmin } = useAuth();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -1198,18 +1199,37 @@ const MemberPage = () => {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
           </div>
           <div className="flex space-x-2 sm:space-x-3">
-            <button
-              onClick={() => setShowEditForm(true)}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
-            >
-              Edit Member
-            </button>
-            <button
-              onClick={handleDeleteMember}
-              className="bg-health-danger hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
-            >
-              Delete Member
-            </button>
+            {isAdmin() ? (
+              <>
+                <button
+                  onClick={() => setShowEditForm(true)}
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
+                >
+                  Edit Member
+                </button>
+                <button
+                  onClick={handleDeleteMember}
+                  className="bg-health-danger hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
+                >
+                  Delete Member
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  disabled
+                  className="bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base cursor-not-allowed opacity-50"
+                >
+                  Edit Member
+                </button>
+                <button
+                  disabled
+                  className="bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base cursor-not-allowed opacity-50"
+                >
+                  Delete Member
+                </button>
+              </>
+            )}
           </div>
         </div>
 
