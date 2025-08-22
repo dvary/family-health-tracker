@@ -1534,8 +1534,7 @@ const MemberPage = () => {
         {/* Tab Content */}
         {activeTab === 'vitals' && (
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Health Vitals</h3>
+            <div className="flex justify-end mb-4">
               <button 
                 onClick={() => setShowAddVitalModal(true)}
                 className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
@@ -1805,8 +1804,7 @@ const MemberPage = () => {
 
         {activeTab === 'reports' && (
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Medical Reports</h3>
+            <div className="flex justify-end mb-4">
               <button 
                 onClick={() => setShowUploadReportModal(true)}
                 className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
@@ -1974,8 +1972,7 @@ const MemberPage = () => {
 
         {activeTab === 'documents' && (
             <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Documents</h3>
+                        <div className="flex justify-end mb-4">
               <button 
                 onClick={() => setShowUploadDocumentModal(true)}
                 className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
@@ -1983,7 +1980,7 @@ const MemberPage = () => {
                 <UploadIcon />
                 <span>Upload Document</span>
               </button>
-                      </div>
+            </div>
             
             {documents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
