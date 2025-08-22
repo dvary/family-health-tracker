@@ -2294,10 +2294,10 @@ const MemberPage = () => {
                     type="file"
                     onChange={handleFileChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                    accept=".pdf"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Accepted formats: PDF, DOC, DOCX, JPG, PNG, GIF (max 10MB)</p>
+                  <p className="text-xs text-gray-500 mt-1">Only PDF files are accepted (max 20MB)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
@@ -2400,10 +2400,10 @@ const MemberPage = () => {
                     type="file"
                     onChange={handleEditFileChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                    accept=".pdf"
                   />
                   <p className="text-xs text-gray-500 mt-1">Current file: {editingReport?.file_name}</p>
-                  <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX, JPG, PNG, GIF (max 10MB)</p>
+                  <p className="text-xs text-gray-500">Only PDF files are accepted (max 20MB)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
@@ -2479,7 +2479,7 @@ const MemberPage = () => {
                     accept=".pdf"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Only PDF files are accepted (max 10MB)</p>
+                  <p className="text-xs text-gray-500 mt-1">Only PDF files are accepted (max 20MB)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
@@ -2591,7 +2591,7 @@ const MemberPage = () => {
                     accept=".pdf"
                   />
                   <p className="text-xs text-gray-500 mt-1">Current file: {editingDocument?.file_name}</p>
-                  <p className="text-xs text-gray-500">Only PDF files are accepted (max 10MB)</p>
+                  <p className="text-xs text-gray-500">Only PDF files are accepted (max 20MB)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
