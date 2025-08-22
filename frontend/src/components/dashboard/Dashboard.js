@@ -683,8 +683,8 @@ const Dashboard = () => {
   return (
     <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen bg-white">
       <div className="p-6 space-y-8">
-          {/* Header */}
-          <div className="flex justify-end">
+        {/* Header */}
+        <div className="flex justify-end">
             {isAdmin() && (
               <button
                 onClick={() => setShowAddForm(true)}
@@ -739,7 +739,6 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Select date of birth (displays as dd-mm-yyyy)</p>
               <select
                 value={editingMember ? editFormData.gender : formData.gender}
                 onChange={(e) => editingMember 
@@ -799,9 +798,9 @@ const Dashboard = () => {
                     >
                       Upload New Picture
                     </button>
-                                      <p className="text-xs text-gray-500 mt-1">
-                    Supported formats: JPEG, PNG, GIF (max 15MB)
-                  </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supported formats: JPEG, PNG, GIF (max 15MB)
+                    </p>
                   </div>
                 </div>
               </div>
@@ -850,7 +849,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                                     {groupMembers.map((member) => {
+                  {groupMembers.map((member) => {
                      const ageData = member.ageData;
                      const ageGroupInfo = getAgeGroupInfo(ageData);
                      const genderIcon = getGenderIcon(member.gender);
