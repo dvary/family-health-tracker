@@ -468,7 +468,7 @@ const MemberPage = () => {
     // Special handling for different vital types
     switch (vitalType) {
       case 'bmi':
-        if (numValue <= ranges.underweight.max) return { color: 'text-blue-600', bgColor: 'bg-blue-100', status: 'Underweight', level: 'low', priority: 2 };
+        if (numValue <= ranges.underweight.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Underweight', level: 'low', priority: 2 };
         if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
         if (numValue >= ranges.overweight.min && numValue <= ranges.overweight.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Overweight', level: 'warning', priority: 1 };
         if (numValue >= ranges.obese.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Obese', level: 'high', priority: 2 };
@@ -1819,13 +1819,13 @@ const MemberPage = () => {
 
                           {/* Expanded Content - Show All Records */}
                           {isExpanded && vitals.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-green-200">
-                              <div className="p-2 bg-green-50 rounded-lg">
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                              <div className="p-2 rounded-lg">
                             {vitals.map((vital, index) => {
                               const latestCard = index === 0;
                               const recordStatus = getVitalStatus(vitalType, vital.value, member?.gender);
                               return (
-                              <div key={vital.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${latestCard ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200' : 'bg-green-50 border border-green-200'} hover:shadow-md transition-shadow duration-200`}>
+                              <div key={vital.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${getSubCardGradientClass(recordStatus)} hover:shadow-md transition-shadow duration-200`}>
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
                                     <div className="flex items-center space-x-2 mb-1">
