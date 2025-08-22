@@ -1341,16 +1341,8 @@ const MemberPage = () => {
     <div className="space-y-6">
       {/* Header with Edit button prominently displayed */}
       <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-3 sm:space-y-0">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="text-gray-600 hover:text-gray-800 text-sm sm:text-base"
-            >
-              ← Back
-            </button>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
           <div className="flex space-x-2">
             {isAdmin() ? (
               <>

@@ -1,6 +1,6 @@
-# Family Health Tracker - Deployment Guide
+# Life Vault - Deployment Guide
 
-This guide covers deploying the Family Health Tracker application on Ubuntu servers using Docker and Portainer.
+This guide covers deploying the Life Vault application on Ubuntu servers using Docker and Portainer.
 
 ## 🚀 Quick Start
 
@@ -8,8 +8,8 @@ This guide covers deploying the Family Health Tracker application on Ubuntu serv
 
 1. **Clone the repository on your Ubuntu server:**
    ```bash
-   git clone https://github.com/dvary/family-health-tracker.git
-   cd family-health-tracker
+   git clone https://github.com/dvary/life-vault.git
+   cd life-vault
    ```
 
 2. **Make the deployment script executable and run it:**

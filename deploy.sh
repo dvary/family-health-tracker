@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Family Health Tracker - Ubuntu Server Deployment Script
+# Life Vault - Ubuntu Server Deployment Script
 # This script sets up the application on a fresh Ubuntu server
 
 set -e  # Exit on any error
 
-echo "🚀 Starting Family Health Tracker deployment..."
+echo "🚀 Starting Life Vault deployment..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -68,7 +68,7 @@ if ! command -v docker-compose &> /dev/null; then
 fi
 
 # Create application directory
-APP_DIR="/opt/family-health-tracker"
+APP_DIR="/opt/life-vault"
 print_status "Creating application directory at $APP_DIR..."
 sudo mkdir -p $APP_DIR
 sudo chown $USER:$USER $APP_DIR
@@ -80,7 +80,7 @@ if [ -d "$APP_DIR/.git" ]; then
     git pull origin main
 else
     print_status "Cloning repository..."
-    git clone https://github.com/dvary/family-health-tracker.git $APP_DIR
+    git clone https://github.com/dvary/life-vault.git $APP_DIR
     cd $APP_DIR
 fi
 
@@ -123,9 +123,9 @@ sudo systemctl start fail2ban
 
 # Create systemd service for auto-restart
 print_status "Creating systemd service..."
-sudo tee /etc/systemd/system/family-health-tracker.service > /dev/null <<EOF
+sudo tee /etc/systemd/system/life-vault.service > /dev/null <<EOF
 [Unit]
-Description=Family Health Tracker
+Description=Life Vault
 Requires=docker.service
 After=docker.service
 
@@ -142,7 +142,7 @@ WantedBy=multi-user.target
 EOF
 
 sudo systemctl daemon-reload
-sudo systemctl enable family-health-tracker.service
+sudo systemctl enable life-vault.service
 
 # Build and start containers
 print_status "Building and starting containers..."
@@ -167,8 +167,8 @@ echo "   - HTTPS: https://$(hostname -I | awk '{print $1}')"
 echo ""
 echo "📁 Application directory: $APP_DIR"
 echo "📝 Logs: docker-compose -f docker-compose.prod.yml logs -f"
-echo "🔄 Restart: sudo systemctl restart family-health-tracker"
-echo "⏹️  Stop: sudo systemctl stop family-health-tracker"
+echo "🔄 Restart: sudo systemctl restart life-vault"
+echo "⏹️  Stop: sudo systemctl stop life-vault"
 echo ""
 print_warning "Remember to:"
 echo "   - Update your domain DNS to point to this server"

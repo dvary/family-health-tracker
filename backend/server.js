@@ -63,7 +63,7 @@ app.use('/api/health', healthRoutes);
 app.get('/api/health-check', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Family Health Tracker API is running',
+            message: 'Life Vault API is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -90,7 +90,7 @@ process.on('uncaughtException', (error) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Family Health Tracker API running on port ${PORT}`);
+      console.log(`🚀 Life Vault API running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API URL: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}/api`);
 });

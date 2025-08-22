@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
       
-      toast.success('Registration successful! Welcome to Family Health Tracker!');
+              toast.success('Registration successful! Welcome to Life Vault!');
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
