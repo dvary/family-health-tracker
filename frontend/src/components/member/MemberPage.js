@@ -1545,47 +1545,11 @@ const MemberPage = () => {
               </button>
             </div>
 
-            {/* Vital Type Sub-tabs */}
-            <div className="mb-6">
-              <div className="border-b border-gray-200">
-                <nav className="flex space-x-8 overflow-x-auto">
-                  <button
-                    onClick={() => setActiveVitalSubTab('all')}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                      activeVitalSubTab === 'all'
-                        ? 'border-teal-500 text-teal-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    All Vitals
-                  </button>
-                  {Object.entries(VITAL_TYPES)
-                    .filter(([key]) => {
-                      if (key === 'bmi') {
-                        return getBMIRecords().length > 0;
-                      }
-                      return healthVitals.some(vital => vital.vital_type === key);
-                    })
-                    .map(([key, config]) => (
-                      <button
-                        key={key}
-                        onClick={() => setActiveVitalSubTab(key)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                          activeVitalSubTab === key
-                            ? 'border-teal-500 text-teal-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        {config.label}
-                      </button>
-                    ))}
-                </nav>
-              </div>
-            </div>
+
             {(healthVitals.length > 0 || getBMIRecords().length > 0) ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
                 {/* BMI Card - Always show if there are height and weight records */}
-                {getBMIRecords().length > 0 && (activeVitalSubTab === 'all' || activeVitalSubTab === 'bmi') && (
+                {getBMIRecords().length > 0 && (
                   (() => {
                     const bmiRecords = getBMIRecords();
                     const latestBMI = bmiRecords[0];
@@ -1694,11 +1658,7 @@ const MemberPage = () => {
                 )}
 
                 {/* Regular Vital Cards */}
-                {Object.entries(groupVitalsByType(
-                  activeVitalSubTab === 'all' 
-                    ? sortVitalsByPriority(healthVitals)
-                    : healthVitals.filter(vital => vital.vital_type === activeVitalSubTab)
-                )).map(([vitalType, vitals]) => {
+                {Object.entries(groupVitalsByType(sortVitalsByPriority(healthVitals))).map(([vitalType, vitals]) => {
                   const vitalConfig = VITAL_TYPES[vitalType] || { label: vitalType.replace('_', ' ').toUpperCase() };
                   const latestVital = vitals[0]; // First one is the latest due to sorting
                   const isExpanded = expandedVitalTypes.has(vitalType);
@@ -1720,7 +1680,7 @@ const MemberPage = () => {
                   };
                   
                   return (
-                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow ${getGradientClass(vitalStatus)}`}>
+                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col ${getGradientClass(vitalStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
                         className="p-4 cursor-pointer"
@@ -1781,13 +1741,13 @@ const MemberPage = () => {
 
                           {/* Expanded Content - Show All Records */}
                           {isExpanded && vitals.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-200">
-                              <div className="p-2 bg-gray-50 rounded-lg">
+                            <div className="mt-4 pt-4 border-t border-green-200">
+                              <div className="p-2 bg-green-50 rounded-lg">
                             {vitals.map((vital, index) => {
                               const latestCard = index === 0;
                               const recordStatus = getVitalStatus(vitalType, vital.value, member?.gender);
                               return (
-                              <div key={vital.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${latestCard ? 'bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200' : 'bg-white border border-gray-200'} hover:shadow-md transition-shadow duration-200`}>
+                              <div key={vital.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${latestCard ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200' : 'bg-green-50 border border-green-200'} hover:shadow-md transition-shadow duration-200`}>
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
                                     <div className="flex items-center space-x-2 mb-1">
@@ -1856,45 +1816,10 @@ const MemberPage = () => {
               </button>
             </div>
 
-            {/* Report Type Sub-tabs */}
-            <div className="mb-6">
-              <div className="border-b border-gray-200">
-                <nav className="flex space-x-8 overflow-x-auto">
-                  <button
-                    onClick={() => setActiveReportSubTab('all')}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                      activeReportSubTab === 'all'
-                        ? 'border-teal-500 text-teal-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    All Reports
-                  </button>
-                  {Object.entries(REPORT_TYPES)
-                    .filter(([key]) => medicalReports.some(report => report.report_type === key))
-                    .map(([key, config]) => (
-                      <button
-                        key={key}
-                        onClick={() => setActiveReportSubTab(key)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                          activeReportSubTab === key
-                            ? 'border-teal-500 text-teal-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        {config.label}
-                      </button>
-                    ))}
-                </nav>
-              </div>
-            </div>
+
             {medicalReports.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-                {Object.entries(groupReportsByType(
-                  activeReportSubTab === 'all' 
-                    ? medicalReports 
-                    : medicalReports.filter(report => report.report_type === activeReportSubTab)
-                )).map(([reportKey, reports]) => {
+                {Object.entries(groupReportsByType(medicalReports)).map(([reportKey, reports]) => {
                   const latestReport = reports[0]; // First one is the latest due to sorting
                   const isExpanded = expandedReportTypes.has(reportKey);
                   
