@@ -602,9 +602,9 @@ const MemberPage = () => {
     const currentDate = new Date();
     const daysDiff = Math.floor((currentDate - reportDate) / (1000 * 60 * 60 * 24));
     
-    // Recent reports (within 30 days) are considered "Normal"
+    // Recent reports (within 30 days) are considered "Normal" - no status tag
     if (daysDiff <= 30) {
-      return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+      return { color: 'text-gray-600', bgColor: 'bg-gray-100', status: '', level: 'normal', priority: 0 };
     }
     // Reports between 30-90 days are "Borderline"
     else if (daysDiff <= 90) {
@@ -653,17 +653,8 @@ const MemberPage = () => {
 
   // Get sub-card gradient class based on status level
   const getSubCardGradientClass = (status) => {
-    switch (status.level) {
-      case 'high':
-      case 'low':
-        return 'bg-gradient-to-r from-rose-50 to-rose-100 border border-rose-200';
-      case 'warning':
-        return 'bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200';
-      case 'normal':
-        return 'bg-gradient-to-r from-teal-50 to-teal-100 border border-teal-200';
-      default:
-        return 'bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200';
-    }
+    // Return neutral styling for sub-cards (no gradients)
+    return 'bg-white border border-gray-200';
   };
 
   // Get main card status based on latest record
@@ -1924,9 +1915,11 @@ const MemberPage = () => {
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <h4 className="text-lg font-semibold text-gray-900">{reportConfig.label}</h4>
-                              <span className={`text-xs px-2 py-1 rounded-full ${mainCardStatus.bgColor} ${mainCardStatus.color}`}>
-                                {mainCardStatus.status}
-                              </span>
+                              {mainCardStatus.status && (
+                                <span className={`text-xs px-2 py-1 rounded-full ${mainCardStatus.bgColor} ${mainCardStatus.color}`}>
+                                  {mainCardStatus.status}
+                                </span>
+                              )}
                             </div>
                             {subTypeLabel && (
                               <p className="text-sm text-gray-600 mb-2">{subTypeLabel}</p>
@@ -1990,9 +1983,11 @@ const MemberPage = () => {
                                       <div className="flex-1">
                                         <div className="flex items-center space-x-2 mb-1">
                                           <h6 className="text-sm font-medium text-gray-900">{subLabel}</h6>
-                                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${reportStatus.bgColor} ${reportStatus.color}`}>
-                                            {reportStatus.status}
-                                          </span>
+                                          {reportStatus.status && (
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${reportStatus.bgColor} ${reportStatus.color}`}>
+                                              {reportStatus.status}
+                                            </span>
+                                          )}
                                         </div>
                                         <div className="mb-1">
                                           <span className="text-xs text-gray-500">{formatDate(report.report_date)}</span>
@@ -2080,10 +2075,19 @@ const MemberPage = () => {
             
             {documents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {documents.map((document) => (
-                  <div key={document.id} className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-3 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
+                {documents.map((document) => {
+                  const documentStatus = getDocumentStatus(document);
+                  return (
+                    <div key={document.id} className={`rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow ${getGradientClass(documentStatus)}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
+                          {documentStatus.status && (
+                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${documentStatus.bgColor} ${documentStatus.color}`}>
+                              {documentStatus.status}
+                            </span>
+                          )}
+                        </div>
                       <div className="flex space-x-1">
                         <button
                           onClick={() => handleViewDocument(document)}
@@ -2116,7 +2120,8 @@ const MemberPage = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+                })}
                 </div>
               ) : (
               <div className="text-center py-12">
@@ -2603,16 +2608,16 @@ const MemberPage = () => {
 
         {/* Document Viewer Modal */}
         {showDocumentViewer && selectedDocument && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-lg w-full max-w-6xl h-[98vh] sm:h-[95vh] flex flex-col shadow-2xl">
-              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
-                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
+            <div className="bg-white rounded-lg w-full h-full max-w-7xl max-h-[99vh] sm:max-h-[98vh] md:max-h-[95vh] flex flex-col shadow-2xl">
+              <div className="flex justify-between items-center p-2 sm:p-3 md:p-4 border-b flex-wrap gap-1 sm:gap-2">
+                <h2 className="text-sm sm:text-base md:text-lg font-semibold flex-1 min-w-0">
                   <span className="truncate block">{selectedDocument.title}</span>
                 </h2>
                 <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleDownloadDocument(selectedDocument)}
-                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
+                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Download
                   </button>
@@ -2624,19 +2629,20 @@ const MemberPage = () => {
                       setShowDocumentViewer(false);
                       setSelectedDocument(null);
                     }}
-                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
+                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Close
                   </button>
                 </div>
               </div>
-              <div className="flex-1 p-1 sm:p-2 overflow-hidden">
+              <div className="flex-1 p-0 sm:p-1 md:p-2 overflow-hidden">
                 {selectedDocument.pdfUrl ? (
                   <iframe
-                    src={`${selectedDocument.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                    src={`${selectedDocument.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH&zoom=page-fit`}
                     className="w-full h-full border-0 rounded"
                     title={selectedDocument.title}
-                    style={{ minHeight: '400px' }}
+                    style={{ minHeight: '300px' }}
+                    allowFullScreen
                   />
                 ) : (
                   <div className="flex items-center justify-center h-64">
@@ -2724,10 +2730,10 @@ const MemberPage = () => {
 
         {/* PDF Viewer Modal */}
         {showPdfViewer && selectedReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-lg w-full max-w-6xl h-[98vh] sm:h-[95vh] flex flex-col shadow-2xl">
-              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
-                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
+            <div className="bg-white rounded-lg w-full h-full max-w-7xl max-h-[99vh] sm:max-h-[98vh] md:max-h-[95vh] flex flex-col shadow-2xl">
+              <div className="flex justify-between items-center p-2 sm:p-3 md:p-4 border-b flex-wrap gap-1 sm:gap-2">
+                <h2 className="text-sm sm:text-base md:text-lg font-semibold flex-1 min-w-0">
                   <span className="truncate block">
                     {(() => {
                       const reportConfig = REPORT_TYPES[selectedReport.report_type] || { label: selectedReport.report_type?.replace(/_/g, ' ').toUpperCase() };
@@ -2746,7 +2752,7 @@ const MemberPage = () => {
                 <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleDownloadReport(selectedReport)}
-                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
+                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Download
                   </button>
@@ -2758,19 +2764,20 @@ const MemberPage = () => {
                       setShowPdfViewer(false);
                       setSelectedReport(null);
                     }}
-                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
+                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Close
                   </button>
                 </div>
               </div>
-              <div className="flex-1 p-1 sm:p-2 overflow-hidden">
+              <div className="flex-1 p-0 sm:p-1 md:p-2 overflow-hidden">
                 {selectedReport.pdfUrl ? (
                   <iframe
-                    src={`${selectedReport.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                    src={`${selectedReport.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH&zoom=page-fit`}
                     className="w-full h-full border-0 rounded"
                     title={selectedReport.title}
-                    style={{ minHeight: '400px' }}
+                    style={{ minHeight: '300px' }}
+                    allowFullScreen
                   />
                 ) : (
                   <div className="flex items-center justify-center h-64">
