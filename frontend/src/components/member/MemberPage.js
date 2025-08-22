@@ -2160,8 +2160,8 @@ const MemberPage = () => {
 
         {/* Add Vital Modal */}
         {showAddVitalModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Add Health Vital</h2>
               <form onSubmit={handleAddVital} className="space-y-4">
                 <div>
@@ -2204,19 +2204,12 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
                   <input
-                    type="text"
-                    placeholder="dd-mm-yyyy"
-                    value={vitalFormData.recordedAt ? formatDate(vitalFormData.recordedAt) : ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^[\d-]*$/.test(value)) {
-                        setVitalFormData({...vitalFormData, recordedAt: parseDateFromDisplay(value)});
-                      }
-                    }}
+                    type="date"
+                    value={vitalFormData.recordedAt}
+                    onChange={(e) => setVitalFormData({...vitalFormData, recordedAt: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2247,8 +2240,8 @@ const MemberPage = () => {
 
         {/* Edit Vital Modal */}
         {showEditVitalModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Edit Health Vital</h2>
               <form onSubmit={handleUpdateVital} className="space-y-4">
                 <div>
@@ -2298,19 +2291,12 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
                   <input
-                    type="text"
-                    placeholder="dd-mm-yyyy"
-                    value={editVitalFormData.recordedAt ? formatDate(editVitalFormData.recordedAt) : ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^[\d-]*$/.test(value)) {
-                        setEditVitalFormData({...editVitalFormData, recordedAt: parseDateFromDisplay(value)});
-                      }
-                    }}
+                    type="date"
+                    value={editVitalFormData.recordedAt}
+                    onChange={(e) => setEditVitalFormData({...editVitalFormData, recordedAt: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2344,8 +2330,8 @@ const MemberPage = () => {
 
         {/* Upload Report Modal */}
         {showUploadReportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Upload Medical Report</h2>
               <form onSubmit={handleUploadReport} className="space-y-4">
                 <div>
@@ -2388,19 +2374,12 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
                   <input
-                    type="text"
-                    placeholder="dd-mm-yyyy"
-                    value={reportFormData.reportDate ? formatDate(reportFormData.reportDate) : ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^[\d-]*$/.test(value)) {
-                        setReportFormData({...reportFormData, reportDate: parseDateFromDisplay(value)});
-                      }
-                    }}
+                    type="date"
+                    value={reportFormData.reportDate}
+                    onChange={(e) => setReportFormData({...reportFormData, reportDate: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
@@ -2442,7 +2421,7 @@ const MemberPage = () => {
 
         {/* Edit Report Modal */}
         {showEditReportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Edit Medical Report</h2>
               <form onSubmit={handleUpdateReport} className="space-y-4">
@@ -2494,19 +2473,12 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
                   <input
-                    type="text"
-                    placeholder="dd-mm-yyyy"
-                    value={editReportFormData.reportDate ? formatDate(editReportFormData.reportDate) : ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^[\d-]*$/.test(value)) {
-                        setEditReportFormData({...editReportFormData, reportDate: parseDateFromDisplay(value)});
-                      }
-                    }}
+                    type="date"
+                    value={editReportFormData.reportDate}
+                    onChange={(e) => setEditReportFormData({...editReportFormData, reportDate: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File (Optional - leave empty to keep current file)</label>
@@ -2559,8 +2531,8 @@ const MemberPage = () => {
 
         {/* Upload Document Modal */}
         {showUploadDocumentModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Upload Document</h2>
               <form onSubmit={handleUploadDocument} className="space-y-4">
                 <div>
@@ -2676,8 +2648,8 @@ const MemberPage = () => {
 
         {/* Edit Document Modal */}
         {showEditDocumentModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Edit Document</h2>
               <form onSubmit={handleUpdateDocument} className="space-y-4">
                 <div>
