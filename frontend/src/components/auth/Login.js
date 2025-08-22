@@ -50,7 +50,7 @@ const Login = () => {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-            Welcome back
+            Welcome Back
           </h1>
           <p className="text-neutral-600">
             Sign in to your Life Vault account

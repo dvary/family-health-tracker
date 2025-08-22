@@ -1294,9 +1294,7 @@ const MemberPage = () => {
                   }}
                   className="input"
                 />
-                <p className="form-help">
-                  Format: dd-mm-yyyy (e.g., 25-12-1990)
-                </p>
+
               </div>
               <div className="form-group">
                 <label htmlFor="gender" className="form-label">
@@ -2076,7 +2074,7 @@ const MemberPage = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
+
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2170,7 +2168,7 @@ const MemberPage = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
+
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2260,7 +2258,7 @@ const MemberPage = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
+
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
@@ -2366,7 +2364,7 @@ const MemberPage = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
+
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File (Optional - leave empty to keep current file)</label>

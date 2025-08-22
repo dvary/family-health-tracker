@@ -52,7 +52,7 @@ const Layout = () => {
               <div className="hidden sm:flex items-center space-x-3">
                 <div className="text-right">
                   <p className="text-sm font-medium text-neutral-900">
-                    Welcome back
+                    Welcome Back
                   </p>
                   <p className="text-xs text-neutral-600">
                     {user?.firstName && user?.lastName 
