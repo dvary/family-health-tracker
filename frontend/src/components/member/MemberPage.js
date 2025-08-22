@@ -309,6 +309,9 @@ const MemberPage = () => {
     email: '',
     password: ''
   });
+  
+  // Date component states for edit form
+  const [editDateComponents, setEditDateComponents] = useState({ day: '', month: '', year: '' });
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
     value: '',
@@ -391,6 +394,65 @@ const MemberPage = () => {
       return `${year}-${month}-${day}`;
     }
     return dateString;
+  };
+
+  // Generate date dropdown options (1-31)
+  const generateDateOptions = () => {
+    const options = [];
+    for (let i = 1; i <= 31; i++) {
+      options.push(
+        <option key={i} value={i.toString().padStart(2, '0')}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+
+  // Generate month dropdown options
+  const generateMonthOptions = () => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months.map((month, index) => (
+      <option key={index + 1} value={(index + 1).toString().padStart(2, '0')}>
+        {month}
+      </option>
+    ));
+  };
+
+  // Generate year dropdown options (1900 to current year)
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const options = [];
+    for (let year = currentYear; year >= 1900; year--) {
+      options.push(
+        <option key={year} value={year}>
+          {year}
+        </option>
+      );
+    }
+    return options;
+  };
+
+  // Parse date components from date string
+  const parseDateComponents = (dateString) => {
+    if (!dateString) return { day: '', month: '', year: '' };
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return { day: '', month: '', year: '' };
+    
+    return {
+      day: date.getDate().toString().padStart(2, '0'),
+      month: (date.getMonth() + 1).toString().padStart(2, '0'),
+      year: date.getFullYear().toString()
+    };
+  };
+
+  // Combine date components into date string
+  const combineDateComponents = (day, month, year) => {
+    if (!day || !month || !year) return '';
+    return `${year}-${month}-${day}`;
   };
 
   // Get vital status color and label based on value and ranges
@@ -670,6 +732,14 @@ const MemberPage = () => {
         password: '' // Don't populate password for security
       });
       
+      // Populate date components for editing
+      if (foundMember.date_of_birth) {
+        const components = parseDateComponents(foundMember.date_of_birth);
+        setEditDateComponents(components);
+      } else {
+        setEditDateComponents({ day: '', month: '', year: '' });
+      }
+      
       // Fetch health vitals
       try {
         const vitalsResponse = await axios.get(`/health/vitals/${foundMember.id}`);
@@ -761,6 +831,7 @@ const MemberPage = () => {
       email: member.user_email || '',
       password: ''
     });
+    setEditDateComponents({ day: '', month: '', year: '' });
   };
 
 
@@ -1280,21 +1351,53 @@ const MemberPage = () => {
                 <label htmlFor="dateOfBirth" className="form-label">
                   Date of Birth
                 </label>
-                <input
-                  id="dateOfBirth"
-                  type="text"
-                  placeholder="dd-mm-yyyy"
-                  value={formData.dateOfBirth ? formatDate(formData.dateOfBirth) : ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow only digits and hyphens
-                    if (/^[\d-]*$/.test(value)) {
-                      setFormData({...formData, dateOfBirth: parseDateFromDisplay(value)});
-                    }
-                  }}
-                  className="input"
-                />
-
+                <div className="flex space-x-2">
+                  <select
+                    value={editDateComponents.day}
+                    onChange={(e) => {
+                      const newComponents = { ...editDateComponents, day: e.target.value };
+                      setEditDateComponents(newComponents);
+                      setFormData({
+                        ...formData,
+                        dateOfBirth: combineDateComponents(newComponents.day, newComponents.month, newComponents.year)
+                      });
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    <option value="">Day</option>
+                    {generateDateOptions()}
+                  </select>
+                  <select
+                    value={editDateComponents.month}
+                    onChange={(e) => {
+                      const newComponents = { ...editDateComponents, month: e.target.value };
+                      setEditDateComponents(newComponents);
+                      setFormData({
+                        ...formData,
+                        dateOfBirth: combineDateComponents(newComponents.day, newComponents.month, newComponents.year)
+                      });
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    <option value="">Month</option>
+                    {generateMonthOptions()}
+                  </select>
+                  <select
+                    value={editDateComponents.year}
+                    onChange={(e) => {
+                      const newComponents = { ...editDateComponents, year: e.target.value };
+                      setEditDateComponents(newComponents);
+                      setFormData({
+                        ...formData,
+                        dateOfBirth: combineDateComponents(newComponents.day, newComponents.month, newComponents.year)
+                      });
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  >
+                    <option value="">Year</option>
+                    {generateYearOptions()}
+                  </select>
+                </div>
               </div>
               <div className="form-group">
                 <label htmlFor="gender" className="form-label">
@@ -1803,7 +1906,7 @@ const MemberPage = () => {
                   const groupSubTypeLabel = subTypeLabel;
                   
                   return (
-                    <div key={reportKey} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+                    <div key={reportKey} className="bg-green-50 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
                       {/* Main Card - Always Visible */}
                       <div 
                         className="p-4 cursor-pointer"
@@ -1857,8 +1960,8 @@ const MemberPage = () => {
 
                           {/* Expanded Content - Show All Reports */}
                           {isExpanded && reports.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-200">
-                              <div className="p-2 bg-gray-50 rounded-lg">
+                            <div className="mt-4 pt-4 border-t border-green-200">
+                              <div className="p-2 bg-green-50 rounded-lg">
                               {reports.map((report, index) => {
                                 const isPdf = report.file_name?.toLowerCase().endsWith('.pdf');
                                 const subValue = report.report_sub_type || '';
@@ -1868,7 +1971,7 @@ const MemberPage = () => {
                                 const subLabel = derivedSub || (subValue ? subValue.replace(/_/g, ' ').toUpperCase() : '') || report.report_type?.replace(/_/g, ' ').toUpperCase() || 'Report';
                                 const latestCard = index === 0;
                                 return (
-                                  <div key={report.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${latestCard ? 'bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200' : 'bg-white border border-gray-200'} hover:shadow-md transition-shadow duration-200`}>
+                                  <div key={report.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${latestCard ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200' : 'bg-green-50 border border-green-200'} hover:shadow-md transition-shadow duration-200`}>
                                     <div className="flex justify-between items-start">
                                       <div className="flex-1">
                                         <h6 className="text-sm font-medium text-gray-900 mb-1">{subLabel}</h6>
@@ -1960,7 +2063,7 @@ const MemberPage = () => {
             {documents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {documents.map((document) => (
-                  <div key={document.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                  <div key={document.id} className="bg-orange-50 border border-orange-200 rounded-lg p-3 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
                       <div className="flex space-x-1">
