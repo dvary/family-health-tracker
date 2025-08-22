@@ -243,9 +243,9 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  /* Card consistency */
+  /* Card consistency - removed fixed height for better UX */
   .card-consistent-height {
-    @apply h-32;
+    @apply min-h-24;
   }
 
   .card-content {

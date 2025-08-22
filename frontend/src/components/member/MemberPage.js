@@ -1749,7 +1749,7 @@ const MemberPage = () => {
                       case 'warning':
                         return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
                       case 'normal':
-                        return 'bg-gradient-to-br from-teal-50 via-teal-25 to-white';
+                        return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
                       default:
                         return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
                     }
