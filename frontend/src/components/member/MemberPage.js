@@ -469,13 +469,13 @@ const MemberPage = () => {
     switch (vitalType) {
       case 'bmi':
         if (numValue <= ranges.underweight.max) return { color: 'text-blue-600', bgColor: 'bg-blue-100', status: 'Underweight', level: 'low', priority: 2 };
-        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
         if (numValue >= ranges.overweight.min && numValue <= ranges.overweight.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Overweight', level: 'warning', priority: 1 };
         if (numValue >= ranges.obese.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Obese', level: 'high', priority: 2 };
         break;
 
       case 'cholesterol':
-        if (numValue <= ranges.optimal.max) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Optimal', level: 'normal', priority: 0 };
+        if (numValue <= ranges.optimal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: 'Optimal', level: 'normal', priority: 0 };
         if (numValue >= ranges.borderline.min && numValue <= ranges.borderline.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Borderline', level: 'warning', priority: 1 };
         if (numValue >= ranges.high.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'High', level: 'high', priority: 2 };
         break;
@@ -483,25 +483,25 @@ const MemberPage = () => {
       case 'hemoglobin':
         const genderRange = memberGender === 'male' ? ranges.male : ranges.female;
         if (numValue < genderRange.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Low', level: 'low', priority: 2 };
-        if (numValue >= genderRange.min && numValue <= genderRange.max) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+        if (numValue >= genderRange.min && numValue <= genderRange.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
         if (numValue > genderRange.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'High', level: 'warning', priority: 1 };
         break;
 
       case 'vitamin_d':
         if (numValue <= ranges.deficient.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Deficient', level: 'low', priority: 2 };
         if (numValue >= ranges.insufficient.min && numValue <= ranges.insufficient.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Insufficient', level: 'warning', priority: 1 };
-        if (numValue >= ranges.sufficient.min) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Sufficient', level: 'normal', priority: 0 };
+        if (numValue >= ranges.sufficient.min) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: 'Sufficient', level: 'normal', priority: 0 };
         break;
 
       case 'vitamin_b12':
         if (numValue <= ranges.deficient.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Deficient', level: 'low', priority: 2 };
         if (numValue >= ranges.low.min && numValue <= ranges.low.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Low', level: 'warning', priority: 1 };
-        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
         if (numValue > ranges.normal.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'High', level: 'warning', priority: 1 };
         break;
 
       case 'hba1c':
-        if (numValue <= ranges.normal.max) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+        if (numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
         if (numValue >= ranges.prediabetic.min && numValue <= ranges.prediabetic.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Prediabetic', level: 'warning', priority: 1 };
         if (numValue >= ranges.diabetic.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Diabetic', level: 'high', priority: 2 };
         break;
@@ -510,7 +510,7 @@ const MemberPage = () => {
         // Generic handling for vitals with simple normal ranges
         if (ranges.normal) {
           if (numValue < ranges.normal.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Low', level: 'low', priority: 2 };
-          if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+          if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
           if (numValue > ranges.normal.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'High', level: 'high', priority: 2 };
         }
         break;
@@ -624,7 +624,7 @@ const MemberPage = () => {
     
     // Recent documents (within 60 days) are considered "Normal"
     if (daysDiff <= 60) {
-      return { color: 'text-teal-600', bgColor: 'bg-teal-100', status: 'Normal', level: 'normal', priority: 0 };
+      return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
     }
     // Documents between 60-180 days are "Borderline"
     else if (daysDiff <= 180) {
@@ -645,7 +645,7 @@ const MemberPage = () => {
       case 'warning':
         return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
       case 'normal':
-        return 'bg-gradient-to-br from-teal-50 via-teal-25 to-white';
+        return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
       default:
         return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
     }
@@ -1579,7 +1579,7 @@ const MemberPage = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Health Vitals
+              Vitals
             </button>
             <button
               onClick={() => setActiveTab('reports')}
@@ -1589,7 +1589,7 @@ const MemberPage = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Medical Reports
+              Reports
             </button>
             <button
               onClick={() => setActiveTab('documents')}
@@ -1638,7 +1638,7 @@ const MemberPage = () => {
                         case 'warning':
                           return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
                         case 'normal':
-                          return 'bg-gradient-to-br from-teal-50 via-teal-25 to-white';
+                          return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
                         default:
                           return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
                       }
@@ -1655,9 +1655,11 @@ const MemberPage = () => {
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
                                 <h4 className="text-lg font-semibold text-gray-900">BMI</h4>
-                                <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
-                                  {vitalStatus.status}
-                                </span>
+                                {vitalStatus.status && (
+                                  <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
+                                    {vitalStatus.status}
+                                  </span>
+                                )}
                               </div>
                               <div className="mb-2">
                                 <p className={`text-xl font-bold ${vitalStatus.color}`}>
@@ -1707,9 +1709,11 @@ const MemberPage = () => {
                                         <p className={`font-medium ${recordStatus.color}`}>
                                           {bmiRecord.value} {bmiRecord.unit}
                                         </p>
-                                        <span className={`text-xs px-2 py-1 rounded-full ${recordStatus.bgColor} ${recordStatus.color}`}>
-                                          {recordStatus.status}
-                                        </span>
+                                        {recordStatus.status && (
+                                          <span className={`text-xs px-2 py-1 rounded-full ${recordStatus.bgColor} ${recordStatus.color}`}>
+                                            {recordStatus.status}
+                                          </span>
+                                        )}
                                       </div>
                                       <p className="text-sm text-gray-500">
                                         {formatDate(bmiRecord.recorded_at)}
@@ -1752,19 +1756,21 @@ const MemberPage = () => {
                   };
                   
                   return (
-                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col ${getGradientClass(vitalStatus)}`}>
+                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height ${getGradientClass(vitalStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
-                        className="p-3 cursor-pointer"
+                        className="p-3 cursor-pointer card-content"
                         onClick={() => toggleVitalTypeExpansion(vitalType)}
                       >
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start card-body">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <h4 className="text-lg font-semibold text-gray-900">{vitalConfig.label}</h4>
-                              <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
-                                {vitalStatus.status}
-                              </span>
+                              {vitalStatus.status && (
+                                <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
+                                  {vitalStatus.status}
+                                </span>
+                              )}
                             </div>
                             <div className="mb-2">
                               <p className={`text-xl font-bold ${vitalStatus.color}`}>
@@ -1826,9 +1832,11 @@ const MemberPage = () => {
                                       <p className={`text-sm font-medium ${recordStatus.color}`}>
                                       {vital.value} {vital.unit}
                                     </p>
-                                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${recordStatus.bgColor} ${recordStatus.color}`}>
-                                        {recordStatus.status}
-                                      </span>
+                                      {recordStatus.status && (
+                                        <span className={`text-xs px-1.5 py-0.5 rounded-full ${recordStatus.bgColor} ${recordStatus.color}`}>
+                                          {recordStatus.status}
+                                        </span>
+                                      )}
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
                                       {formatDate(vital.recorded_at)}
@@ -1905,13 +1913,13 @@ const MemberPage = () => {
                   const mainCardStatus = getMainCardStatus(reports, getReportStatus);
                   
                   return (
-                    <div key={reportKey} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col ${getGradientClass(mainCardStatus)}`}>
+                    <div key={reportKey} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height ${getGradientClass(mainCardStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
-                        className="p-3 cursor-pointer"
+                        className="p-3 cursor-pointer card-content"
                         onClick={() => toggleReportTypeExpansion(reportKey)}
                       >
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start card-body">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <h4 className="text-lg font-semibold text-gray-900">{reportConfig.label}</h4>
@@ -2078,49 +2086,57 @@ const MemberPage = () => {
                 {documents.map((document) => {
                   const documentStatus = getDocumentStatus(document);
                   return (
-                    <div key={document.id} className={`rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow ${getGradientClass(documentStatus)}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
-                          {documentStatus.status && (
-                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${documentStatus.bgColor} ${documentStatus.color}`}>
-                              {documentStatus.status}
-                            </span>
+                    <div key={document.id} className={`rounded-lg border border-gray-200 hover:shadow-md transition-shadow card-consistent-height flex flex-col ${getGradientClass(documentStatus)}`}>
+                      <div className="p-3 card-content">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
+                            {documentStatus.status && (
+                              <span className={`text-xs px-1.5 py-0.5 rounded-full ${documentStatus.bgColor} ${documentStatus.color}`}>
+                                {documentStatus.status}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => handleViewDocument(document)}
+                              className="text-teal-600 hover:text-teal-800 p-1.5 bg-teal-50 hover:bg-teal-100 rounded transition-colors"
+                              title="View"
+                            >
+                              <EyeIcon />
+                            </button>
+                            <button
+                              onClick={() => handleDownloadDocument(document)}
+                              className="text-blue-600 hover:text-blue-800 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
+                              title="Download"
+                            >
+                              <DownloadIcon />
+                            </button>
+                            <button
+                              onClick={() => handleEditDocument(document)}
+                              className="text-green-600 hover:text-green-800 p-1.5 bg-green-50 hover:bg-green-100 rounded transition-colors"
+                              title="Edit"
+                            >
+                              <EditIcon />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDocument(document)}
+                              className="text-red-600 hover:text-red-800 p-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors"
+                              title="Delete"
+                            >
+                              <DeleteIcon />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="card-body">
+                          <p className="text-sm text-gray-600 mb-2">{formatDate(document.upload_date)}</p>
+                          {document.description && (
+                            <p className="text-sm text-gray-600 line-clamp-3">{document.description}</p>
                           )}
                         </div>
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => handleViewDocument(document)}
-                          className="text-teal-600 hover:text-teal-800 p-1.5 bg-teal-50 hover:bg-teal-100 rounded transition-colors"
-                          title="View"
-                        >
-                          <EyeIcon />
-                        </button>
-                        <button
-                          onClick={() => handleDownloadDocument(document)}
-                          className="text-blue-600 hover:text-blue-800 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
-                          title="Download"
-                        >
-                          <DownloadIcon />
-                        </button>
-                        <button
-                          onClick={() => handleEditDocument(document)}
-                          className="text-green-600 hover:text-green-800 p-1.5 bg-green-50 hover:bg-green-100 rounded transition-colors"
-                          title="Edit"
-                        >
-                          <EditIcon />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteDocument(document)}
-                          className="text-red-600 hover:text-red-800 p-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors"
-                          title="Delete"
-                        >
-                          <DeleteIcon />
-                        </button>
                       </div>
                     </div>
-                  </div>
-                );
+                  );
                 })}
                 </div>
               ) : (
@@ -2608,8 +2624,8 @@ const MemberPage = () => {
 
         {/* Document Viewer Modal */}
         {showDocumentViewer && selectedDocument && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
-            <div className="bg-white rounded-lg w-full h-full max-w-7xl max-h-[99vh] sm:max-h-[98vh] md:max-h-[95vh] flex flex-col shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0">
+            <div className="bg-white rounded-lg w-full h-full max-w-7xl flex flex-col shadow-2xl pdf-viewer-container"> 
               <div className="flex justify-between items-center p-2 sm:p-3 md:p-4 border-b flex-wrap gap-1 sm:gap-2">
                 <h2 className="text-sm sm:text-base md:text-lg font-semibold flex-1 min-w-0">
                   <span className="truncate block">{selectedDocument.title}</span>
@@ -2635,14 +2651,18 @@ const MemberPage = () => {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 p-0 sm:p-1 md:p-2 overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 {selectedDocument.pdfUrl ? (
                   <iframe
-                    src={`${selectedDocument.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH&zoom=page-fit`}
-                    className="w-full h-full border-0 rounded"
+                    src={`${selectedDocument.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=Fit&zoom=page-width`}
+                    className="w-full h-full border-0 pdf-viewer-iframe"
                     title={selectedDocument.title}
-                    style={{ minHeight: '300px' }}
                     allowFullScreen
+                    style={{ 
+                      minHeight: '100%',
+                      maxHeight: '100%',
+                      overflow: 'auto'
+                    }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-64">
@@ -2730,8 +2750,8 @@ const MemberPage = () => {
 
         {/* PDF Viewer Modal */}
         {showPdfViewer && selectedReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
-            <div className="bg-white rounded-lg w-full h-full max-w-7xl max-h-[99vh] sm:max-h-[98vh] md:max-h-[95vh] flex flex-col shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0">
+            <div className="bg-white rounded-lg w-full h-full max-w-7xl flex flex-col shadow-2xl pdf-viewer-container">
               <div className="flex justify-between items-center p-2 sm:p-3 md:p-4 border-b flex-wrap gap-1 sm:gap-2">
                 <h2 className="text-sm sm:text-base md:text-lg font-semibold flex-1 min-w-0">
                   <span className="truncate block">
@@ -2770,14 +2790,18 @@ const MemberPage = () => {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 p-0 sm:p-1 md:p-2 overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 {selectedReport.pdfUrl ? (
                   <iframe
-                    src={`${selectedReport.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH&zoom=page-fit`}
-                    className="w-full h-full border-0 rounded"
+                    src={`${selectedReport.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=Fit&zoom=page-width`}
+                    className="w-full h-full border-0 pdf-viewer-iframe"
                     title={selectedReport.title}
-                    style={{ minHeight: '300px' }}
                     allowFullScreen
+                    style={{ 
+                      minHeight: '100%',
+                      maxHeight: '100%',
+                      overflow: 'auto'
+                    }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-64">

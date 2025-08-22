@@ -78,6 +78,27 @@
     .container-fluid {
       @apply px-4;
     }
+    
+    /* PDF viewer improvements for mobile */
+    .pdf-viewer-iframe {
+      -webkit-overflow-scrolling: touch;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    /* Prevent zoom on PDF viewer */
+    .pdf-viewer-container {
+      touch-action: pan-x pan-y;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
   }
 }
 
@@ -220,6 +241,19 @@
   .grid-auto-fill {
     @apply grid gap-6;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  /* Card consistency */
+  .card-consistent-height {
+    @apply h-48;
+  }
+
+  .card-content {
+    @apply flex flex-col h-full;
+  }
+
+  .card-body {
+    @apply flex-1;
   }
 
   /* Health-specific Components */
