@@ -658,12 +658,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Family Members</h1>
+      <div className="flex justify-end">
         {isAdmin() && (
           <button
             onClick={() => setShowAddForm(true)}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           >
             Add Family Member
           </button>
@@ -816,28 +815,28 @@ const Dashboard = () => {
                      return (
                        <div
                          key={member.id}
-                         className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-5 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group"
+                         className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-soft border border-gray-100 p-3 sm:p-4 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group"
                          onClick={() => handleMemberClick(member)}
                        >
-                         <div className="flex flex-col items-center text-center space-y-3">
+                         <div className="flex flex-col items-center text-center space-y-2">
                            {/* Profile Picture with enhanced styling */}
                            <div className="relative">
                              <ProfilePicture
                                member={member}
-                               size="lg"
+                               size="md"
                                showUploadButton={false}
                              />
-                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary-500 rounded-full border-2 border-white shadow-sm"></div>
+                             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary-500 rounded-full border-2 border-white shadow-sm"></div>
                            </div>
                            
                            {/* Name with enhanced typography */}
-                           <div className="font-bold text-gray-900 text-lg sm:text-xl group-hover:text-primary-700 transition-colors">
+                           <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors">
                              {member.name}
                            </div>
                            
                            {/* Age Display with better styling */}
                            {member.date_of_birth && (
-                             <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full font-medium">
+                             <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium">
                                {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
                              </div>
                            )}
@@ -867,7 +866,7 @@ const Dashboard = () => {
           {isAdmin() && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium"
             >
               Add Family Member
             </button>

@@ -1175,13 +1175,13 @@ const MemberPage = () => {
           <div className="flex space-x-2 sm:space-x-3">
             <button
               onClick={() => setShowEditForm(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
             >
               Edit Member
             </button>
             <button
               onClick={handleDeleteMember}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
+              className="bg-health-danger hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
             >
               Delete Member
             </button>

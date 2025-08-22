@@ -474,7 +474,7 @@ router.delete('/members/:memberId', requireAdmin, async (req, res) => {
 });
 
 // Upload profile picture for family member
-router.post('/members/:memberId/profile-picture', authenticateToken, profileUpload.single('profilePicture'), async (req, res) => {
+router.post('/members/:memberId/profile-picture', requireAdmin, profileUpload.single('profilePicture'), async (req, res) => {
   try {
     const { memberId } = req.params;
 
