@@ -251,6 +251,10 @@ const Dashboard = () => {
     email: '',
     password: ''
   });
+  
+  // Date component states
+  const [dateComponents, setDateComponents] = useState({ day: '', month: '', year: '' });
+  const [editDateComponents, setEditDateComponents] = useState({ day: '', month: '', year: '' });
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
     value: '',
@@ -399,6 +403,65 @@ const Dashboard = () => {
     return dateString;
   };
 
+  // Generate date dropdown options (1-31)
+  const generateDateOptions = () => {
+    const options = [];
+    for (let i = 1; i <= 31; i++) {
+      options.push(
+        <option key={i} value={i.toString().padStart(2, '0')}>
+          {i}
+        </option>
+      );
+    }
+    return options;
+  };
+
+  // Generate month dropdown options
+  const generateMonthOptions = () => {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months.map((month, index) => (
+      <option key={index + 1} value={(index + 1).toString().padStart(2, '0')}>
+        {month}
+      </option>
+    ));
+  };
+
+  // Generate year dropdown options (1900 to current year)
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const options = [];
+    for (let year = currentYear; year >= 1900; year--) {
+      options.push(
+        <option key={year} value={year}>
+          {year}
+        </option>
+      );
+    }
+    return options;
+  };
+
+  // Parse date components from date string
+  const parseDateComponents = (dateString) => {
+    if (!dateString) return { day: '', month: '', year: '' };
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return { day: '', month: '', year: '' };
+    
+    return {
+      day: date.getDate().toString().padStart(2, '0'),
+      month: (date.getMonth() + 1).toString().padStart(2, '0'),
+      year: date.getFullYear().toString()
+    };
+  };
+
+  // Combine date components into date string
+  const combineDateComponents = (day, month, year) => {
+    if (!day || !month || !year) return '';
+    return `${year}-${month}-${day}`;
+  };
+
   // Vital type change handler
   const handleVitalTypeChange = (vitalType) => {
     const vitalConfig = VITAL_TYPES[vitalType];
@@ -513,6 +576,14 @@ const Dashboard = () => {
       email: member.user_email || '',
       password: '' // Don't populate password for security
     });
+    
+    // Populate date components for editing
+    if (member.date_of_birth) {
+      const components = parseDateComponents(member.date_of_birth);
+      setEditDateComponents(components);
+    } else {
+      setEditDateComponents({ day: '', month: '', year: '' });
+    }
   };
 
   const handleCancel = () => {
@@ -520,6 +591,8 @@ const Dashboard = () => {
     setEditingMember(null);
     setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
     setEditFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
+    setDateComponents({ day: '', month: '', year: '' });
+    setEditDateComponents({ day: '', month: '', year: '' });
   };
 
   const handleMemberClick = (member) => {
@@ -714,30 +787,73 @@ const Dashboard = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               />
-              <div className="relative">
-                <input
-                  type="date"
-                  value={editingMember 
-                    ? (editFormData.dateOfBirth ? editFormData.dateOfBirth : '')
-                    : (formData.dateOfBirth ? formData.dateOfBirth : '')
-                  }
+              {/* Date of Birth Dropdowns */}
+              <div className="flex space-x-2">
+                <select
+                  value={editingMember ? editDateComponents.day : dateComponents.day}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (editingMember) {
-                      setEditFormData({...editFormData, dateOfBirth: value});
+                      const newComponents = { ...editDateComponents, day: value };
+                      setEditDateComponents(newComponents);
+                      const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                      setEditFormData({...editFormData, dateOfBirth: combinedDate});
                     } else {
-                      setFormData({...formData, dateOfBirth: value});
+                      const newComponents = { ...dateComponents, day: value };
+                      setDateComponents(newComponents);
+                      const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                      setFormData({...formData, dateOfBirth: combinedDate});
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-                {(editingMember ? editFormData.dateOfBirth : formData.dateOfBirth) && (
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <span className="text-sm text-gray-500">
-                      {formatDate(editingMember ? editFormData.dateOfBirth : formData.dateOfBirth)}
-                    </span>
-                  </div>
-                )}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">Day</option>
+                  {generateDateOptions()}
+                </select>
+                
+                <select
+                  value={editingMember ? editDateComponents.month : dateComponents.month}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (editingMember) {
+                      const newComponents = { ...editDateComponents, month: value };
+                      setEditDateComponents(newComponents);
+                      const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                      setEditFormData({...editFormData, dateOfBirth: combinedDate});
+                    } else {
+                      const newComponents = { ...dateComponents, month: value };
+                      setDateComponents(newComponents);
+                      const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                      setFormData({...formData, dateOfBirth: combinedDate});
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">Month</option>
+                  {generateMonthOptions()}
+                </select>
+                
+                <select
+                  value={editingMember ? editDateComponents.year : dateComponents.year}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (editingMember) {
+                      const newComponents = { ...editDateComponents, year: value };
+                      setEditDateComponents(newComponents);
+                      const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                      setEditFormData({...editFormData, dateOfBirth: combinedDate});
+                    } else {
+                      const newComponents = { ...dateComponents, year: value };
+                      setDateComponents(newComponents);
+                      const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                      setFormData({...formData, dateOfBirth: combinedDate});
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">Year</option>
+                  {generateYearOptions()}
+                </select>
               </div>
               <select
                 value={editingMember ? editFormData.gender : formData.gender}
