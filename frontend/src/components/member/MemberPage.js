@@ -1351,35 +1351,39 @@ const MemberPage = () => {
             </button>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
           </div>
-          <div className="flex space-x-2 sm:space-x-3">
+          <div className="flex space-x-2">
             {isAdmin() ? (
               <>
                 <button
                   onClick={() => setShowEditForm(true)}
-                  className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
+                  className="p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                  title="Edit Member"
                 >
-                  Edit Member
+                  <EditIcon />
                 </button>
                 <button
                   onClick={handleDeleteMember}
-                  className="bg-health-danger hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
+                  className="p-2 bg-health-danger hover:bg-red-700 text-white rounded-lg transition-colors"
+                  title="Delete Member"
                 >
-                  Delete Member
+                  <DeleteIcon />
                 </button>
               </>
             ) : (
               <>
                 <button
                   disabled
-                  className="bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base cursor-not-allowed opacity-50"
+                  className="p-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50"
+                  title="Edit Member (Admin only)"
                 >
-                  Edit Member
+                  <EditIcon />
                 </button>
                 <button
                   disabled
-                  className="bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base cursor-not-allowed opacity-50"
+                  className="p-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50"
+                  title="Delete Member (Admin only)"
                 >
-                  Delete Member
+                  <DeleteIcon />
                 </button>
               </>
             )}
@@ -1391,7 +1395,7 @@ const MemberPage = () => {
           <div className="relative flex justify-center sm:justify-start">
             <ProfilePicture
               member={member}
-              size="xl"
+              size="2xl"
               showUploadButton={false}
             />
           </div>
