@@ -18,11 +18,11 @@ services:
       - family-health-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d family_health_tracker"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   backend:
     build:
@@ -49,9 +49,9 @@ services:
     command: >
       sh -c "
         echo 'Waiting for database to be ready...' &&
-        while ! pg_isready -h postgres -U postgres -d family_health_tracker; do
+        while ! pg_isready -h postgres -U postgres; do
           echo 'Database not ready, waiting...' &&
-          sleep 5;
+          sleep 10;
         done &&
         echo 'Database is ready!' &&
         echo 'Starting backend server...' &&
