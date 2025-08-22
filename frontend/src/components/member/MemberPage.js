@@ -1831,7 +1831,7 @@ const MemberPage = () => {
                   const groupSubTypeLabel = subTypeLabel;
                   
                   return (
-                    <div key={reportKey} className="bg-green-50 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+                    <div key={reportKey} className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
                       {/* Main Card - Always Visible */}
                       <div 
                         className="p-4 cursor-pointer"
@@ -1988,7 +1988,7 @@ const MemberPage = () => {
             {documents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {documents.map((document) => (
-                  <div key={document.id} className="bg-orange-50 border border-orange-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                  <div key={document.id} className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-3 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
                       <div className="flex space-x-1">
@@ -2510,16 +2510,16 @@ const MemberPage = () => {
 
         {/* Document Viewer Modal */}
         {showDocumentViewer && selectedDocument && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg w-full max-w-6xl h-[95vh] flex flex-col shadow-2xl">
-              <div className="flex justify-between items-center p-4 border-b">
-                <h2 className="text-lg font-semibold">
-                  {selectedDocument.title}
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg w-full max-w-6xl h-[98vh] sm:h-[95vh] flex flex-col shadow-2xl">
+              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
+                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
+                  <span className="truncate block">{selectedDocument.title}</span>
                 </h2>
-                <div className="flex space-x-2">
+                <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleDownloadDocument(selectedDocument)}
-                    className="text-teal-600 hover:text-teal-800 text-sm bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded"
+                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
                   >
                     Download
                   </button>
@@ -2531,18 +2531,19 @@ const MemberPage = () => {
                       setShowDocumentViewer(false);
                       setSelectedDocument(null);
                     }}
-                    className="text-gray-600 hover:text-gray-800 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded"
+                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
                   >
                     Close
                   </button>
                 </div>
               </div>
-              <div className="flex-1 p-2">
+              <div className="flex-1 p-1 sm:p-2 overflow-hidden">
                 {selectedDocument.pdfUrl ? (
                   <iframe
-                    src={selectedDocument.pdfUrl}
+                    src={`${selectedDocument.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
                     className="w-full h-full border-0 rounded"
                     title={selectedDocument.title}
+                    style={{ minHeight: '400px' }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-64">
@@ -2630,27 +2631,29 @@ const MemberPage = () => {
 
         {/* PDF Viewer Modal */}
         {showPdfViewer && selectedReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg w-full max-w-6xl h-[95vh] flex flex-col shadow-2xl">
-              <div className="flex justify-between items-center p-4 border-b">
-                <h2 className="text-lg font-semibold">
-                  {(() => {
-                    const reportConfig = REPORT_TYPES[selectedReport.report_type] || { label: selectedReport.report_type?.replace(/_/g, ' ').toUpperCase() };
-                    const subTypeValue = selectedReport.report_sub_type || '';
-                    const subTypeConfig = REPORT_TYPES[selectedReport.report_type]?.subTypes?.find(st => st.value === subTypeValue);
-                    const subTypeLabel = subTypeConfig?.label || (subTypeValue ? subTypeValue.replace(/_/g, ' ').toUpperCase() : '');
-                    
-                    if (subTypeLabel) {
-                      return `${reportConfig.label} : ${subTypeLabel}`;
-                    } else {
-                      return reportConfig.label;
-                    }
-                  })()}
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg w-full max-w-6xl h-[98vh] sm:h-[95vh] flex flex-col shadow-2xl">
+              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
+                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
+                  <span className="truncate block">
+                    {(() => {
+                      const reportConfig = REPORT_TYPES[selectedReport.report_type] || { label: selectedReport.report_type?.replace(/_/g, ' ').toUpperCase() };
+                      const subTypeValue = selectedReport.report_sub_type || '';
+                      const subTypeConfig = REPORT_TYPES[selectedReport.report_type]?.subTypes?.find(st => st.value === subTypeValue);
+                      const subTypeLabel = subTypeConfig?.label || (subTypeValue ? subTypeValue.replace(/_/g, ' ').toUpperCase() : '');
+                      
+                      if (subTypeLabel) {
+                        return `${reportConfig.label} : ${subTypeLabel}`;
+                      } else {
+                        return reportConfig.label;
+                      }
+                    })()}
+                  </span>
                 </h2>
-                <div className="flex space-x-2">
+                <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleDownloadReport(selectedReport)}
-                    className="text-teal-600 hover:text-teal-800 text-sm bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded"
+                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
                   >
                     Download
                   </button>
@@ -2662,18 +2665,19 @@ const MemberPage = () => {
                       setShowPdfViewer(false);
                       setSelectedReport(null);
                     }}
-                    className="text-gray-600 hover:text-gray-800 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded"
+                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1 rounded whitespace-nowrap"
                   >
                     Close
                   </button>
                 </div>
               </div>
-              <div className="flex-1 p-2">
+              <div className="flex-1 p-1 sm:p-2 overflow-hidden">
                 {selectedReport.pdfUrl ? (
                   <iframe
-                    src={selectedReport.pdfUrl}
+                    src={`${selectedReport.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
                     className="w-full h-full border-0 rounded"
                     title={selectedReport.title}
+                    style={{ minHeight: '400px' }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-64">
