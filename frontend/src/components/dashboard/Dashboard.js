@@ -681,46 +681,7 @@ const Dashboard = () => {
   const ageGroupOrder = ['Generation Alpha', 'Generation Z', 'Millennials', 'Generation X', 'Baby Boomers', 'Silent Generation', 'Greatest Generation', 'Lost Generation', 'Unknown'];
 
   return (
-    <div className="relative min-h-screen">
-      {/* Background Profile Picture Section - Left 50% */}
-      <div className="fixed top-0 left-0 w-1/2 h-full z-0 hidden lg:block">
-        <div className="relative w-full h-full">
-          {/* Profile Picture Background with Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-10"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            {members.length > 0 && (
-              <div className="relative w-full h-full">
-                {/* Use the first member with profile picture or a default */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {(() => {
-                    const memberWithPicture = members.find(m => m.profile_picture);
-                    if (memberWithPicture?.profile_picture) {
-                      return (
-                        <img
-                          src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${memberWithPicture.profile_picture}`}
-                          alt="Family background"
-                          className="w-full h-full object-cover opacity-20"
-                        />
-                      );
-                    } else {
-                      return (
-                        <div className="w-full h-full bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 opacity-30 flex items-center justify-center">
-                          <div className="text-8xl opacity-20">👨‍👩‍👧‍👦</div>
-                        </div>
-                      );
-                    }
-                  })()}
-                </div>
-                {/* Gradient overlay for better text readability */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-transparent"></div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Section - Right 70% */}
-      <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen bg-white">
+          <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen bg-white">
         <div className="p-6 space-y-8">
           {/* Header */}
           <div className="flex justify-end">
