@@ -1986,7 +1986,11 @@ const MemberPage = () => {
                                 const latestCard = index === 0;
                                 const reportStatus = getReportStatus(report);
                                 return (
-                                  <div key={report.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${getSubCardGradientClass(reportStatus)} hover:shadow-md transition-shadow duration-200`}>
+                                  <div 
+                                    key={report.id} 
+                                    className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${getSubCardGradientClass(reportStatus)} hover:shadow-md transition-shadow duration-200 cursor-pointer`}
+                                    onClick={() => isPdf && handleViewReport(report)}
+                                  >
                                     <div className="flex justify-between items-start">
                                       <div className="flex-1">
                                         <div className="flex items-center space-x-2 mb-1">
@@ -2008,18 +2012,6 @@ const MemberPage = () => {
                                       </div>
                                       <div className="flex flex-col items-end gap-1 ml-2">
                                         <div className="flex space-x-1">
-                                          {isPdf && (
-                                            <button 
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleViewReport(report);
-                                              }}
-                                              className="text-blue-600 hover:text-blue-800 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
-                                              title="View PDF"
-                                            >
-                                              <EyeIcon />
-                                            </button>
-                                          )}
                                           <button 
                                             onClick={(e) => {
                                               e.stopPropagation();
@@ -2086,7 +2078,11 @@ const MemberPage = () => {
                 {documents.map((document) => {
                   const documentStatus = getDocumentStatus(document);
                   return (
-                    <div key={document.id} className={`rounded-lg border border-gray-200 hover:shadow-md transition-shadow card-consistent-height flex flex-col ${getGradientClass(documentStatus)}`}>
+                    <div 
+                      key={document.id} 
+                      className={`rounded-lg border border-gray-200 hover:shadow-md transition-shadow card-consistent-height flex flex-col ${getGradientClass(documentStatus)} cursor-pointer`}
+                      onClick={() => handleViewDocument(document)}
+                    >
                       <div className="p-3 card-content">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
@@ -2099,28 +2095,30 @@ const MemberPage = () => {
                           </div>
                           <div className="flex space-x-1">
                             <button
-                              onClick={() => handleViewDocument(document)}
-                              className="text-teal-600 hover:text-teal-800 p-1.5 bg-teal-50 hover:bg-teal-100 rounded transition-colors"
-                              title="View"
-                            >
-                              <EyeIcon />
-                            </button>
-                            <button
-                              onClick={() => handleDownloadDocument(document)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownloadDocument(document);
+                              }}
                               className="text-blue-600 hover:text-blue-800 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition-colors"
                               title="Download"
                             >
                               <DownloadIcon />
                             </button>
                             <button
-                              onClick={() => handleEditDocument(document)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditDocument(document);
+                              }}
                               className="text-green-600 hover:text-green-800 p-1.5 bg-green-50 hover:bg-green-100 rounded transition-colors"
                               title="Edit"
                             >
                               <EditIcon />
                             </button>
                             <button
-                              onClick={() => handleDeleteDocument(document)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteDocument(document);
+                              }}
                               className="text-red-600 hover:text-red-800 p-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors"
                               title="Delete"
                             >
@@ -2596,16 +2594,16 @@ const MemberPage = () => {
 
         {/* Document Viewer Modal */}
         {showDocumentViewer && selectedDocument && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
             <div className="bg-white rounded-lg w-full h-full max-w-7xl flex flex-col shadow-2xl pdf-viewer-container"> 
-              <div className="flex justify-between items-center p-2 sm:p-3 md:p-4 border-b flex-wrap gap-1 sm:gap-2">
-                <h2 className="text-sm sm:text-base md:text-lg font-semibold flex-1 min-w-0">
+              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
+                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
                   <span className="truncate block">{selectedDocument.title}</span>
                 </h2>
-                <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
+                <div className="flex space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleDownloadDocument(selectedDocument)}
-                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
+                    className="text-teal-600 hover:text-teal-800 text-sm bg-teal-50 hover:bg-teal-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Download
                   </button>
@@ -2617,7 +2615,7 @@ const MemberPage = () => {
                       setShowDocumentViewer(false);
                       setSelectedDocument(null);
                     }}
-                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
+                    className="text-gray-600 hover:text-gray-800 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Close
                   </button>
@@ -2722,10 +2720,10 @@ const MemberPage = () => {
 
         {/* PDF Viewer Modal */}
         {showPdfViewer && selectedReport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-2 md:p-4">
             <div className="bg-white rounded-lg w-full h-full max-w-7xl flex flex-col shadow-2xl pdf-viewer-container">
-              <div className="flex justify-between items-center p-2 sm:p-3 md:p-4 border-b flex-wrap gap-1 sm:gap-2">
-                <h2 className="text-sm sm:text-base md:text-lg font-semibold flex-1 min-w-0">
+              <div className="flex justify-between items-center p-3 sm:p-4 border-b flex-wrap gap-2">
+                <h2 className="text-base sm:text-lg font-semibold flex-1 min-w-0">
                   <span className="truncate block">
                     {(() => {
                       const reportConfig = REPORT_TYPES[selectedReport.report_type] || { label: selectedReport.report_type?.replace(/_/g, ' ').toUpperCase() };
@@ -2741,10 +2739,10 @@ const MemberPage = () => {
                     })()}
                   </span>
                 </h2>
-                <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
+                <div className="flex space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleDownloadReport(selectedReport)}
-                    className="text-teal-600 hover:text-teal-800 text-xs sm:text-sm bg-teal-50 hover:bg-teal-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
+                    className="text-teal-600 hover:text-teal-800 text-sm bg-teal-50 hover:bg-teal-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Download
                   </button>
@@ -2756,7 +2754,7 @@ const MemberPage = () => {
                       setShowPdfViewer(false);
                       setSelectedReport(null);
                     }}
-                    className="text-gray-600 hover:text-gray-800 text-xs sm:text-sm bg-gray-50 hover:bg-gray-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded whitespace-nowrap transition-colors"
+                    className="text-gray-600 hover:text-gray-800 text-sm bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded whitespace-nowrap transition-colors"
                   >
                     Close
                   </button>
