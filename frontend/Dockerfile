@@ -7,6 +7,9 @@ RUN apk add --no-cache tzdata
 ENV TZ=Asia/Kolkata
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Accept build argument for API URL
+ARG REACT_APP_API_URL=http://localhost:5000/api
+
 # Set working directory
 WORKDIR /app
 
@@ -18,6 +21,9 @@ RUN npm install
 
 # Copy source code
 COPY . .
+
+# Set the environment variable for build time
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Build the app
 RUN npm run build
