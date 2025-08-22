@@ -756,9 +756,9 @@ const Dashboard = () => {
                     >
                       Upload New Picture
                     </button>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Supported formats: JPEG, PNG, GIF (max 5MB)
-                    </p>
+                                      <p className="text-xs text-gray-500 mt-1">
+                    Supported formats: JPEG, PNG, GIF (max 15MB)
+                  </p>
                   </div>
                 </div>
               </div>

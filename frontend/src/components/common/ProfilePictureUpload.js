@@ -18,9 +18,9 @@ const ProfilePictureUpload = ({ member, onUploadSuccess, onClose }) => {
       return;
     }
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
+    // Validate file size (15MB)
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error('File size must be less than 15MB');
       return;
     }
 
@@ -121,9 +121,9 @@ const ProfilePictureUpload = ({ member, onUploadSuccess, onClose }) => {
               onChange={handleFileSelect}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Supported formats: JPEG, PNG, GIF (max 5MB)
-            </p>
+                    <p className="text-xs text-gray-500 mt-1">
+          Supported formats: JPEG, PNG, GIF (max 15MB)
+        </p>
           </div>
 
           {/* Preview */}

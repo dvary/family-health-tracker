@@ -28,7 +28,7 @@ const profileStorage = multer.diskStorage({
 const profileUpload = multer({
   storage: profileStorage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB for profile pictures
+    fileSize: 15 * 1024 * 1024 // 15MB for profile pictures
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
@@ -508,12 +508,12 @@ router.post('/members/:memberId/profile-picture', requireAdmin, profileUpload.si
       });
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+        // Validate file size (max 15MB)
+    const maxSize = 15 * 1024 * 1024; // 15MB
     if (req.file.size > maxSize) {
-      return res.status(400).json({ 
-        error: 'File too large', 
-        message: 'Profile picture must be less than 5MB' 
+      return res.status(400).json({
+        error: 'File too large',
+        message: 'Profile picture must be less than 15MB'
       });
     }
 

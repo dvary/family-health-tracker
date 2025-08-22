@@ -363,8 +363,33 @@ const MemberPage = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  // Format date for HTML date input (yyyy-mm-dd)
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Parse dd-mm-yyyy format to Date object
+  const parseDateFromDisplay = (dateString) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      const day = parts[0];
+      const month = parts[1];
+      const year = parts[2];
+      return `${year}-${month}-${day}`;
+    }
+    return dateString;
   };
 
   // Get vital status color and label based on value and ranges
@@ -1237,11 +1262,21 @@ const MemberPage = () => {
                 </label>
                 <input
                   id="dateOfBirth"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                  type="text"
+                  placeholder="dd-mm-yyyy"
+                  value={formData.dateOfBirth ? formatDate(formData.dateOfBirth) : ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only digits and hyphens
+                    if (/^[\d-]*$/.test(value)) {
+                      setFormData({...formData, dateOfBirth: parseDateFromDisplay(value)});
+                    }
+                  }}
                   className="input"
                 />
+                <p className="form-help">
+                  Format: dd-mm-yyyy (e.g., 25-12-1990)
+                </p>
               </div>
               <div className="form-group">
                 <label htmlFor="gender" className="form-label">
@@ -1313,7 +1348,7 @@ const MemberPage = () => {
                     Upload New Picture
                   </button>
                   <p className="text-xs text-gray-500 mt-1">
-                    Supported formats: JPEG, PNG, GIF (max 5MB)
+                    Supported formats: JPEG, PNG, GIF (max 15MB)
                   </p>
                 </div>
               </div>
@@ -2009,12 +2044,19 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
                   <input
-                    type="date"
-                    value={vitalFormData.recordedAt}
-                    onChange={(e) => setVitalFormData({...vitalFormData, recordedAt: e.target.value})}
+                    type="text"
+                    placeholder="dd-mm-yyyy"
+                    value={vitalFormData.recordedAt ? formatDate(vitalFormData.recordedAt) : ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^[\d-]*$/.test(value)) {
+                        setVitalFormData({...vitalFormData, recordedAt: parseDateFromDisplay(value)});
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2096,12 +2138,19 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
                   <input
-                    type="date"
-                    value={editVitalFormData.recordedAt}
-                    onChange={(e) => setEditVitalFormData({...editVitalFormData, recordedAt: e.target.value})}
+                    type="text"
+                    placeholder="dd-mm-yyyy"
+                    value={editVitalFormData.recordedAt ? formatDate(editVitalFormData.recordedAt) : ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^[\d-]*$/.test(value)) {
+                        setEditVitalFormData({...editVitalFormData, recordedAt: parseDateFromDisplay(value)});
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2179,12 +2228,19 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
                   <input
-                    type="date"
-                    value={reportFormData.reportDate}
-                    onChange={(e) => setReportFormData({...reportFormData, reportDate: e.target.value})}
+                    type="text"
+                    placeholder="dd-mm-yyyy"
+                    value={reportFormData.reportDate ? formatDate(reportFormData.reportDate) : ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^[\d-]*$/.test(value)) {
+                        setReportFormData({...reportFormData, reportDate: parseDateFromDisplay(value)});
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
@@ -2278,12 +2334,19 @@ const MemberPage = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
                   <input
-                    type="date"
-                    value={editReportFormData.reportDate}
-                    onChange={(e) => setEditReportFormData({...editReportFormData, reportDate: e.target.value})}
+                    type="text"
+                    placeholder="dd-mm-yyyy"
+                    value={editReportFormData.reportDate ? formatDate(editReportFormData.reportDate) : ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^[\d-]*$/.test(value)) {
+                        setEditReportFormData({...editReportFormData, reportDate: parseDateFromDisplay(value)});
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File (Optional - leave empty to keep current file)</label>
