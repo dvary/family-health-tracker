@@ -1,4 +1,4 @@
-# Family Health Tracker
+# Life Vault
 
 A comprehensive multi-user health tracking application for families to monitor health vitals, upload medical reports, and maintain health history.
 

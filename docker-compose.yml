@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: family-health-db
+    container_name: life-vault-db
     environment:
       POSTGRES_DB: family_health_tracker
       POSTGRES_USER: postgres
@@ -28,7 +28,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: family-health-backend
+    container_name: life-vault-backend
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password123}@postgres:5432/family_health_tracker
@@ -65,7 +65,7 @@ services:
       dockerfile: Dockerfile
       args:
         - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
-    container_name: family-health-frontend
+    container_name: life-vault-frontend
     environment:
       REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
       TZ: Asia/Kolkata
@@ -84,7 +84,7 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: family-health-nginx
+    container_name: life-vault-nginx
     ports:
       - "8080:80"
     volumes:

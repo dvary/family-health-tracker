@@ -1,7 +1,7 @@
 {
-  "name": "family-health-tracker-frontend",
+  "name": "life-vault-frontend",
   "version": "1.0.0",
-  "description": "Frontend for Family Health Tracker",
+  "description": "Frontend for Life Vault",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.17",

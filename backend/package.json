@@ -1,7 +1,7 @@
 {
-  "name": "family-health-tracker-backend",
+  "name": "life-vault-backend",
   "version": "1.0.0",
-  "description": "Backend API for Family Health Tracker",
+  "description": "Backend API for Life Vault",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -28,12 +28,12 @@
   },
   "keywords": [
     "health",
-    "tracker",
+    "vault",
     "family",
     "api",
     "nodejs",
     "express"
   ],
-  "author": "Family Health Tracker Team",
+  "author": "Life Vault Team",
   "license": "MIT"
 }
