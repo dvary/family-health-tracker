@@ -885,15 +885,10 @@ const Dashboard = () => {
                                {member.name}
                              </div>
                              
-                             {/* Age Display with better styling */}
+                             {/* Age Display */}
                              {member.date_of_birth && (
-                               <div className="space-y-1 mb-3">
-                                 <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block">
-                                   {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
-                                 </div>
-                                 <div className="text-xs text-gray-500">
-                                   {formatDate(member.date_of_birth)}
-                                 </div>
+                               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block">
+                                 {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
                                </div>
                              )}
                            </div>
