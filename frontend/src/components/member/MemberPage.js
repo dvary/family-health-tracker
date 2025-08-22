@@ -1657,7 +1657,7 @@ const MemberPage = () => {
                       <div className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow ${getBMIGradientClass(vitalStatus)}`}>
                         {/* BMI Card - Always Visible */}
                         <div 
-                          className="p-4 cursor-pointer"
+                          className="p-3 cursor-pointer"
                           onClick={() => toggleVitalTypeExpansion('bmi')}
                         >
                           <div className="flex justify-between items-start">
@@ -1669,7 +1669,7 @@ const MemberPage = () => {
                                 </span>
                               </div>
                               <div className="mb-2">
-                                <p className={`text-2xl font-bold ${vitalStatus.color}`}>
+                                <p className={`text-xl font-bold ${vitalStatus.color}`}>
                                   {latestBMI.value} {latestBMI.unit}
                                 </p>
                               </div>
@@ -1764,7 +1764,7 @@ const MemberPage = () => {
                     <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col ${getGradientClass(vitalStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
-                        className="p-4 cursor-pointer"
+                        className="p-3 cursor-pointer"
                         onClick={() => toggleVitalTypeExpansion(vitalType)}
                       >
                         <div className="flex justify-between items-start">
@@ -1776,7 +1776,7 @@ const MemberPage = () => {
                               </span>
                             </div>
                             <div className="mb-2">
-                              <p className={`text-2xl font-bold ${vitalStatus.color}`}>
+                              <p className={`text-xl font-bold ${vitalStatus.color}`}>
                                 {latestVital.value} {latestVital.unit}
                               </p>
                             </div>
@@ -1910,16 +1910,24 @@ const MemberPage = () => {
                   const subTypeLabel = subTypeConfig?.label || (subTypeValue ? subTypeValue.replace(/_/g, ' ').toUpperCase() : '');
                   const groupSubTypeLabel = subTypeLabel;
                   
+                  // Get main card status based on latest report
+                  const mainCardStatus = getMainCardStatus(reports, getReportStatus);
+                  
                   return (
-                    <div key={reportKey} className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+                    <div key={reportKey} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col ${getGradientClass(mainCardStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
-                        className="p-4 cursor-pointer"
+                        className="p-3 cursor-pointer"
                         onClick={() => toggleReportTypeExpansion(reportKey)}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-gray-900 mb-1">{reportConfig.label}</h4>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h4 className="text-lg font-semibold text-gray-900">{reportConfig.label}</h4>
+                              <span className={`text-xs px-2 py-1 rounded-full ${mainCardStatus.bgColor} ${mainCardStatus.color}`}>
+                                {mainCardStatus.status}
+                              </span>
+                            </div>
                             {subTypeLabel && (
                               <p className="text-sm text-gray-600 mb-2">{subTypeLabel}</p>
                             )}
@@ -1965,8 +1973,8 @@ const MemberPage = () => {
 
                           {/* Expanded Content - Show All Reports */}
                           {isExpanded && reports.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-green-200">
-                              <div className="p-2 bg-green-50 rounded-lg">
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                              <div className="p-2 rounded-lg">
                               {reports.map((report, index) => {
                                 const isPdf = report.file_name?.toLowerCase().endsWith('.pdf');
                                 const subValue = report.report_sub_type || '';
@@ -1975,11 +1983,17 @@ const MemberPage = () => {
                                 // Prioritize showing actual sub-type value over falling back to report type
                                 const subLabel = derivedSub || (subValue ? subValue.replace(/_/g, ' ').toUpperCase() : '') || report.report_type?.replace(/_/g, ' ').toUpperCase() || 'Report';
                                 const latestCard = index === 0;
+                                const reportStatus = getReportStatus(report);
                                 return (
-                                  <div key={report.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${latestCard ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200' : 'bg-green-50 border border-green-200'} hover:shadow-md transition-shadow duration-200`}>
+                                  <div key={report.id} className={`p-1.5 rounded-md shadow-sm mx-1 my-0.5 ${getSubCardGradientClass(reportStatus)} hover:shadow-md transition-shadow duration-200`}>
                                     <div className="flex justify-between items-start">
                                       <div className="flex-1">
-                                        <h6 className="text-sm font-medium text-gray-900 mb-1">{subLabel}</h6>
+                                        <div className="flex items-center space-x-2 mb-1">
+                                          <h6 className="text-sm font-medium text-gray-900">{subLabel}</h6>
+                                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${reportStatus.bgColor} ${reportStatus.color}`}>
+                                            {reportStatus.status}
+                                          </span>
+                                        </div>
                                         <div className="mb-1">
                                           <span className="text-xs text-gray-500">{formatDate(report.report_date)}</span>
                                         </div>
