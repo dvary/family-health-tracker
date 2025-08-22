@@ -25,6 +25,8 @@ CREATE TABLE users (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    role VARCHAR(20) DEFAULT 'non_admin' CHECK (role IN ('admin', 'non_admin')),
+    original_email VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -37,6 +39,7 @@ CREATE TABLE family_members (
     name VARCHAR(255) NOT NULL,
     date_of_birth DATE,
     gender VARCHAR(20) CHECK (gender IN ('male', 'female', 'other', 'prefer_not_to_say')),
+    profile_picture VARCHAR(500),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

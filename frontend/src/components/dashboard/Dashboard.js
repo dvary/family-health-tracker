@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import ProfilePicture from '../common/ProfilePicture';
+import ProfilePictureUpload from '../common/ProfilePictureUpload';
 
 // Vital types configuration with units and reference ranges
 const VITAL_TYPES = {
@@ -225,6 +228,7 @@ const REPORT_TYPES = {
 };
 
 const Dashboard = () => {
+  const { isAdmin } = useAuth();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -234,6 +238,13 @@ const Dashboard = () => {
   const [showUploadDocumentModal, setShowUploadDocumentModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [formData, setFormData] = useState({
+    name: '',
+    dateOfBirth: '',
+    gender: '',
+    email: '',
+    password: ''
+  });
+  const [editFormData, setEditFormData] = useState({
     name: '',
     dateOfBirth: '',
     gender: '',
@@ -261,6 +272,8 @@ const Dashboard = () => {
     uploadDate: new Date().toISOString().split('T')[0],
     file: null
   });
+  const [showProfileUploadModal, setShowProfileUploadModal] = useState(false);
+  const [selectedMemberForProfile, setSelectedMemberForProfile] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -276,10 +289,15 @@ const Dashboard = () => {
                        (today.getMonth() - birthDate.getMonth());
     
     if (ageInMonths < 12) {
-      return { age: ageInMonths, unit: 'month', display: `${ageInMonths} month${ageInMonths !== 1 ? 's' : ''}` };
+      return { age: ageInMonths, unit: 'month', display: `${ageInMonths} Month${ageInMonths !== 1 ? 's' : ''} old` };
     } else {
       const years = Math.floor(ageInMonths / 12);
-      return { age: years, unit: 'year', display: `${years} year${years !== 1 ? 's' : ''}` };
+      const remainingMonths = ageInMonths % 12;
+      if (remainingMonths === 0) {
+        return { age: years, unit: 'year', display: `${years} Year${years !== 1 ? 's' : ''} old` };
+      } else {
+        return { age: years, unit: 'year', display: `${years} Year${years !== 1 ? 's' : ''} ${remainingMonths} Month${remainingMonths !== 1 ? 's' : ''} old` };
+      }
     }
   }, []);
 
@@ -424,15 +442,26 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       if (editingMember) {
-        await axios.put(`/family/members/${editingMember.id}`, formData);
+        // For editing, use editFormData and only send non-empty fields
+        const updateData = {};
+        Object.keys(editFormData).forEach(key => {
+          if (editFormData[key] !== '' && editFormData[key] !== null && editFormData[key] !== undefined) {
+            updateData[key] = editFormData[key];
+          }
+        });
+        
+        await axios.put(`/family/members/${editingMember.id}`, updateData);
         toast.success('Family member updated successfully');
         setEditingMember(null);
+        setEditFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
       } else {
         if (members.length === 0) {
           await axios.post('/family/members/initial', {
             name: formData.name,
             dateOfBirth: formData.dateOfBirth,
-            gender: formData.gender
+            gender: formData.gender,
+            email: formData.email,
+            password: formData.password
           });
           toast.success('Initial family member added successfully');
         } else {
@@ -444,14 +473,28 @@ const Dashboard = () => {
       setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
       fetchMembers();
     } catch (error) {
-      toast.error(editingMember ? 'Failed to update family member' : 'Failed to add family member');
+      const errorMessage = error.response?.data?.message || 
+        (editingMember ? 'Failed to update family member' : 'Failed to add family member');
+      toast.error(errorMessage);
     }
+  };
+
+  const handleEditMember = (member) => {
+    setEditingMember(member);
+    setEditFormData({
+      name: member.name || '',
+      dateOfBirth: member.date_of_birth ? member.date_of_birth.split('T')[0] : '',
+      gender: member.gender || '',
+      email: member.user_email || '',
+      password: '' // Don't populate password for security
+    });
   };
 
   const handleCancel = () => {
     setShowAddForm(false);
     setEditingMember(null);
     setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
+    setEditFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
   };
 
   const handleMemberClick = (member) => {
@@ -472,6 +515,28 @@ const Dashboard = () => {
   const handleUploadDocumentFromDashboard = (member) => {
     setSelectedMember(member);
     setShowUploadDocumentModal(true);
+  };
+
+  const handleProfilePictureUpload = (member) => {
+    setSelectedMemberForProfile(member);
+    setShowProfileUploadModal(true);
+  };
+
+  const handleProfileUploadSuccess = (updatedMember) => {
+    setMembers(prevMembers => 
+      prevMembers.map(member => 
+        member.id === updatedMember.id 
+          ? { ...member, profile_picture: updatedMember.profile_picture }
+          : member
+      )
+    );
+    // Update the editing member if it's the same one
+    if (editingMember && editingMember.id === updatedMember.id) {
+      setEditingMember(prev => ({
+        ...prev,
+        profile_picture: updatedMember.profile_picture
+      }));
+    }
   };
 
   const handleAddVital = async (e) => {
@@ -563,15 +628,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleEditMember = (member) => {
-    setEditingMember(member);
-    setFormData({
-      name: member.name,
-      dateOfBirth: member.date_of_birth ? member.date_of_birth.split('T')[0] : '',
-      gender: member.gender || ''
-    });
-    setShowAddForm(true);
-  };
+
 
   const handleDeleteMember = async (memberId) => {
     if (window.confirm('Are you sure you want to delete this family member?')) {
@@ -603,12 +660,14 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Family Members</h1>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          Add Family Member
-        </button>
+        {isAdmin() && (
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            Add Family Member
+          </button>
+        )}
       </div>
 
       {/* Add/Edit Form */}
@@ -622,20 +681,29 @@ const Dashboard = () => {
               <input
                 type="text"
                 placeholder="Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                value={editingMember ? editFormData.name : formData.name}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, name: e.target.value})
+                  : setFormData({...formData, name: e.target.value})
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               />
               <input
                 type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                value={editingMember ? editFormData.dateOfBirth : formData.dateOfBirth}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, dateOfBirth: e.target.value})
+                  : setFormData({...formData, dateOfBirth: e.target.value})
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <select
-                value={formData.gender}
-                onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                value={editingMember ? editFormData.gender : formData.gender}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, gender: e.target.value})
+                  : setFormData({...formData, gender: e.target.value})
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               >
@@ -648,20 +716,54 @@ const Dashboard = () => {
               <input
                 type="email"
                 placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                value={editingMember ? editFormData.email : formData.email}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, email: e.target.value})
+                  : setFormData({...formData, email: e.target.value})
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required
+                required={!editingMember}
               />
               <input
                 type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                placeholder={editingMember ? "New Password (leave blank to keep current)" : "Password"}
+                value={editingMember ? editFormData.password : formData.password}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, password: e.target.value})
+                  : setFormData({...formData, password: e.target.value})
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required
+                required={!editingMember}
               />
             </div>
+
+            {/* Profile Picture Upload Section - Only show when editing */}
+            {editingMember && (
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-md font-medium text-gray-900 mb-3">Profile Picture</h3>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <ProfilePicture
+                      member={editingMember}
+                      size="lg"
+                      showUploadButton={false}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <button
+                      type="button"
+                      onClick={() => handleProfilePictureUpload(editingMember)}
+                      className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium text-sm"
+                    >
+                      Upload New Picture
+                    </button>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supported formats: JPEG, PNG, GIF (max 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex space-x-3">
               <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
@@ -699,13 +801,13 @@ const Dashboard = () => {
             
             return (
               <div key={groupName} className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{ageGroupInfo.icon}</span>
-                  <h2 className="text-xl font-semibold text-gray-900">{groupName}s</h2>
-                  <span className="text-sm text-gray-500">({groupMembers.length} member{groupMembers.length !== 1 ? 's' : ''})</span>
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <span className="text-xl sm:text-2xl">{ageGroupInfo.icon}</span>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{groupName}s</h2>
+                  <span className="text-xs sm:text-sm text-gray-500">({groupMembers.length} member{groupMembers.length !== 1 ? 's' : ''})</span>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                                      {groupMembers.map((member) => {
                      const ageData = member.ageData;
                      const ageGroupInfo = getAgeGroupInfo(ageData);
@@ -714,68 +816,36 @@ const Dashboard = () => {
                      return (
                        <div
                          key={member.id}
-                         className="bg-white rounded-xl shadow-md border border-gray-200 p-4 md:p-6 hover:shadow-xl transition-all duration-200 cursor-pointer hover:border-gray-300 transform hover:scale-[1.02]"
+                         className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-5 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group"
                          onClick={() => handleMemberClick(member)}
                        >
                          <div className="flex flex-col items-center text-center space-y-3">
-                           {/* Avatar */}
-                           <div 
-                             className="w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md border-2"
-                             style={{ 
-                               backgroundColor: ageGroupInfo.bgColor,
-                               borderColor: ageGroupInfo.color
-                             }}
-                           >
-                             {genderIcon}
+                           {/* Profile Picture with enhanced styling */}
+                           <div className="relative">
+                             <ProfilePicture
+                               member={member}
+                               size="lg"
+                               showUploadButton={false}
+                             />
+                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary-500 rounded-full border-2 border-white shadow-sm"></div>
                            </div>
                            
-                           {/* Name */}
-                           <div className="font-semibold text-gray-900 text-lg">
+                           {/* Name with enhanced typography */}
+                           <div className="font-bold text-gray-900 text-lg sm:text-xl group-hover:text-primary-700 transition-colors">
                              {member.name}
                            </div>
                            
-
-                           
-                           {/* Action Buttons */}
-                           <div className="flex flex-wrap gap-2 mt-3">
-                             <button
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 const memberName = member.name.toLowerCase().replace(/\s+/g, '-');
-                                 navigate(`/${memberName}?tab=health-vitals`);
-                               }}
-                               className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-                             >
-                               Vitals
-                             </button>
-                             <button
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 const memberName = member.name.toLowerCase().replace(/\s+/g, '-');
-                                 navigate(`/${memberName}?tab=medical-reports`);
-                               }}
-                               className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-                             >
-                               Reports
-                             </button>
-                             <button
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 const memberName = member.name.toLowerCase().replace(/\s+/g, '-');
-                                 navigate(`/${memberName}?tab=documents`);
-                               }}
-                               className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white px-3 py-2 rounded-lg text-xs font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-                             >
-                               Documents
-                             </button>
-                           </div>
-                           
-                           {/* Date of Birth */}
+                           {/* Age Display with better styling */}
                            {member.date_of_birth && (
-                             <div className="text-xs text-gray-500">
-                               Born {formatDate(member.date_of_birth)}
+                             <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full font-medium">
+                               {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
                              </div>
                            )}
+                           
+                           {/* Subtle indicator */}
+                           <div className="text-xs text-gray-400 font-medium">
+                             Tap to view details
+                           </div>
                          </div>
                        </div>
                      );
@@ -792,14 +862,16 @@ const Dashboard = () => {
             No family members yet
           </h3>
           <p className="text-gray-600 mb-6">
-            Add your first family member to start building your family profile.
+            Add your first family member to start building your Life Vault profile.
           </p>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium"
-          >
-            Add Family Member
-          </button>
+          {isAdmin() && (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium"
+            >
+              Add Family Member
+            </button>
+          )}
         </div>
       )}
 
@@ -1066,6 +1138,18 @@ const Dashboard = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Profile Picture Upload Modal */}
+      {showProfileUploadModal && selectedMemberForProfile && (
+        <ProfilePictureUpload
+          member={selectedMemberForProfile}
+          onUploadSuccess={handleProfileUploadSuccess}
+          onClose={() => {
+            setShowProfileUploadModal(false);
+            setSelectedMemberForProfile(null);
+          }}
+        />
       )}
     </div>
   );

@@ -120,13 +120,18 @@ export const AuthProvider = ({ children }) => {
     setUser(updatedUser);
   };
 
+  const isAdmin = () => {
+    return user?.role === 'admin';
+  };
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
-    updateUser
+    updateUser,
+    isAdmin
   };
 
   return (

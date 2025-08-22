@@ -1,14 +1,51 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const { query } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/adminAuth');
 
 const router = express.Router();
 
+// Configure multer for profile picture uploads
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(process.env.UPLOAD_PATH || '/app/uploads', 'profiles');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const profileUpload = multer({
+  storage: profileStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB for profile pictures
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPEG, PNG, GIF) are allowed for profile pictures'));
+    }
+  }
+});
+
 // Create initial family member
 router.post('/members/initial', [
-  authenticateToken,
+  requireAdmin,
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
@@ -25,6 +62,7 @@ router.post('/members/initial', [
     }
 
     const { name, dateOfBirth, gender, email, password } = req.body;
+    const originalEmail = req.body.email; // Store original email before normalization
 
     // Check if family already has members
     const existingMembers = await query(
@@ -57,8 +95,8 @@ router.post('/members/initial', [
     const lastName = nameParts.slice(1).join(' ') || '';
 
     const userResult = await query(
-      'INSERT INTO users (email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-      [email, hashedPassword, req.user.family_id, firstName, lastName]
+      'INSERT INTO users (email, original_email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName]
     );
 
     const userId = userResult.rows[0].id;
@@ -77,9 +115,27 @@ router.post('/members/initial', [
     });
   } catch (error) {
     console.error('Add initial family member error:', error);
+    
+    // Handle specific database errors
+    if (error.code === '23505') { // Unique violation
+      if (error.constraint === 'users_email_key') {
+        return res.status(400).json({ 
+          error: 'Email already exists', 
+          message: 'This email is already registered. Please use a different email address.' 
+        });
+      }
+    }
+    
+    if (error.code === '23514') { // Check violation
+      return res.status(400).json({ 
+        error: 'Invalid data', 
+        message: 'Please check your input data and try again.' 
+      });
+    }
+    
     res.status(500).json({ 
       error: 'Failed to add initial family member', 
-      message: 'Could not add initial family member' 
+      message: 'Could not add initial family member. Please try again.' 
     });
   }
 });
@@ -99,8 +155,10 @@ router.get('/members', authenticateToken, async (req, res) => {
         fm.name, 
         fm.date_of_birth, 
         fm.gender,
+        fm.profile_picture,
         fm.created_at,
-        u.email as user_email
+        COALESCE(u.original_email, u.email) as user_email,
+        u.id as user_id
       FROM family_members fm 
       LEFT JOIN users u ON fm.user_id = u.id 
       WHERE fm.family_id = $1 
@@ -122,7 +180,7 @@ router.get('/members', authenticateToken, async (req, res) => {
 
 // Add new family member
 router.post('/members', [
-  authenticateToken,
+  requireAdmin,
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
@@ -139,6 +197,7 @@ router.post('/members', [
     }
 
     const { name, dateOfBirth, gender, email, password } = req.body;
+    const originalEmail = req.body.email; // Store original email before normalization
 
     // Check if email already exists
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
@@ -158,8 +217,8 @@ router.post('/members', [
     const lastName = nameParts.slice(1).join(' ') || '';
 
     const userResult = await query(
-      'INSERT INTO users (email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-      [email, hashedPassword, req.user.family_id, firstName, lastName]
+      'INSERT INTO users (email, original_email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName]
     );
 
     const userId = userResult.rows[0].id;
@@ -179,9 +238,27 @@ router.post('/members', [
     });
   } catch (error) {
     console.error('Add family member error:', error);
+    
+    // Handle specific database errors
+    if (error.code === '23505') { // Unique violation
+      if (error.constraint === 'users_email_key') {
+        return res.status(400).json({ 
+          error: 'Email already exists', 
+          message: 'This email is already registered. Please use a different email address.' 
+        });
+      }
+    }
+    
+    if (error.code === '23514') { // Check violation
+      return res.status(400).json({ 
+        error: 'Invalid data', 
+        message: 'Please check your input data and try again.' 
+      });
+    }
+    
     res.status(500).json({ 
       error: 'Failed to add family member', 
-      message: 'Could not add family member' 
+      message: 'Could not add family member. Please try again.' 
     });
   }
 });
@@ -226,10 +303,12 @@ router.get('/members/:memberId', authenticateToken, async (req, res) => {
 
 // Update family member
 router.put('/members/:memberId', [
-  authenticateToken,
+  requireAdmin,
   body('name').optional().notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
-  body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say'])
+  body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
+  body('email').optional().isEmail().normalizeEmail(),
+  body('password').optional().isLength({ min: 6 })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -241,11 +320,14 @@ router.put('/members/:memberId', [
     }
 
     const { memberId } = req.params;
-    const { name, dateOfBirth, gender } = req.body;
+    const { name, dateOfBirth, gender, email, password } = req.body;
 
-    // Check if member exists and belongs to family
+    // Check if member exists and belongs to family, and get user info
     const checkResult = await query(
-      'SELECT id FROM family_members WHERE id = $1 AND family_id = $2',
+      `SELECT fm.id, fm.user_id, u.email 
+       FROM family_members fm 
+       LEFT JOIN users u ON fm.user_id = u.id 
+       WHERE fm.id = $1 AND fm.family_id = $2`,
       [memberId, req.user.family_id]
     );
 
@@ -256,7 +338,41 @@ router.put('/members/:memberId', [
       });
     }
 
-    // Build update query dynamically
+    const memberData = checkResult.rows[0];
+    const userId = memberData.user_id;
+
+    // Handle email update if provided
+    if (email !== undefined && userId) {
+      // Check if email already exists (excluding current user)
+      const existingEmail = await query(
+        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        [email, userId]
+      );
+      
+      if (existingEmail.rows.length > 0) {
+        return res.status(400).json({ 
+          error: 'Email already exists', 
+          message: 'This email is already registered by another user' 
+        });
+      }
+
+      // Update user email and original email
+      await query(
+        'UPDATE users SET email = $1, original_email = $2, updated_at = NOW() WHERE id = $3',
+        [email, email, userId]
+      );
+    }
+
+    // Handle password update if provided
+    if (password !== undefined && userId) {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      await query(
+        'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
+        [hashedPassword, userId]
+      );
+    }
+
+    // Build update query for family member fields
     const updateFields = [];
     const updateValues = [];
     let paramCount = 1;
@@ -274,21 +390,33 @@ router.put('/members/:memberId', [
       updateValues.push(gender);
     }
 
-    if (updateFields.length === 0) {
-      return res.status(400).json({ 
-        error: 'No fields to update', 
-        message: 'Please provide at least one field to update' 
-      });
+    // Only update family member if there are fields to update
+    if (updateFields.length > 0) {
+      updateValues.push(memberId, req.user.family_id);
+
+      await query(
+        `UPDATE family_members 
+         SET ${updateFields.join(', ')}, updated_at = NOW() 
+         WHERE id = $${paramCount++} AND family_id = $${paramCount++}`,
+        updateValues
+      );
     }
 
-    updateValues.push(memberId, req.user.family_id);
-
+    // Get updated member data
     const result = await query(
-      `UPDATE family_members 
-       SET ${updateFields.join(', ')}, updated_at = NOW() 
-       WHERE id = $${paramCount++} AND family_id = $${paramCount++} 
-       RETURNING id, name, date_of_birth, gender, created_at, updated_at`,
-      updateValues
+      `SELECT 
+        fm.id, 
+        fm.name, 
+        fm.date_of_birth, 
+        fm.gender,
+        fm.profile_picture,
+        fm.created_at, 
+        fm.updated_at,
+        COALESCE(u.original_email, u.email) as user_email
+      FROM family_members fm 
+      LEFT JOIN users u ON fm.user_id = u.id 
+      WHERE fm.id = $1 AND fm.family_id = $2`,
+      [memberId, req.user.family_id]
     );
 
     res.json({
@@ -305,7 +433,7 @@ router.put('/members/:memberId', [
 });
 
 // Delete family member
-router.delete('/members/:memberId', authenticateToken, async (req, res) => {
+router.delete('/members/:memberId', requireAdmin, async (req, res) => {
   try {
     const { memberId } = req.params;
 
@@ -341,6 +469,75 @@ router.delete('/members/:memberId', authenticateToken, async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to delete family member', 
       message: 'Could not delete family member' 
+    });
+  }
+});
+
+// Upload profile picture for family member
+router.post('/members/:memberId/profile-picture', authenticateToken, profileUpload.single('profilePicture'), async (req, res) => {
+  try {
+    const { memberId } = req.params;
+
+    // Check if member exists and belongs to family
+    const checkResult = await query(
+      'SELECT id FROM family_members WHERE id = $1 AND family_id = $2',
+      [memberId, req.user.family_id]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Family member not found', 
+        message: 'Family member does not exist' 
+      });
+    }
+
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ 
+        error: 'No file uploaded', 
+        message: 'Please select a profile picture to upload' 
+      });
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ 
+        error: 'Invalid file type', 
+        message: 'Please upload a valid image file (JPEG, PNG, or GIF)' 
+      });
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (req.file.size > maxSize) {
+      return res.status(400).json({ 
+        error: 'File too large', 
+        message: 'Profile picture must be less than 5MB' 
+      });
+    }
+
+    // Use the file path from multer
+    const filePath = `/uploads/profiles/${req.file.filename}`;
+
+    // Update member with profile picture path
+    const result = await query(
+      `UPDATE family_members 
+       SET profile_picture = $1, updated_at = NOW() 
+       WHERE id = $2 AND family_id = $3 
+       RETURNING id, name, profile_picture, updated_at`,
+      [filePath, memberId, req.user.family_id]
+    );
+
+    res.json({
+      message: 'Profile picture uploaded successfully',
+      member: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Upload profile picture error:', error);
+    res.status(500).json({ 
+      error: 'Failed to upload profile picture', 
+      message: 'Could not upload profile picture' 
     });
   }
 });

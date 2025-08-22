@@ -5,6 +5,7 @@ const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const { query } = require('../config/database');
 const { authenticateToken, authorizeFamilyMember } = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/adminAuth');
 
 const router = express.Router();
 
@@ -249,7 +250,7 @@ router.put('/vitals/:vitalId', [
 });
 
 // Delete vital
-router.delete('/vitals/:vitalId', authenticateToken, async (req, res) => {
+router.delete('/vitals/:vitalId', requireAdmin, async (req, res) => {
   try {
     const { vitalId } = req.params;
 
@@ -517,7 +518,7 @@ router.put('/reports/:reportId', [
 });
 
 // Delete medical report
-router.delete('/reports/:reportId', authenticateToken, async (req, res) => {
+router.delete('/reports/:reportId', requireAdmin, async (req, res) => {
   try {
     const { reportId } = req.params;
 
@@ -1019,7 +1020,7 @@ router.put('/documents/:documentId', [
 
 // Delete document
 router.delete('/documents/:documentId', [
-  authenticateToken
+  requireAdmin
 ], async (req, res) => {
   try {
     const { documentId } = req.params;

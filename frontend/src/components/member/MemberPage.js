@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import ProfilePicture from '../common/ProfilePicture';
+import ProfilePictureUpload from '../common/ProfilePictureUpload';
 
 // Icon components
 const EyeIcon = () => (
@@ -301,7 +304,9 @@ const MemberPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     dateOfBirth: '',
-    gender: ''
+    gender: '',
+    email: '',
+    password: ''
   });
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
@@ -352,6 +357,7 @@ const MemberPage = () => {
     uploadDate: new Date().toISOString().split('T')[0],
     file: null
   });
+  const [showProfileUploadModal, setShowProfileUploadModal] = useState(false);
 
   // Date formatting utility
   const formatDate = (dateString) => {
@@ -580,10 +586,15 @@ const MemberPage = () => {
                        (today.getMonth() - birthDate.getMonth());
     
     if (ageInMonths < 12) {
-      return `${ageInMonths} month${ageInMonths !== 1 ? 's' : ''}`;
+      return `${ageInMonths} Month${ageInMonths !== 1 ? 's' : ''}`;
     } else {
       const years = Math.floor(ageInMonths / 12);
-      return `${years} year${years !== 1 ? 's' : ''}`;
+      const remainingMonths = ageInMonths % 12;
+      if (remainingMonths === 0) {
+        return `${years} Year${years !== 1 ? 's' : ''}`;
+      } else {
+        return `${years} Year${years !== 1 ? 's' : ''} ${remainingMonths} Month${remainingMonths !== 1 ? 's' : ''}`;
+      }
     }
   };
 
@@ -629,7 +640,8 @@ const MemberPage = () => {
         name: foundMember.name,
         dateOfBirth: foundMember.date_of_birth ? foundMember.date_of_birth.split('T')[0] : '',
         gender: foundMember.gender || '',
-
+        email: foundMember.user_email || '',
+        password: '' // Don't populate password for security
       });
       
       // Fetch health vitals
@@ -685,13 +697,33 @@ const MemberPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/family/members/${member.id}`, formData);
+      // Only send non-empty fields
+      const updateData = {};
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== '' && formData[key] !== null && formData[key] !== undefined) {
+          updateData[key] = formData[key];
+        }
+      });
+      
+      await axios.put(`/family/members/${member.id}`, updateData);
       toast.success('Member updated successfully');
       setShowEditForm(false);
       fetchMemberData();
     } catch (error) {
-      toast.error('Failed to update member');
+      const errorMessage = error.response?.data?.message || 'Failed to update member';
+      toast.error(errorMessage);
     }
+  };
+
+  const handleProfilePictureUpload = () => {
+    setShowProfileUploadModal(true);
+  };
+
+  const handleProfileUploadSuccess = (updatedMember) => {
+    setMember(prevMember => ({
+      ...prevMember,
+      profile_picture: updatedMember.profile_picture
+    }));
   };
 
   const handleCancel = () => {
@@ -700,7 +732,8 @@ const MemberPage = () => {
       name: member.name,
       dateOfBirth: member.date_of_birth ? member.date_of_birth.split('T')[0] : '',
       gender: member.gender || '',
-      
+      email: member.user_email || '',
+      password: ''
     });
   };
 
@@ -1128,27 +1161,27 @@ const MemberPage = () => {
   return (
     <div className="space-y-6">
       {/* Header with Edit button prominently displayed */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-4">
+      <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-3 sm:space-y-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => navigate('/dashboard')}
-              className="text-gray-600 hover:text-gray-800"
+              className="text-gray-600 hover:text-gray-800 text-sm sm:text-base"
             >
-              ← Back to Dashboard
+              ← Back
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">{member.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex space-x-2 sm:space-x-3">
             <button
               onClick={() => setShowEditForm(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium"
+              className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
             >
               Edit Member
             </button>
             <button
               onClick={handleDeleteMember}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium"
+              className="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm sm:text-base"
             >
               Delete Member
             </button>
@@ -1156,22 +1189,22 @@ const MemberPage = () => {
         </div>
 
         {/* Member basic info */}
-        <div className="flex items-center space-x-6">
-          <div 
-            className="w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-lg"
-            style={{ 
-              backgroundColor: genderInfo.bgColor,
-              color: genderInfo.color
-            }}
-          >
-            {genderInfo.icon}
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+          <div className="relative flex justify-center sm:justify-start">
+            <ProfilePicture
+              member={member}
+              size="xl"
+              showUploadButton={false}
+            />
           </div>
-          <div>
-            <p className="text-gray-600">
-              {age ? `${age} years old` : 'Age not specified'}
-              {member.date_of_birth && ` • Born ${new Date(member.date_of_birth).toLocaleDateString()}`}
+          <div className="text-center sm:text-left space-y-1 sm:space-y-2">
+            <p className="text-gray-600 text-sm sm:text-base">
+              {age ? `Age ${age}` : 'Age not specified'}
             </p>
-            <p className="text-gray-600 capitalize">
+            <p className="text-gray-600 text-sm sm:text-base">
+              {member.date_of_birth ? `Born ${formatDate(member.date_of_birth)}` : 'Birth date not specified'}
+            </p>
+            <p className="text-gray-600 capitalize text-sm sm:text-base">
               {member.gender || 'Gender not specified'}
             </p>
           </div>
@@ -1180,48 +1213,122 @@ const MemberPage = () => {
 
       {/* Edit Form */}
       {showEditForm && (
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-lg p-4 sm:p-6">
           <h2 className="text-lg font-semibold mb-4">Edit Family Member</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input
-                type="text"
-                placeholder="Name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required
-              />
-              <input
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <select
-                value={formData.gender}
-                onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required
-              >
+            <div className="grid grid-cols-1 gap-4">
+              <div className="form-group">
+                <label htmlFor="name" className="form-label">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Enter full name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="input"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="dateOfBirth" className="form-label">
+                  Date of Birth
+                </label>
+                <input
+                  id="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                  className="input"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="gender" className="form-label">
+                  Gender
+                </label>
+                <select
+                  id="gender"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                  className="input"
+                  required
+                >
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
                 <option value="prefer_not_to_say">Prefer not to say</option>
               </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter email address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="input"
+                />
+
+              </div>
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  New Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Leave blank to keep current password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  className="input"
+                />
+                <p className="form-help">
+                  Password must be at least 6 characters long
+                </p>
+              </div>
+            </div>
+
+            {/* Profile Picture Upload Section */}
+            <div className="border-t pt-4 mt-4">
+              <h3 className="text-md font-medium text-gray-900 mb-3">Profile Picture</h3>
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <ProfilePicture
+                    member={member}
+                    size="lg"
+                    showUploadButton={false}
+                  />
+                </div>
+                <div className="flex-1">
+                  <button
+                    type="button"
+                    onClick={handleProfilePictureUpload}
+                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium text-sm"
+                  >
+                    Upload New Picture
+                  </button>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supported formats: JPEG, PNG, GIF (max 5MB)
+                  </p>
+                </div>
+              </div>
             </div>
 
 
 
             <div className="flex space-x-3">
-              <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
+              <button type="submit" className="btn-primary">
                 Update Member
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                className="btn-secondary"
               >
                 Cancel
               </button>
@@ -2467,6 +2574,15 @@ const MemberPage = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Profile Picture Upload Modal */}
+        {showProfileUploadModal && member && (
+          <ProfilePictureUpload
+            member={member}
+            onUploadSuccess={handleProfileUploadSuccess}
+            onClose={() => setShowProfileUploadModal(false)}
+          />
         )}
       </div>
     </div>

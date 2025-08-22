@@ -2,141 +2,409 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-aqua-50 text-gray-900;
+    @apply bg-background-primary text-neutral-800 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  * {
+    @apply border-neutral-200;
+  }
+
+  /* Typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-neutral-900 tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h5 {
+    @apply text-lg md:text-xl;
+  }
+
+  h6 {
+    @apply text-base md:text-lg;
+  }
+
+  p {
+    @apply text-neutral-700 leading-relaxed;
+  }
+
+  /* Focus styles for accessibility */
+  *:focus {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white;
+  }
+
+  /* Smooth transitions for interactive elements */
+  button, a, input, select, textarea {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 640px) {
+    /* Increase touch targets on mobile */
+    button, a, input, select, textarea {
+      min-height: 44px;
+    }
+    
+    /* Improve text readability on mobile */
+    body {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    /* Better spacing for mobile */
+    .container-fluid {
+      @apply px-4;
+    }
   }
 }
 
 @layer components {
+  /* Button System */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    min-height: 44px; /* Accessibility: minimum touch target */
+  }
+
   .btn-primary {
-    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2;
+    @apply btn bg-primary-600 text-white shadow-soft hover:bg-primary-700 hover:shadow-medium focus:ring-primary-500 active:bg-primary-800;
   }
-  
+
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply btn bg-surface-secondary text-neutral-700 border border-neutral-300 shadow-soft hover:bg-neutral-100 hover:shadow-medium focus:ring-neutral-500 active:bg-neutral-200;
   }
-  
+
+  .btn-success {
+    @apply btn bg-secondary-600 text-white shadow-soft hover:bg-secondary-700 hover:shadow-medium focus:ring-secondary-500 active:bg-secondary-800;
+  }
+
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+    @apply btn bg-health-danger text-white shadow-soft hover:bg-red-700 hover:shadow-medium focus:ring-red-500 active:bg-red-800;
   }
-  
-  .input-field {
-    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm;
+
+  .btn-ghost {
+    @apply btn bg-transparent text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 focus:ring-neutral-500;
   }
-  
+
+  .btn-sm {
+    @apply px-3 py-2 text-sm min-h-[36px];
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base min-h-[52px];
+  }
+
+  /* Input System */
+  .input {
+    @apply block w-full px-4 py-3 text-sm border border-neutral-300 rounded-xl bg-white shadow-soft transition-all duration-200 ease-in-out placeholder:text-neutral-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:shadow-glow disabled:opacity-50 disabled:cursor-not-allowed;
+    min-height: 48px; /* Accessibility: minimum touch target */
+  }
+
+  .input-error {
+    @apply border-health-danger focus:border-health-danger focus:ring-health-danger;
+  }
+
+  .input-success {
+    @apply border-secondary-500 focus:border-secondary-500 focus:ring-secondary-500;
+  }
+
+  /* Card System */
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-surface-primary rounded-2xl shadow-soft border border-neutral-200/50 overflow-hidden transition-all duration-200 ease-in-out;
   }
-  
+
+  .card-hover {
+    @apply card hover:shadow-medium hover:border-neutral-300/50 hover:-translate-y-1;
+  }
+
+  .card-interactive {
+    @apply card-hover cursor-pointer active:scale-[0.98];
+  }
+
+  /* Form Components */
+  .form-group {
+    @apply space-y-2;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-neutral-700 mb-2;
+  }
+
+  .form-error {
+    @apply text-sm text-health-danger mt-1;
+  }
+
+  .form-help {
+    @apply text-sm text-neutral-500 mt-1;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply inline-flex items-center px-4 py-2 text-sm font-medium text-neutral-600 rounded-xl transition-all duration-200 ease-in-out hover:text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  .nav-link-active {
+    @apply nav-link text-primary-700 bg-primary-50 border border-primary-200;
+  }
+
+  /* Status Indicators */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @apply status-badge bg-secondary-100 text-secondary-800;
+  }
+
+  .status-warning {
+    @apply status-badge bg-yellow-100 text-yellow-800;
+  }
+
+  .status-danger {
+    @apply status-badge bg-red-100 text-red-800;
+  }
+
+  .status-info {
+    @apply status-badge bg-primary-100 text-primary-800;
+  }
+
+  .status-neutral {
+    @apply status-badge bg-neutral-100 text-neutral-700;
+  }
+
+  /* Layout Components */
+  .container-fluid {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-8 md:py-12 lg:py-16;
+  }
+
+  .section-sm {
+    @apply py-6 md:py-8;
+  }
+
+  .section-lg {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  /* Grid System */
+  .grid-auto-fit {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .grid-auto-fill {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  /* Health-specific Components */
   .vital-card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200;
+    @apply card-hover p-6 space-y-4;
   }
-  
+
+  .vital-value {
+    @apply text-2xl font-bold text-neutral-900;
+  }
+
+  .vital-label {
+    @apply text-sm font-medium text-neutral-600 uppercase tracking-wide;
+  }
+
+  .vital-unit {
+    @apply text-sm text-neutral-500;
+  }
+
   .health-indicator {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium;
   }
-  
+
   .health-good {
-    @apply bg-green-100 text-green-800;
+    @apply health-indicator bg-secondary-100 text-secondary-800;
   }
-  
+
   .health-warning {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply health-indicator bg-yellow-100 text-yellow-800;
   }
-  
+
   .health-danger {
-    @apply bg-red-100 text-red-800;
+    @apply health-indicator bg-red-100 text-red-800;
+  }
+
+  .health-info {
+    @apply health-indicator bg-primary-100 text-primary-800;
+  }
+
+  /* Member Card System */
+  .member-card {
+    @apply card-interactive p-6 space-y-4;
+  }
+
+  .member-card-header {
+    @apply flex items-center space-x-4;
+  }
+
+  .member-card-avatar {
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-semibold shadow-soft border-2 transition-all duration-200;
+  }
+
+  .member-card-avatar:hover {
+    @apply shadow-medium scale-105;
+  }
+
+  .member-card-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .member-card-name {
+    @apply text-lg font-semibold text-neutral-900 truncate;
+  }
+
+  .member-card-details {
+    @apply text-sm text-neutral-600 space-y-1;
+  }
+
+  .member-card-actions {
+    @apply flex flex-wrap gap-2 mt-4;
+  }
+
+  /* Gender-specific styling */
+  .gender-male {
+    @apply bg-primary-100 text-primary-700 border-primary-200;
+  }
+
+  .gender-female {
+    @apply bg-accent-100 text-accent-700 border-accent-200;
+  }
+
+  .gender-other {
+    @apply bg-neutral-100 text-neutral-700 border-neutral-200;
+  }
+
+  /* Modal System */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50;
+  }
+
+  .modal-content {
+    @apply bg-surface-primary rounded-2xl shadow-large max-w-md w-full max-h-[90vh] overflow-y-auto;
+  }
+
+  .modal-header {
+    @apply px-6 py-4 border-b border-neutral-200;
+  }
+
+  .modal-body {
+    @apply px-6 py-4;
+  }
+
+  .modal-footer {
+    @apply px-6 py-4 border-t border-neutral-200 flex justify-end space-x-3;
+  }
+
+  /* Loading States */
+  .loading-skeleton {
+    @apply animate-pulse bg-neutral-200 rounded;
+  }
+
+  .loading-spinner {
+    @apply inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+
+  /* Responsive Utilities */
+  .responsive-text {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .responsive-padding {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .responsive-margin {
+    @apply m-4 sm:m-6 lg:m-8;
+  }
+
+  /* Accessibility Improvements */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  }
+
+  .focus-visible {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  /* Print Styles */
+  @media print {
+    .no-print {
+      @apply hidden;
+    }
+    
+    .print-break {
+      @apply break-before-page;
+    }
   }
 }
 
-/* Custom styles */
-.btn-primary {
-  @apply bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-}
+@layer utilities {
+  /* Custom utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
 
-.btn-secondary {
-  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-}
+  .text-pretty {
+    text-wrap: pretty;
+  }
 
-.btn-danger {
-  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-}
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-.input-field {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent;
-}
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 
-/* Custom styles for clickable member cards */
-.member-card {
-  @apply bg-white border border-gray-200 rounded shadow-sm h-full p-2 transition-all duration-200;
-}
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
 
-.member-card:hover {
-  @apply shadow-md border-gray-300 transform scale-105;
-}
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
 
-.member-card.selected {
-  @apply ring-2 ring-teal-500 ring-offset-2 shadow-lg;
-}
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-neutral-100 rounded-full;
+  }
 
-/* Canvas container styles */
-.canvas-container {
-  @apply relative overflow-auto;
-  min-height: 400px;
-}
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-full;
+  }
 
-/* Member card positioning */
-.member-card-container {
-  @apply absolute cursor-pointer transition-all duration-200;
-}
-
-.member-card-container:hover {
-  @apply z-10;
-}
-
-.member-card-container.selected {
-  @apply z-20;
-}
-
-/* Circular avatar styles */
-.avatar-circle {
-  @apply w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow-md border-2 transition-all duration-200;
-}
-
-.avatar-circle:hover {
-  @apply transform scale-110 shadow-lg;
-}
-
-.avatar-circle.self {
-  @apply border-4 border-yellow-400;
-}
-
-.avatar-circle.selected {
-  @apply ring-2 ring-teal-500 ring-offset-2;
-}
-
-/* Gender color schemes */
-.gender-male {
-  background-color: #DBEAFE;
-  color: #3B82F6;
-}
-
-.gender-female {
-  background-color: #FCE7F3;
-  color: #EC4899;
-}
-
-.gender-other {
-  background-color: #EDE9FE;
-  color: #8B5CF6;
-}
-
-.gender-default {
-  background-color: #F3F4F6;
-  color: #6B7280;
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400;
+  }
 }

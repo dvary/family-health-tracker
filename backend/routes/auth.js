@@ -45,10 +45,10 @@ router.post('/register', [
     );
     const familyId = familyResult.rows[0].id;
 
-    // Create user
+    // Create user (first user in family becomes admin)
     const userResult = await query(
-      'INSERT INTO users (email, password, family_id, first_name, last_name) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, first_name, last_name',
-      [email, hashedPassword, familyId, firstName, lastName]
+      'INSERT INTO users (email, password, family_id, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, first_name, last_name, role',
+      [email, hashedPassword, familyId, firstName, lastName, 'admin']
     );
 
     // Create family member profile for the user
@@ -71,7 +71,8 @@ router.post('/register', [
         email: userResult.rows[0].email,
         firstName: userResult.rows[0].first_name,
         lastName: userResult.rows[0].last_name,
-        familyId
+        familyId,
+        role: userResult.rows[0].role
       },
       token
     });
@@ -105,7 +106,7 @@ router.post('/login', [
 
     // Find user
     const userResult = await query(
-      'SELECT u.id, u.email, u.password, u.first_name, u.last_name, u.family_id, f.name as family_name FROM users u JOIN families f ON u.family_id = f.id WHERE u.email = $1',
+      'SELECT u.id, u.email, u.password, u.first_name, u.last_name, u.family_id, u.role, f.name as family_name FROM users u JOIN families f ON u.family_id = f.id WHERE u.email = $1',
       [email]
     );
 
@@ -136,7 +137,7 @@ router.post('/login', [
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user.id },
+      { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
@@ -149,7 +150,8 @@ router.post('/login', [
         firstName: user.first_name,
         lastName: user.last_name,
         familyId: user.family_id,
-        familyName: user.family_name
+        familyName: user.family_name,
+        role: user.role
       },
       token
     };
@@ -174,7 +176,7 @@ router.post('/login', [
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const userResult = await query(
-      'SELECT u.id, u.email, u.first_name, u.last_name, u.family_id, f.name as family_name FROM users u JOIN families f ON u.family_id = f.id WHERE u.id = $1',
+      'SELECT u.id, u.email, u.first_name, u.last_name, u.family_id, u.role, f.name as family_name FROM users u JOIN families f ON u.family_id = f.id WHERE u.id = $1',
       [req.user.id]
     );
 
@@ -193,7 +195,8 @@ router.get('/profile', authenticateToken, async (req, res) => {
         firstName: user.first_name,
         lastName: user.last_name,
         familyId: user.family_id,
-        familyName: user.family_name
+        familyName: user.family_name,
+        role: user.role
       }
     });
   } catch (error) {
