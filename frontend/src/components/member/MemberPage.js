@@ -1108,9 +1108,13 @@ const MemberPage = () => {
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       
-      // Set the document for viewing in the same tab
-      setSelectedDocument({ ...document, pdfUrl: url });
-      setShowDocumentViewer(true);
+      // Open PDF in new tab for better mobile experience
+      const newWindow = window.open(url, '_blank');
+      if (!newWindow) {
+        // Fallback if popup is blocked
+        setSelectedDocument({ ...document, pdfUrl: url });
+        setShowDocumentViewer(true);
+      }
     } catch (error) {
       console.error('Error viewing document:', error);
       toast.error('Failed to view document');
@@ -1258,17 +1262,22 @@ const MemberPage = () => {
 
   const handleViewReport = async (report) => {
     try {
-      setSelectedReport(report);
-      setShowPdfViewer(true);
-      
-      // Fetch PDF as blob to create object URL for iframe
+      // Fetch PDF as blob to create object URL for new tab
       const response = await axios.get(`/health/reports/${report.id}/download`, {
         responseType: 'blob'
       });
       
       const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
-      setSelectedReport(prev => ({ ...prev, pdfUrl }));
+      
+      // Open PDF in new tab for better mobile experience
+      const newWindow = window.open(pdfUrl, '_blank');
+      if (!newWindow) {
+        // Fallback if popup is blocked
+        setSelectedReport(report);
+        setShowPdfViewer(true);
+        setSelectedReport(prev => ({ ...prev, pdfUrl }));
+      }
     } catch (error) {
       console.error('Error loading PDF:', error);
       toast.error('Failed to load PDF');
