@@ -13,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
     networks:
       - family-health-network
     restart: unless-stopped
@@ -23,6 +22,58 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+
+  db-init:
+    image: postgres:15-alpine
+    container_name: family-health-db-init
+    environment:
+      POSTGRES_DB: family_health_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password123}
+      TZ: Asia/Kolkata
+    networks:
+      - family-health-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...' &&
+        until pg_isready -h postgres -U postgres; do
+          echo 'Waiting for PostgreSQL...' &&
+          sleep 2;
+        done &&
+        echo 'PostgreSQL is ready!' &&
+        echo 'Running database initialization...' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'DROP TABLE IF EXISTS documents CASCADE;' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'DROP TABLE IF EXISTS medical_reports CASCADE;' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'DROP TABLE IF EXISTS health_vitals CASCADE;' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'DROP TABLE IF EXISTS family_members CASCADE;' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'DROP TABLE IF EXISTS users CASCADE;' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'DROP TABLE IF EXISTS families CASCADE;' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE TABLE families (id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), name VARCHAR(255) NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE TABLE users (id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), email VARCHAR(255) UNIQUE NOT NULL, password VARCHAR(255) NOT NULL, first_name VARCHAR(100) NOT NULL, last_name VARCHAR(100) NOT NULL, family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE TABLE family_members (id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE, user_id UUID REFERENCES users(id) ON DELETE SET NULL, name VARCHAR(255) NOT NULL, date_of_birth DATE, gender VARCHAR(20) CHECK (gender IN (\"male\", \"female\", \"other\", \"prefer_not_to_say\")), created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE TABLE health_vitals (id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE, vital_type VARCHAR(50) NOT NULL CHECK (vital_type IN (\"height\", \"weight\", \"cholesterol\", \"hemoglobin\", \"sgpt\", \"sgot\", \"vitamin_d\", \"thyroid_tsh\", \"thyroid_t3\", \"thyroid_t4\", \"vitamin_b12\", \"calcium\", \"hba1c\", \"urea\", \"fasting_blood_glucose\", \"creatinine\")), value DECIMAL(10,2) NOT NULL, unit VARCHAR(20) NOT NULL, notes TEXT, recorded_at TIMESTAMP WITH TIME ZONE NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE TABLE medical_reports (id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE, report_type VARCHAR(50) NOT NULL CHECK (report_type IN (\"lab_report\", \"prescription_consultation\", \"vaccination\", \"hospital_records\")), report_sub_type VARCHAR(100), title VARCHAR(255) NOT NULL, description TEXT, file_path VARCHAR(500) NOT NULL, file_name VARCHAR(255) NOT NULL, file_size BIGINT NOT NULL, report_date DATE NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE TABLE documents (id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), member_id UUID NOT NULL REFERENCES family_members(id) ON DELETE CASCADE, title VARCHAR(255) NOT NULL, description TEXT, file_path VARCHAR(500) NOT NULL, file_name VARCHAR(255) NOT NULL, file_size BIGINT NOT NULL, upload_date DATE NOT NULL, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW());' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_users_email ON users(email);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_users_family_id ON users(family_id);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_family_members_family_id ON family_members(family_id);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_family_members_user_id ON family_members(user_id);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_health_vitals_member_id ON health_vitals(member_id);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_health_vitals_vital_type ON health_vitals(vital_type);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_health_vitals_recorded_at ON health_vitals(recorded_at);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_medical_reports_member_id ON medical_reports(member_id);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_medical_reports_report_type ON medical_reports(report_type);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_medical_reports_report_date ON medical_reports(report_date);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_documents_member_id ON documents(member_id);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'CREATE INDEX idx_documents_upload_date ON documents(upload_date);' &&
+        PGPASSWORD=\$POSTGRES_PASSWORD psql -h postgres -U \$POSTGRES_USER -d \$POSTGRES_DB -c 'INSERT INTO families (name) VALUES (\"Default Family\") ON CONFLICT DO NOTHING;' &&
+        echo 'Database initialization completed!'
+      "
+    restart: "no"
 
   backend:
     build:
@@ -44,17 +95,11 @@ services:
     volumes:
       - ./uploads:/app/uploads
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     command: >
       sh -c "
-        echo 'Waiting for database to be ready...' &&
-        while ! pg_isready -h postgres -U postgres; do
-          echo 'Database not ready, waiting...' &&
-          sleep 10;
-        done &&
-        echo 'Database is ready!' &&
-        echo 'Starting backend server...' &&
+        echo 'Database initialization completed, starting backend server...' &&
         npm start
       "
     networks:
