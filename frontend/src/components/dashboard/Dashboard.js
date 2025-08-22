@@ -754,7 +754,7 @@ const Dashboard = () => {
   const ageGroupOrder = ['Generation Alpha', 'Generation Z', 'Millennials', 'Generation X', 'Baby Boomers', 'Silent Generation', 'Greatest Generation', 'Lost Generation', 'Unknown'];
 
   return (
-    <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen bg-white">
+    <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen">
       <div className="p-6 space-y-8">
         {/* Header */}
         <div className="flex justify-end">

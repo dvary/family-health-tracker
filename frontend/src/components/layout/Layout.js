@@ -90,24 +90,7 @@ const Layout = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-surface-secondary border-t border-neutral-200/50 mt-auto">
-        <div className="container-fluid py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
-            <div className="flex items-center space-x-2">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xs">LV</span>
-              </div>
-              <span className="text-xs sm:text-sm text-neutral-600">
-                Life Vault
-              </span>
-            </div>
-            <div className="text-xs sm:text-sm text-neutral-500">
-              © 2024 Life Vault. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 };
