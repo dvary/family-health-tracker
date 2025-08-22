@@ -681,18 +681,58 @@ const Dashboard = () => {
   const ageGroupOrder = ['Generation Alpha', 'Generation Z', 'Millennials', 'Generation X', 'Baby Boomers', 'Silent Generation', 'Greatest Generation', 'Lost Generation', 'Unknown'];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-end">
-        {isAdmin() && (
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          >
-            Add Family Member
-          </button>
-        )}
+    <div className="relative min-h-screen">
+      {/* Background Profile Picture Section - Left 50% */}
+      <div className="fixed top-0 left-0 w-1/2 h-full z-0 hidden lg:block">
+        <div className="relative w-full h-full">
+          {/* Profile Picture Background with Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-10"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            {members.length > 0 && (
+              <div className="relative w-full h-full">
+                {/* Use the first member with profile picture or a default */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {(() => {
+                    const memberWithPicture = members.find(m => m.profile_picture);
+                    if (memberWithPicture?.profile_picture) {
+                      return (
+                        <img
+                          src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${memberWithPicture.profile_picture}`}
+                          alt="Family background"
+                          className="w-full h-full object-cover opacity-20"
+                        />
+                      );
+                    } else {
+                      return (
+                        <div className="w-full h-full bg-gradient-to-br from-teal-50 via-blue-50 to-indigo-50 opacity-30 flex items-center justify-center">
+                          <div className="text-8xl opacity-20">👨‍👩‍👧‍👦</div>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+                {/* Gradient overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-transparent"></div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Main Content Section - Right 70% */}
+      <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen bg-white">
+        <div className="p-6 space-y-8">
+          {/* Header */}
+          <div className="flex justify-end">
+            {isAdmin() && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Add Family Member
+              </button>
+            )}
+          </div>
 
       {/* Add/Edit Form */}
       {(showAddForm || editingMember) && (
@@ -851,41 +891,42 @@ const Dashboard = () => {
                      return (
                        <div
                          key={member.id}
-                         className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-soft border border-gray-100 p-3 sm:p-4 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group"
+                         className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-soft border border-gray-100 p-4 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group"
                          onClick={() => handleMemberClick(member)}
                        >
-                         <div className="flex flex-col items-center text-center space-y-2">
-                           {/* Profile Picture with enhanced styling */}
-                           <div className="relative">
-                             <ProfilePicture
-                               member={member}
-                               size="md"
-                               showUploadButton={false}
-                             />
-                             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary-500 rounded-full border-2 border-white shadow-sm"></div>
-                             {/* Admin indicator */}
-                             {member.role === 'admin' && (
-                               <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
-                                 <span className="text-white text-xs font-bold">A</span>
+                         <div className="flex items-center space-x-3">
+                           {/* Gender Icon */}
+                           <div className="flex-shrink-0">
+                             <span className="text-2xl">{genderIcon}</span>
+                           </div>
+                           
+                           {/* Member Info */}
+                           <div className="flex-1 min-w-0">
+                             {/* Name with enhanced typography */}
+                             <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors truncate">
+                               {member.name}
+                             </div>
+                             
+                             {/* Age Display with better styling */}
+                             {member.date_of_birth && (
+                               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block mt-1">
+                                 {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
                                </div>
                              )}
                            </div>
                            
-                           {/* Name with enhanced typography */}
-                           <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors">
-                             {member.name}
-                           </div>
-                           
-                           {/* Age Display with better styling */}
-                           {member.date_of_birth && (
-                             <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium">
-                               {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
+                           {/* Admin indicator */}
+                           {member.role === 'admin' && (
+                             <div className="flex-shrink-0 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                               <span className="text-white text-xs font-bold">A</span>
                              </div>
                            )}
                            
-                           {/* Subtle indicator */}
-                           <div className="text-xs text-gray-400 font-medium">
-                             Tap to view details
+                           {/* Arrow indicator */}
+                           <div className="flex-shrink-0 text-gray-400 group-hover:text-primary-500 transition-colors">
+                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                             </svg>
                            </div>
                          </div>
                        </div>
@@ -1213,6 +1254,8 @@ const Dashboard = () => {
           }}
         />
       )}
+        </div>
+      </div>
     </div>
   );
 };
