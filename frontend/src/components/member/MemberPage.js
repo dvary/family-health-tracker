@@ -469,13 +469,13 @@ const MemberPage = () => {
     switch (vitalType) {
       case 'bmi':
         if (numValue <= ranges.underweight.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Underweight', level: 'low', priority: 2 };
-        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
+        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-green-600', bgColor: 'bg-green-100', status: '', level: 'normal', priority: 0 };
         if (numValue >= ranges.overweight.min && numValue <= ranges.overweight.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Overweight', level: 'warning', priority: 1 };
         if (numValue >= ranges.obese.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Obese', level: 'high', priority: 2 };
         break;
 
       case 'cholesterol':
-        if (numValue <= ranges.optimal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: 'Optimal', level: 'normal', priority: 0 };
+        if (numValue <= ranges.optimal.max) return { color: 'text-green-600', bgColor: 'bg-green-100', status: 'Optimal', level: 'normal', priority: 0 };
         if (numValue >= ranges.borderline.min && numValue <= ranges.borderline.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Borderline', level: 'warning', priority: 1 };
         if (numValue >= ranges.high.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'High', level: 'high', priority: 2 };
         break;
@@ -483,25 +483,25 @@ const MemberPage = () => {
       case 'hemoglobin':
         const genderRange = memberGender === 'male' ? ranges.male : ranges.female;
         if (numValue < genderRange.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Low', level: 'low', priority: 2 };
-        if (numValue >= genderRange.min && numValue <= genderRange.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
+        if (numValue >= genderRange.min && numValue <= genderRange.max) return { color: 'text-green-600', bgColor: 'bg-green-100', status: '', level: 'normal', priority: 0 };
         if (numValue > genderRange.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'High', level: 'warning', priority: 1 };
         break;
 
       case 'vitamin_d':
         if (numValue <= ranges.deficient.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Deficient', level: 'low', priority: 2 };
         if (numValue >= ranges.insufficient.min && numValue <= ranges.insufficient.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Insufficient', level: 'warning', priority: 1 };
-        if (numValue >= ranges.sufficient.min) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: 'Sufficient', level: 'normal', priority: 0 };
+        if (numValue >= ranges.sufficient.min) return { color: 'text-green-600', bgColor: 'bg-green-100', status: 'Sufficient', level: 'normal', priority: 0 };
         break;
 
       case 'vitamin_b12':
         if (numValue <= ranges.deficient.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Deficient', level: 'low', priority: 2 };
         if (numValue >= ranges.low.min && numValue <= ranges.low.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Low', level: 'warning', priority: 1 };
-        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
+        if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-green-600', bgColor: 'bg-green-100', status: '', level: 'normal', priority: 0 };
         if (numValue > ranges.normal.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'High', level: 'warning', priority: 1 };
         break;
 
       case 'hba1c':
-        if (numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
+        if (numValue <= ranges.normal.max) return { color: 'text-green-600', bgColor: 'bg-green-100', status: '', level: 'normal', priority: 0 };
         if (numValue >= ranges.prediabetic.min && numValue <= ranges.prediabetic.max) return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Prediabetic', level: 'warning', priority: 1 };
         if (numValue >= ranges.diabetic.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Diabetic', level: 'high', priority: 2 };
         break;
@@ -510,7 +510,7 @@ const MemberPage = () => {
         // Generic handling for vitals with simple normal ranges
         if (ranges.normal) {
           if (numValue < ranges.normal.min) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Low', level: 'low', priority: 2 };
-          if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
+          if (numValue >= ranges.normal.min && numValue <= ranges.normal.max) return { color: 'text-green-600', bgColor: 'bg-green-100', status: '', level: 'normal', priority: 0 };
           if (numValue > ranges.normal.max) return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'High', level: 'high', priority: 2 };
         }
         break;
@@ -645,7 +645,7 @@ const MemberPage = () => {
       case 'warning':
         return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
       case 'normal':
-        return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
+        return 'bg-gradient-to-br from-green-50 via-green-25 to-white';
       default:
         return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
     }
