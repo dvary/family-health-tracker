@@ -857,67 +857,63 @@ const Dashboard = () => {
                      return (
                        <div
                          key={member.id}
-                         className="relative bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-soft border border-gray-100 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group overflow-hidden"
+                         className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-soft border border-gray-100 hover:shadow-medium transition-all duration-300 cursor-pointer hover:border-primary-200 transform hover:scale-[1.02] group p-4"
                          onClick={() => handleMemberClick(member)}
                        >
-                         {/* Background Profile Picture with Gradient Overlay */}
-                         <div className="absolute inset-0 z-0">
-                           {member.profile_picture ? (
-                             <img
-                               src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${member.profile_picture}`}
-                               alt={`${member.name}'s profile`}
-                               className="w-full h-full object-cover"
-                             />
-                           ) : (
-                             <div className="w-full h-full bg-gradient-to-r from-blue-100 to-purple-100"></div>
-                           )}
-                           {/* Gradient overlay for decreasing opacity from left to right */}
-                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-white/90"></div>
-                         </div>
-                         
-                         {/* Content Layer */}
-                         <div className="relative z-10 p-4">
-                           <div className="flex items-center justify-between">
-                             {/* Left side - Empty space for profile picture effect */}
-                             <div className="w-1/3"></div>
+                         <div className="flex items-center space-x-4">
+                           {/* Square Profile Picture on the Left */}
+                           <div className="flex-shrink-0">
+                             {member.profile_picture ? (
+                               <img
+                                 src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${member.profile_picture}`}
+                                 alt={`${member.name}'s profile`}
+                                 className="w-16 h-16 rounded-lg object-cover border-2 border-gray-200"
+                               />
+                             ) : (
+                               <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 border-2 border-gray-200 flex items-center justify-center">
+                                 <span className="text-2xl text-gray-400">
+                                   {member.gender === 'male' ? '👨' : member.gender === 'female' ? '👩' : '👤'}
+                                 </span>
+                               </div>
+                             )}
+                           </div>
+                           
+                           {/* Content on the Right */}
+                           <div className="flex-1 min-w-0">
+                             {/* Name with enhanced typography */}
+                             <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors truncate mb-2">
+                               {member.name}
+                             </div>
                              
-                             {/* Right side - All content with consistent indentation */}
-                             <div className="w-2/3 pl-4">
-                               {/* Name with enhanced typography */}
-                               <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors truncate mb-2">
-                                 {member.name}
-                               </div>
-                               
-                               {/* Age Display with better styling */}
-                               {member.date_of_birth && (
-                                 <div className="space-y-1 mb-3">
-                                   <div className="text-xs text-gray-600 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full font-medium inline-block">
-                                     {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
-                                   </div>
-                                   <div className="text-xs text-gray-500">
-                                     {formatDate(member.date_of_birth)}
-                                   </div>
+                             {/* Age Display with better styling */}
+                             {member.date_of_birth && (
+                               <div className="space-y-1 mb-3">
+                                 <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block">
+                                   {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
                                  </div>
-                               )}
-                               
-                               {/* Admin indicator and arrow in a row */}
-                               <div className="flex items-center justify-between">
-                                 {/* Admin indicator */}
-                                 {member.role === 'admin' && (
-                                   <div className="flex-shrink-0 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
-                                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                       <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                     </svg>
-                                   </div>
-                                 )}
-                                 
-                                 {/* Arrow indicator */}
-                                 <div className="flex-shrink-0 text-gray-400 group-hover:text-primary-500 transition-colors">
-                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                   </svg>
+                                 <div className="text-xs text-gray-500">
+                                   {formatDate(member.date_of_birth)}
                                  </div>
                                </div>
+                             )}
+                           </div>
+                           
+                           {/* Right side indicators */}
+                           <div className="flex items-center space-x-2">
+                             {/* Admin indicator */}
+                             {member.role === 'admin' && (
+                               <div className="flex-shrink-0 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                 </svg>
+                               </div>
+                             )}
+                             
+                             {/* Arrow indicator */}
+                             <div className="flex-shrink-0 text-gray-400 group-hover:text-primary-500 transition-colors">
+                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                               </svg>
                              </div>
                            </div>
                          </div>
