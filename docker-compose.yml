@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15-alpine
@@ -15,11 +17,11 @@ services:
       - family-health-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d family_health_tracker"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d family_health_tracker && psql -U postgres -d family_health_tracker -c 'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = \\'public\\';' | grep -q '[0-9]'"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   backend:
     build:
@@ -34,7 +36,7 @@ services:
       PORT: 5000
       MAX_FILE_SIZE: 10485760
       UPLOAD_PATH: /app/uploads
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
     ports:
       - "5000:5000"
     volumes:
@@ -46,9 +48,18 @@ services:
       sh -c "
         echo 'Waiting for database to be ready...' &&
         while ! pg_isready -h postgres -U postgres -d family_health_tracker; do
-          sleep 2;
+          echo 'Database not ready, waiting...' &&
+          sleep 5;
         done &&
         echo 'Database is ready!' &&
+        echo 'Verifying database tables...' &&
+        TABLE_COUNT=\$(psql -h postgres -U postgres -d family_health_tracker -t -c 'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = \\'public\\';' | tr -d ' ') &&
+        echo \"Found \$TABLE_COUNT tables\" &&
+        if [ \"\$TABLE_COUNT\" -lt 7 ]; then
+          echo 'Database tables not found, reinitializing...' &&
+          psql -h postgres -U postgres -d family_health_tracker -f /docker-entrypoint-initdb.d/01-init.sql
+        fi &&
+        echo 'Starting backend server...' &&
         npm start
       "
     networks:
@@ -59,7 +70,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   frontend:
     build:
@@ -67,7 +78,7 @@ services:
       dockerfile: Dockerfile
     container_name: family-health-frontend
     environment:
-      REACT_APP_API_URL: http://localhost:5000/api
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5000/api}
     ports:
       - "3000:3000"
     depends_on:
@@ -81,10 +92,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
 volumes:
   postgres_data:
+    driver: local
 
 networks:
   family-health-network:
