@@ -13,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
     networks:
       - family-health-network
     restart: unless-stopped
@@ -23,6 +22,36 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+
+  db-init:
+    image: postgres:15-alpine
+    container_name: family-health-db-init
+    environment:
+      POSTGRES_DB: family_health_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password123}
+      TZ: Asia/Kolkata
+    volumes:
+      - ./database/init-db.sh:/init-db.sh
+    networks:
+      - family-health-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...' &&
+        until pg_isready -h postgres -U postgres; do
+          echo 'Waiting for PostgreSQL...' &&
+          sleep 2;
+        done &&
+        echo 'PostgreSQL is ready!' &&
+        echo 'Running database initialization...' &&
+        chmod +x /init-db.sh &&
+        /init-db.sh &&
+        echo 'Database initialization completed!'
+      "
+    restart: "no"
 
   backend:
     build:
@@ -44,17 +73,11 @@ services:
     volumes:
       - ./uploads:/app/uploads
     depends_on:
-      postgres:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     command: >
       sh -c "
-        echo 'Waiting for database to be ready...' &&
-        while ! pg_isready -h postgres -U postgres; do
-          echo 'Database not ready, waiting...' &&
-          sleep 10;
-        done &&
-        echo 'Database is ready!' &&
-        echo 'Starting backend server...' &&
+        echo 'Database initialization completed, starting backend server...' &&
         npm start
       "
     networks:
