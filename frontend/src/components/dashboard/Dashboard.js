@@ -753,26 +753,32 @@ const Dashboard = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 required
               />
-              <input
-                type="text"
-                placeholder="dd-mm-yyyy"
-                value={editingMember 
-                  ? (editFormData.dateOfBirth ? formatDate(editFormData.dateOfBirth) : '')
-                  : (formData.dateOfBirth ? formatDate(formData.dateOfBirth) : '')
-                }
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^[\d-]*$/.test(value)) {
-                    if (editingMember) {
-                      setEditFormData({...editFormData, dateOfBirth: parseDateFromDisplay(value)});
-                    } else {
-                      setFormData({...formData, dateOfBirth: parseDateFromDisplay(value)});
-                    }
+              <div className="relative">
+                <input
+                  type="date"
+                  value={editingMember 
+                    ? (editFormData.dateOfBirth ? editFormData.dateOfBirth : '')
+                    : (formData.dateOfBirth ? formData.dateOfBirth : '')
                   }
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">Format: dd-mm-yyyy (e.g., 25-12-1990)</p>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (editingMember) {
+                      setEditFormData({...editFormData, dateOfBirth: value});
+                    } else {
+                      setFormData({...formData, dateOfBirth: value});
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                {(editingMember ? editFormData.dateOfBirth : formData.dateOfBirth) && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-sm text-gray-500">
+                      {formatDate(editingMember ? editFormData.dateOfBirth : formData.dateOfBirth)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Select date of birth (displays as dd-mm-yyyy)</p>
               <select
                 value={editingMember ? editFormData.gender : formData.gender}
                 onChange={(e) => editingMember 
@@ -895,9 +901,13 @@ const Dashboard = () => {
                          onClick={() => handleMemberClick(member)}
                        >
                          <div className="flex items-center space-x-3">
-                           {/* Gender Icon */}
+                           {/* Profile Picture */}
                            <div className="flex-shrink-0">
-                             <span className="text-2xl">{genderIcon}</span>
+                             <ProfilePicture
+                               member={member}
+                               size="md"
+                               showUploadButton={false}
+                             />
                            </div>
                            
                            {/* Member Info */}
@@ -909,8 +919,13 @@ const Dashboard = () => {
                              
                              {/* Age Display with better styling */}
                              {member.date_of_birth && (
-                               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block mt-1">
-                                 {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
+                               <div className="space-y-1">
+                                 <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block">
+                                   {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
+                                 </div>
+                                 <div className="text-xs text-gray-500">
+                                   {formatDate(member.date_of_birth)}
+                                 </div>
                                </div>
                              )}
                            </div>
@@ -918,7 +933,9 @@ const Dashboard = () => {
                            {/* Admin indicator */}
                            {member.role === 'admin' && (
                              <div className="flex-shrink-0 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
-                               <span className="text-white text-xs font-bold">A</span>
+                               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                               </svg>
                              </div>
                            )}
                            
