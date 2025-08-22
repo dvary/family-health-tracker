@@ -245,7 +245,7 @@
 
   /* Card consistency */
   .card-consistent-height {
-    @apply h-48;
+    @apply h-32;
   }
 
   .card-content {
