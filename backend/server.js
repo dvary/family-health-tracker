@@ -64,7 +64,7 @@ process.on('uncaughtException', (error) => {
 app.listen(PORT, () => {
   console.log(`🚀 Family Health Tracker API running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 API URL: http://localhost:${PORT}/api`);
+  console.log(`🔗 API URL: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}/api`);
 });
 
 module.exports = app;
