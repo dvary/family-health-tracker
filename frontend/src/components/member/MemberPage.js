@@ -682,7 +682,7 @@ const MemberPage = () => {
   const groupReportsByType = (reports) => {
     const grouped = {};
     reports.forEach(report => {
-      const key = `${report.report_type}_${report.report_sub_type || 'general'}`;
+      const key = report.report_type;
       if (!grouped[key]) {
         grouped[key] = [];
       }
@@ -1723,9 +1723,7 @@ const MemberPage = () => {
                                 </span>
                               </div>
                             )}
-                            <p className="text-sm text-gray-500">
-                              {formatDate(latestVital.recorded_at)}
-                            </p>
+
 
                           </div>
                                                      <div className="flex items-center space-x-2">
@@ -1854,14 +1852,8 @@ const MemberPage = () => {
                                 </span>
                               )}
                             </div>
-                            {subTypeLabel && (
-                              <p className="text-sm text-gray-600 mb-2">{subTypeLabel}</p>
-                            )}
-                                                         <div className="mb-2">
-                               <span className="text-xs text-gray-500">
-                                 {formatDate(latestReport.report_date)}
-                               </span>
-                             </div>
+
+
                             {latestReport.description && (
                               <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                                 {latestReport.description}
@@ -1988,7 +1980,7 @@ const MemberPage = () => {
                       <div className="p-3 card-content">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
-                            <h4 className="font-medium text-gray-900 text-sm">{document.title}</h4>
+                            <h4 className="text-lg font-semibold text-gray-900">{document.title}</h4>
                             {documentStatus.status && (
                               <span className={`text-xs px-1.5 py-0.5 rounded-full ${documentStatus.bgColor} ${documentStatus.color}`}>
                                 {documentStatus.status}
