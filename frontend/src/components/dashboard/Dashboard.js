@@ -241,6 +241,8 @@ const Dashboard = () => {
     name: '',
     dateOfBirth: '',
     gender: '',
+    bloodGroup: '',
+    mobileNumber: '',
     email: '',
     password: ''
   });
@@ -248,6 +250,8 @@ const Dashboard = () => {
     name: '',
     dateOfBirth: '',
     gender: '',
+    bloodGroup: '',
+    mobileNumber: '',
     email: '',
     password: ''
   });
@@ -573,6 +577,8 @@ const Dashboard = () => {
       name: member.name || '',
       dateOfBirth: member.date_of_birth ? member.date_of_birth.split('T')[0] : '',
       gender: member.gender || '',
+      bloodGroup: member.blood_group || '',
+      mobileNumber: member.mobile_number || '',
       email: member.user_email || '',
       password: '' // Don't populate password for security
     });
@@ -589,8 +595,8 @@ const Dashboard = () => {
   const handleCancel = () => {
     setShowAddForm(false);
     setEditingMember(null);
-    setFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
-    setEditFormData({ name: '', dateOfBirth: '', gender: '', email: '', password: '' });
+    setFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '' });
+    setEditFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '' });
     setDateComponents({ day: '', month: '', year: '' });
     setEditDateComponents({ day: '', month: '', year: '' });
   };
@@ -873,6 +879,34 @@ const Dashboard = () => {
                 <option value="other">Other</option>
                 <option value="prefer_not_to_say">Prefer not to say</option>
               </select>
+              <select
+                value={editingMember ? editFormData.bloodGroup : formData.bloodGroup}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, bloodGroup: e.target.value})
+                  : setFormData({...formData, bloodGroup: e.target.value})
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              >
+                <option value="">Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+              <input
+                type="tel"
+                placeholder="Mobile Number"
+                value={editingMember ? editFormData.mobileNumber : formData.mobileNumber}
+                onChange={(e) => editingMember 
+                  ? setEditFormData({...editFormData, mobileNumber: e.target.value})
+                  : setFormData({...formData, mobileNumber: e.target.value})
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
               <input
                 type="email"
                 placeholder="Email"
@@ -1006,8 +1040,22 @@ const Dashboard = () => {
                              
                              {/* Age Display */}
                              {member.date_of_birth && (
-                               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block">
+                               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block mb-1">
                                  {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
+                               </div>
+                             )}
+                             
+                             {/* Blood Group Display */}
+                             {member.blood_group && (
+                               <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium inline-block mb-1">
+                                 🩸 {member.blood_group}
+                               </div>
+                             )}
+                             
+                             {/* Mobile Number Display */}
+                             {member.mobile_number && (
+                               <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full font-medium inline-block">
+                                 📱 {member.mobile_number}
                                </div>
                              )}
                            </div>

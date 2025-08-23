@@ -1,48 +1,60 @@
-const fs = require('fs');
-const path = require('path');
-const { query } = require('../config/database');
+const { Pool } = require('pg');
+require('dotenv').config();
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password123@localhost:5432/family_health_tracker'
+});
 
 async function runMigrations() {
+  const client = await pool.connect();
+  
   try {
-    console.log('🔄 Starting database migration...');
+    console.log('Starting database migration...');
     
-    // Read the init.sql file
-    const initSqlPath = path.join(__dirname, '../../database/init.sql');
-    const initSql = fs.readFileSync(initSqlPath, 'utf8');
+    // Check if blood_group column exists
+    const bloodGroupCheck = await client.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'family_members' AND column_name = 'blood_group'
+    `);
     
-    // Split the SQL into individual statements
-    const statements = initSql
-      .split(';')
-      .map(stmt => stmt.trim())
-      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
-    
-    console.log(`📝 Found ${statements.length} SQL statements to execute`);
-    
-    // Execute each statement
-    for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i];
-      if (statement.trim()) {
-        try {
-          await query(statement);
-          console.log(`✅ Executed statement ${i + 1}/${statements.length}`);
-        } catch (error) {
-          // Skip if table already exists or extension already enabled
-          if (error.code === '42P07' || error.code === '42710' || error.code === '42701') {
-            console.log(`⏭️  Skipped statement ${i + 1}/${statements.length} (already exists)`);
-          } else {
-            console.error(`❌ Error executing statement ${i + 1}/${statements.length}:`, error.message);
-            throw error;
-          }
-        }
-      }
+    if (bloodGroupCheck.rows.length === 0) {
+      console.log('Adding blood_group column...');
+      await client.query(`
+        ALTER TABLE family_members 
+        ADD COLUMN blood_group VARCHAR(10) CHECK (blood_group IN ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'))
+      `);
+      console.log('✓ blood_group column added successfully');
+    } else {
+      console.log('✓ blood_group column already exists');
     }
     
-    console.log('🎉 Database migration completed successfully!');
-    console.log('📊 Database schema is ready for use');
+    // Check if mobile_number column exists
+    const mobileNumberCheck = await client.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'family_members' AND column_name = 'mobile_number'
+    `);
+    
+    if (mobileNumberCheck.rows.length === 0) {
+      console.log('Adding mobile_number column...');
+      await client.query(`
+        ALTER TABLE family_members 
+        ADD COLUMN mobile_number VARCHAR(20)
+      `);
+      console.log('✓ mobile_number column added successfully');
+    } else {
+      console.log('✓ mobile_number column already exists');
+    }
+    
+    console.log('Migration completed successfully!');
     
   } catch (error) {
-    console.error('❌ Migration failed:', error);
-    process.exit(1);
+    console.error('Migration failed:', error);
+    throw error;
+  } finally {
+    client.release();
+    await pool.end();
   }
 }
 

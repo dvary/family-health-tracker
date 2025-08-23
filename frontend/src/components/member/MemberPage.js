@@ -304,6 +304,8 @@ const MemberPage = () => {
     name: '',
     dateOfBirth: '',
     gender: '',
+    bloodGroup: '',
+    mobileNumber: '',
     email: '',
     password: ''
   });
@@ -798,6 +800,8 @@ const MemberPage = () => {
         name: foundMember.name,
         dateOfBirth: foundMember.date_of_birth ? foundMember.date_of_birth.split('T')[0] : '',
         gender: foundMember.gender || '',
+        bloodGroup: foundMember.blood_group || '',
+        mobileNumber: foundMember.mobile_number || '',
         email: foundMember.user_email || '',
         password: '' // Don't populate password for security
       });
@@ -1349,6 +1353,16 @@ const MemberPage = () => {
             <p className="text-gray-600 capitalize text-sm sm:text-base">
               {member.gender || 'Gender not specified'}
             </p>
+            {member.blood_group && (
+              <p className="text-red-600 text-sm sm:text-base font-medium">
+                🩸 Blood Group: {member.blood_group}
+              </p>
+            )}
+            {member.mobile_number && (
+              <p className="text-blue-600 text-sm sm:text-base font-medium">
+                📱 Mobile: {member.mobile_number}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -1442,6 +1456,40 @@ const MemberPage = () => {
                 <option value="other">Other</option>
                 <option value="prefer_not_to_say">Prefer not to say</option>
               </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="bloodGroup" className="form-label">
+                  Blood Group
+                </label>
+                <select
+                  id="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={(e) => setFormData({...formData, bloodGroup: e.target.value})}
+                  className="input"
+                >
+                  <option value="">Select Blood Group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="mobileNumber" className="form-label">
+                  Mobile Number
+                </label>
+                <input
+                  id="mobileNumber"
+                  type="tel"
+                  placeholder="Enter mobile number"
+                  value={formData.mobileNumber}
+                  onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
+                  className="input"
+                />
               </div>
               <div className="form-group">
                 <label htmlFor="email" className="form-label">

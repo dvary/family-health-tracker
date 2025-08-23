@@ -2,63 +2,73 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password123@localhost:5432/family_health_tracker',
-  ssl: false,
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password123@localhost:5432/family_health_tracker'
 });
 
 async function migrate() {
+  const client = await pool.connect();
+  
   try {
-    console.log('🔄 Starting database migration...');
-
-    // Update health_vitals table to support new vital types
-    await pool.query(`
-      ALTER TABLE health_vitals 
-      DROP CONSTRAINT IF EXISTS health_vitals_vital_type_check;
-    `);
-
-    await pool.query(`
-      ALTER TABLE health_vitals 
-      ADD CONSTRAINT health_vitals_vital_type_check 
-      CHECK (vital_type IN (
-        'blood_pressure', 'blood_sugar', 'oxygen', 'weight', 'height', 'temperature', 
-        'heart_rate', 'bmi', 'cholesterol', 'hemoglobin', 'platelet_count', 'white_blood_cells',
-        'red_blood_cells', 'creatinine', 'urea', 'bilirubin', 'sodium', 'potassium', 'calcium',
-        'vitamin_d', 'vitamin_b12', 'thyroid_tsh', 'thyroid_t3', 'thyroid_t4', 'other'
-      ));
-    `);
-
-    // Update medical_reports table to support new report types and add sub_type column
-    await pool.query(`
-      ALTER TABLE medical_reports 
-      DROP CONSTRAINT IF EXISTS medical_reports_report_type_check;
-    `);
-
-    await pool.query(`
-      ALTER TABLE medical_reports 
-      ADD CONSTRAINT medical_reports_report_type_check 
-      CHECK (report_type IN ('lab_report', 'prescription_consultation', 'vaccination', 'hospital_records'));
-    `);
-
-    // Add report_sub_type column if it doesn't exist
-    const subTypeExists = await pool.query(`
+    console.log('Starting database migration...');
+    
+    // Check if blood_group column exists
+    const bloodGroupCheck = await client.query(`
       SELECT column_name 
       FROM information_schema.columns 
-      WHERE table_name = 'medical_reports' AND column_name = 'report_sub_type';
+      WHERE table_name = 'family_members' AND column_name = 'blood_group'
     `);
-
-    if (subTypeExists.rows.length === 0) {
-      await pool.query(`
-        ALTER TABLE medical_reports 
-        ADD COLUMN report_sub_type VARCHAR(100);
+    
+    if (bloodGroupCheck.rows.length === 0) {
+      console.log('Adding blood_group column...');
+      await client.query(`
+        ALTER TABLE family_members 
+        ADD COLUMN blood_group VARCHAR(10) CHECK (blood_group IN ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'))
       `);
+      console.log('✓ blood_group column added successfully');
+    } else {
+      console.log('✓ blood_group column already exists');
     }
-
-    console.log('✅ Database migration completed successfully!');
+    
+    // Check if mobile_number column exists
+    const mobileNumberCheck = await client.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'family_members' AND column_name = 'mobile_number'
+    `);
+    
+    if (mobileNumberCheck.rows.length === 0) {
+      console.log('Adding mobile_number column...');
+      await client.query(`
+        ALTER TABLE family_members 
+        ADD COLUMN mobile_number VARCHAR(20)
+      `);
+      console.log('✓ mobile_number column added successfully');
+    } else {
+      console.log('✓ mobile_number column already exists');
+    }
+    
+    console.log('Migration completed successfully!');
+    
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('Migration failed:', error);
+    throw error;
   } finally {
+    client.release();
     await pool.end();
   }
 }
 
-migrate();
+// Run migration if this file is executed directly
+if (require.main === module) {
+  migrate()
+    .then(() => {
+      console.log('Migration script completed');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('Migration script failed:', error);
+      process.exit(1);
+    });
+}
+
+module.exports = { migrate };

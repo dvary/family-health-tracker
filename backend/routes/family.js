@@ -49,6 +49,8 @@ router.post('/members/initial', [
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
+  body('bloodGroup').optional().isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
+  body('mobileNumber').optional().isMobilePhone('any'),
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 })
 ], async (req, res) => {
@@ -61,7 +63,7 @@ router.post('/members/initial', [
       });
     }
 
-    const { name, dateOfBirth, gender, email, password } = req.body;
+    const { name, dateOfBirth, gender, bloodGroup, mobileNumber, email, password } = req.body;
     const originalEmail = req.body.email; // Store original email before normalization
 
     // Check if family already has members
@@ -103,10 +105,10 @@ router.post('/members/initial', [
 
     const result = await query(
       `INSERT INTO family_members 
-        (family_id, user_id, name, date_of_birth, gender) 
-       VALUES ($1, $2, $3, $4, $5) 
-       RETURNING id, name, date_of_birth, gender, created_at`,
-      [req.user.family_id, userId, name, dateOfBirth, gender]
+        (family_id, user_id, name, date_of_birth, gender, blood_group, mobile_number) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING id, name, date_of_birth, gender, blood_group, mobile_number, created_at`,
+      [req.user.family_id, userId, name, dateOfBirth, gender, bloodGroup, mobileNumber]
     );
 
     res.status(201).json({
@@ -155,6 +157,8 @@ router.get('/members', authenticateToken, async (req, res) => {
         fm.name, 
         fm.date_of_birth, 
         fm.gender,
+        fm.blood_group,
+        fm.mobile_number,
         fm.profile_picture,
         fm.created_at,
         COALESCE(u.original_email, u.email) as user_email,
@@ -185,6 +189,8 @@ router.post('/members', [
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
+  body('bloodGroup').optional().isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
+  body('mobileNumber').optional().isMobilePhone('any'),
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 })
 ], async (req, res) => {
@@ -197,7 +203,7 @@ router.post('/members', [
       });
     }
 
-    const { name, dateOfBirth, gender, email, password } = req.body;
+    const { name, dateOfBirth, gender, bloodGroup, mobileNumber, email, password } = req.body;
     const originalEmail = req.body.email; // Store original email before normalization
 
     // Check if email already exists
@@ -227,10 +233,10 @@ router.post('/members', [
     // Insert family member with user_id
     const memberResult = await query(
       `INSERT INTO family_members 
-        (family_id, user_id, name, date_of_birth, gender) 
-       VALUES ($1, $2, $3, $4, $5) 
-       RETURNING id, name, date_of_birth, gender, created_at`,
-      [req.user.family_id, userId, name, dateOfBirth, gender]
+        (family_id, user_id, name, date_of_birth, gender, blood_group, mobile_number) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING id, name, date_of_birth, gender, blood_group, mobile_number, created_at`,
+      [req.user.family_id, userId, name, dateOfBirth, gender, bloodGroup, mobileNumber]
     );
 
     res.status(201).json({
@@ -275,6 +281,8 @@ router.get('/members/:memberId', authenticateToken, async (req, res) => {
         fm.name, 
         fm.date_of_birth, 
         fm.gender,
+        fm.blood_group,
+        fm.mobile_number,
         fm.created_at,
         u.email as user_email,
         u.role
@@ -309,6 +317,8 @@ router.put('/members/:memberId', [
   body('name').optional().notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
+  body('bloodGroup').optional().isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
+  body('mobileNumber').optional().isMobilePhone('any'),
   body('email').optional().isEmail().normalizeEmail(),
   body('password').optional().isLength({ min: 6 })
 ], async (req, res) => {
@@ -322,7 +332,7 @@ router.put('/members/:memberId', [
     }
 
     const { memberId } = req.params;
-    const { name, dateOfBirth, gender, email, password } = req.body;
+    const { name, dateOfBirth, gender, bloodGroup, mobileNumber, email, password } = req.body;
 
     // Check if member exists and belongs to family, and get user info
     const checkResult = await query(
@@ -391,6 +401,14 @@ router.put('/members/:memberId', [
       updateFields.push(`gender = $${paramCount++}`);
       updateValues.push(gender);
     }
+    if (bloodGroup !== undefined) {
+      updateFields.push(`blood_group = $${paramCount++}`);
+      updateValues.push(bloodGroup);
+    }
+    if (mobileNumber !== undefined) {
+      updateFields.push(`mobile_number = $${paramCount++}`);
+      updateValues.push(mobileNumber);
+    }
 
     // Only update family member if there are fields to update
     if (updateFields.length > 0) {
@@ -411,6 +429,8 @@ router.put('/members/:memberId', [
         fm.name, 
         fm.date_of_birth, 
         fm.gender,
+        fm.blood_group,
+        fm.mobile_number,
         fm.profile_picture,
         fm.created_at, 
         fm.updated_at,
