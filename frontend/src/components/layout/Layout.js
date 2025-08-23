@@ -1,32 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Layout = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Check if device is mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleLogout = () => {
     logout();
-    setIsMobileMenuOpen(false);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
@@ -46,7 +28,7 @@ const Layout = () => {
                     : 'bg-white text-neutral-600 hover:bg-neutral-50 border border-neutral-200'
                 }`}
                 title="Dashboard"
-                onClick={() => setIsMobileMenuOpen(false)}
+
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -55,28 +37,11 @@ const Layout = () => {
               </Link>
 
               {/* Life Vault Title */}
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
                   Life Vault
                 </h1>
               </div>
-
-              {/* Mobile Menu Button */}
-              {isMobile && (
-                <button
-                  onClick={toggleMobileMenu}
-                  className="p-2 rounded-lg hover:bg-neutral-100 mobile-touch"
-                  aria-label="Toggle mobile menu"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isMobileMenuOpen ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    )}
-                  </svg>
-                </button>
-              )}
             </div>
 
             {/* User Menu */}
@@ -123,38 +88,7 @@ const Layout = () => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
-          {isMobile && isMobileMenuOpen && (
-            <div className="sm:hidden border-t border-neutral-200 bg-white mobile-responsive-nav">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {/* Mobile Life Vault Title */}
-                <div className="px-3 py-2 border-b border-neutral-100">
-                  <h1 className="text-lg font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
-                    Life Vault
-                  </h1>
-                </div>
-                <Link
-                  to="/dashboard"
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors mobile-touch ${
-                    location.pathname === '/dashboard'
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <div className="px-3 py-2">
-                  <p className="text-sm font-medium text-neutral-900">
-                    Welcome, {user?.firstName || user?.email}
-                  </p>
-                  <p className="text-xs text-neutral-600">
-                    {user?.role === 'admin' ? 'Administrator' : 'Family Member'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+
         </div>
       </nav>
 
@@ -165,13 +99,7 @@ const Layout = () => {
         </div>
       </main>
 
-      {/* Mobile Menu Overlay */}
-      {isMobile && isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+
     </div>
   );
 };
