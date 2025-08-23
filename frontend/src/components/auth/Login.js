@@ -50,10 +50,11 @@ const Login = () => {
     console.log('Login result:', result);
     
     if (result.success) {
-      console.log('Navigating to dashboard...');
+      console.log('Login successful - triggering confetti...');
       // Trigger confetti on successful login
       setShowConfetti(true);
       setConfettiKey(prev => prev + 1);
+      console.log('Confetti triggered, will navigate in 2 seconds...');
       setTimeout(() => {
         setShowConfetti(false);
         // Add a small delay to ensure state is updated
@@ -72,10 +73,11 @@ const Login = () => {
           width={window.innerWidth}
           height={window.innerHeight}
           recycle={false}
-          numberOfPieces={200}
-          colors={['#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5']}
-          gravity={0.3}
-          wind={0.05}
+          numberOfPieces={300}
+          colors={['#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5', '#059669', '#047857']}
+          gravity={0.2}
+          wind={0.1}
+          tweenDuration={8000}
         />
       )}
       <div className="min-h-screen flex items-center justify-center bg-background-primary py-12 px-4 sm:px-6 lg:px-8">

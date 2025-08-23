@@ -2744,9 +2744,9 @@ const MemberPage = () => {
                   >
                     {isUploading ? (
                       <>
-                        <span className="relative z-10">Uploading...</span>
+                        <span className="relative z-10">Uploading {uploadProgress}%</span>
                         <div 
-                          className="absolute inset-0 bg-teal-500 transition-all duration-300"
+                          className="absolute inset-0 bg-teal-400 transition-all duration-300"
                           style={{ width: `${uploadProgress}%` }}
                         ></div>
                       </>
@@ -3012,9 +3012,9 @@ const MemberPage = () => {
                   >
                     {isUploading ? (
                       <>
-                        <span className="relative z-10">Uploading...</span>
+                        <span className="relative z-10">Uploading {uploadProgress}%</span>
                         <div 
-                          className="absolute inset-0 bg-teal-500 transition-all duration-300"
+                          className="absolute inset-0 bg-teal-400 transition-all duration-300"
                           style={{ width: `${uploadProgress}%` }}
                         ></div>
                       </>
