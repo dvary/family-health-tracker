@@ -1629,23 +1629,9 @@ const MemberPage = () => {
                               <p className="text-sm text-gray-500">
                                 {formatDate(latestBMI.recorded_at)}
                               </p>
-                              {bmiRecords.length > 1 && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {bmiRecords.length} record{bmiRecords.length !== 1 ? 's' : ''}
-                                </p>
-                              )}
+
                             </div>
-                            {bmiRecords.length > 1 && (
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleVitalTypeExpansion('bmi');
-                                }}
-                                className="text-gray-400 hover:text-gray-600"
-                              >
-                                {isExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
-                              </button>
-                            )}
+                            
                           </div>
                         </div>
 
@@ -1740,11 +1726,7 @@ const MemberPage = () => {
                             <p className="text-sm text-gray-500">
                               {formatDate(latestVital.recorded_at)}
                             </p>
-                            {vitals.length > 1 && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                {vitals.length} record{vitals.length !== 1 ? 's' : ''}
-                              </p>
-                            )}
+
                           </div>
                                                      <div className="flex items-center space-x-2">
          								{/* Add Vital inside this type */}
@@ -1755,17 +1737,7 @@ const MemberPage = () => {
          								>
          									<PlusIcon />
          								</button>
-                               {vitals.length > 1 && (
-                                 <button
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     toggleVitalTypeExpansion(vitalType);
-                                   }}
-                                   className="text-gray-400 hover:text-gray-600 transition-colors"
-                                 >
-                                   {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                                 </button>
-                               )}
+
                              </div>
                           </div>
                           </div>
@@ -1895,11 +1867,7 @@ const MemberPage = () => {
                                 {latestReport.description}
                               </p>
                             )}
-                            {reports.length > 1 && (
-                              <p className="text-sm text-gray-600 mt-2">
-                                {reports.length} report{reports.length !== 1 ? 's' : ''}
-                              </p>
-                            )}
+
                           </div>
                           <div className="flex items-center space-x-2">
 								{/* Upload inside this report type */}
@@ -1910,17 +1878,7 @@ const MemberPage = () => {
 								>
 									<UploadIcon />
 								</button>
-                              {reports.length > 1 && (
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleReportTypeExpansion(reportKey);
-                                  }}
-                                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                  {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                                </button>
-                              )}
+
                             </div>
                           </div>
                           </div>
@@ -2062,7 +2020,6 @@ const MemberPage = () => {
                           </div>
                         </div>
                         <div className="card-body">
-                          <p className="text-sm text-gray-600 mb-2">{formatDate(document.upload_date)}</p>
                           {document.description && (
                             <p className="text-sm text-gray-600 line-clamp-3">{document.description}</p>
                           )}
