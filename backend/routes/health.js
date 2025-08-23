@@ -4,8 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const { query } = require('../config/database');
-const { authenticateToken, authorizeFamilyMember } = require('../middleware/auth');
-const { requireAdmin } = require('../middleware/adminAuth');
+const { authenticateToken, authorizeFamilyMember, requireAdmin, authorizeOwnDataOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -44,7 +43,7 @@ const upload = multer({
 // Health Vitals Routes
 
 // Get vitals for a family member
-router.get('/vitals/:memberId', [authenticateToken, authorizeFamilyMember], async (req, res) => {
+router.get('/vitals/:memberId', [authenticateToken, authorizeOwnDataOrAdmin], async (req, res) => {
   try {
     if (!req.user || !req.user.family_id) {
       return res.status(401).json({ 
@@ -249,7 +248,7 @@ router.put('/vitals/:vitalId', [
 });
 
 // Delete vital
-router.delete('/vitals/:vitalId', requireAdmin, async (req, res) => {
+router.delete('/vitals/:vitalId', [authenticateToken, requireAdmin], async (req, res) => {
   try {
     const { vitalId } = req.params;
 
@@ -285,7 +284,7 @@ router.delete('/vitals/:vitalId', requireAdmin, async (req, res) => {
 // Medical Reports Routes
 
 // Get medical reports for a family member
-router.get('/reports/:memberId', [authenticateToken, authorizeFamilyMember], async (req, res) => {
+router.get('/reports/:memberId', [authenticateToken, authorizeOwnDataOrAdmin], async (req, res) => {
   try {
     const { memberId } = req.params;
     const { limit = 20, offset = 0 } = req.query;
@@ -517,7 +516,7 @@ router.put('/reports/:reportId', [
 });
 
 // Delete medical report
-router.delete('/reports/:reportId', requireAdmin, async (req, res) => {
+router.delete('/reports/:reportId', [authenticateToken, requireAdmin], async (req, res) => {
   try {
     const { reportId } = req.params;
 
@@ -658,7 +657,7 @@ router.get('/reports/:reportId/download', authenticateToken, async (req, res) =>
 });
 
 // Health History Summary
-router.get('/history/:memberId', [authenticateToken, authorizeFamilyMember], async (req, res) => {
+router.get('/history/:memberId', [authenticateToken, authorizeOwnDataOrAdmin], async (req, res) => {
   try {
     const { memberId } = req.params;
     const { days = 30 } = req.query;
@@ -1020,6 +1019,7 @@ router.put('/documents/:documentId', [
 
 // Delete document
 router.delete('/documents/:documentId', [
+  authenticateToken,
   requireAdmin
 ], async (req, res) => {
   try {

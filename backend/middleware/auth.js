@@ -38,6 +38,16 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
+const requireAdmin = async (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ 
+      error: 'Access denied', 
+      message: 'Admin access required' 
+    });
+  }
+  next();
+};
+
 const authorizeFamilyMember = async (req, res, next) => {
   const { memberId } = req.params;
   
@@ -64,7 +74,40 @@ const authorizeFamilyMember = async (req, res, next) => {
   }
 };
 
+const authorizeOwnDataOrAdmin = async (req, res, next) => {
+  const { memberId } = req.params;
+  
+  try {
+    // Admin can access any member's data
+    if (req.user.role === 'admin') {
+      return next();
+    }
+
+    // Regular users can only access their own data
+    const result = await query(
+      'SELECT id FROM family_members WHERE id = $1 AND user_id = $2',
+      [memberId, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(403).json({ 
+        error: 'Access denied', 
+        message: 'You can only access your own data' 
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({ 
+      error: 'Server error', 
+      message: 'Error checking member access' 
+    });
+  }
+};
+
 module.exports = {
   authenticateToken,
-  authorizeFamilyMember
+  authorizeFamilyMember,
+  requireAdmin,
+  authorizeOwnDataOrAdmin
 };

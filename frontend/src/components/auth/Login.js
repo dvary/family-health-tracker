@@ -21,6 +21,24 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation to match backend
+    if (!formData.email || formData.email.trim() === '') {
+      alert('Email address is required');
+      return;
+    }
+    if (!formData.password || formData.password.trim() === '') {
+      alert('Password is required');
+      return;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
     setLoading(true);
     
     console.log('Login form submitted');
@@ -63,7 +81,7 @@ const Login = () => {
             <div className="space-y-4">
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
-                  Email address
+                  Email address <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="email"
@@ -80,7 +98,7 @@ const Login = () => {
               
               <div className="form-group">
                 <label htmlFor="password" className="form-label">
-                  Password
+                  Password <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="password"

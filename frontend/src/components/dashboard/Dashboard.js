@@ -244,7 +244,8 @@ const Dashboard = () => {
     bloodGroup: '',
     mobileNumber: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'user'
   });
   const [editFormData, setEditFormData] = useState({
     name: '',
@@ -253,7 +254,8 @@ const Dashboard = () => {
     bloodGroup: '',
     mobileNumber: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'user'
   });
   
   // Date component states
@@ -532,6 +534,82 @@ const Dashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation to match backend
+    if (!editingMember) {
+      // Validation for adding new member
+      if (!formData.name || formData.name.trim() === '') {
+        toast.error('Full Name is required');
+        return;
+      }
+      if (!formData.gender || formData.gender === '') {
+        toast.error('Gender is required');
+        return;
+      }
+      if (!formData.email || formData.email.trim() === '') {
+        toast.error('Email is required');
+        return;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        toast.error('Password must be at least 6 characters long');
+        return;
+      }
+      if (!formData.role || formData.role === '') {
+        toast.error('Role is required');
+        return;
+      }
+      
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
+      
+      // Mobile number validation (if provided)
+      if (formData.mobileNumber && formData.mobileNumber.trim() !== '') {
+        if (!/^\d{10}$/.test(formData.mobileNumber)) {
+          toast.error('Mobile number must be exactly 10 digits');
+          return;
+        }
+      }
+    } else {
+      // Validation for editing member
+      if (!editFormData.name || editFormData.name.trim() === '') {
+        toast.error('Full Name is required');
+        return;
+      }
+      if (!editFormData.gender || editFormData.gender === '') {
+        toast.error('Gender is required');
+        return;
+      }
+      
+      // Email format validation (if provided)
+      if (editFormData.email && editFormData.email.trim() !== '') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(editFormData.email)) {
+          toast.error('Please enter a valid email address');
+          return;
+        }
+      }
+      
+      // Password validation (if provided)
+      if (editFormData.password && editFormData.password.trim() !== '') {
+        if (editFormData.password.length < 6) {
+          toast.error('Password must be at least 6 characters long');
+          return;
+        }
+      }
+      
+      // Mobile number validation (if provided)
+      if (editFormData.mobileNumber && editFormData.mobileNumber.trim() !== '') {
+        if (!/^\d{10}$/.test(editFormData.mobileNumber)) {
+          toast.error('Mobile number must be exactly 10 digits');
+          return;
+        }
+      }
+    }
+    
     try {
       if (editingMember) {
         // For editing, use editFormData and only send non-empty fields
@@ -553,11 +631,32 @@ const Dashboard = () => {
             dateOfBirth: formData.dateOfBirth,
             gender: formData.gender,
             email: formData.email,
-            password: formData.password
+            password: formData.password,
+            role: formData.role
           });
           toast.success('Initial family member added successfully');
         } else {
-          await axios.post('/family/members', formData);
+          // Only send fields that have actual values (not empty strings)
+          const memberData = {
+            name: formData.name,
+            gender: formData.gender,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role
+          };
+          
+          // Add optional fields only if they have values
+          if (formData.dateOfBirth && formData.dateOfBirth.trim() !== '') {
+            memberData.dateOfBirth = formData.dateOfBirth;
+          }
+          if (formData.bloodGroup && formData.bloodGroup.trim() !== '') {
+            memberData.bloodGroup = formData.bloodGroup;
+          }
+          if (formData.mobileNumber && formData.mobileNumber.trim() !== '') {
+            memberData.mobileNumber = formData.mobileNumber;
+          }
+          
+          await axios.post('/family/members', memberData);
           toast.success('Family member added successfully');
         }
         setShowAddForm(false);
@@ -580,7 +679,8 @@ const Dashboard = () => {
       bloodGroup: member.blood_group || '',
       mobileNumber: member.mobile_number || '',
       email: member.user_email || '',
-      password: '' // Don't populate password for security
+      password: '', // Don't populate password for security
+      role: member.role || 'non_admin'
     });
     
     // Populate date components for editing
@@ -595,8 +695,8 @@ const Dashboard = () => {
   const handleCancel = () => {
     setShowAddForm(false);
     setEditingMember(null);
-    setFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '' });
-    setEditFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '' });
+    setFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '', role: 'non_admin' });
+    setEditFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '', role: 'non_admin' });
     setDateComponents({ day: '', month: '', year: '' });
     setEditDateComponents({ day: '', month: '', year: '' });
   };
@@ -760,8 +860,8 @@ const Dashboard = () => {
   const ageGroupOrder = ['Generation Alpha', 'Generation Z', 'Millennials', 'Generation X', 'Baby Boomers', 'Silent Generation', 'Greatest Generation', 'Lost Generation', 'Unknown'];
 
   return (
-    <div className="relative z-10 lg:ml-auto lg:w-[70%] w-full min-h-screen">
-      <div className="p-6 space-y-8">
+    <div className="relative z-10 w-full min-h-screen">
+      <div className="p-1 sm:p-2 space-y-4">
         {/* Header */}
         <div className="flex justify-end">
           {isAdmin() && (
@@ -776,27 +876,32 @@ const Dashboard = () => {
 
         {/* Add/Edit Form */}
         {(showAddForm || editingMember) && (
-        <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+        <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 border border-gray-200 max-w-full overflow-hidden">
           <h2 className="text-lg font-semibold mb-4 text-gray-900">
             {editingMember ? 'Edit Family Member' : 'Add Family Member'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <input
-                type="text"
-                placeholder="Name"
-                value={editingMember ? editFormData.name : formData.name}
-                onChange={(e) => editingMember 
-                  ? setEditFormData({...editFormData, name: e.target.value})
-                  : setFormData({...formData, name: e.target.value})
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required
-              />
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter full name"
+                  value={editingMember ? editFormData.name : formData.name}
+                  onChange={(e) => editingMember 
+                    ? setEditFormData({...editFormData, name: e.target.value})
+                    : setFormData({...formData, name: e.target.value})
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required
+                />
+              </div>
               {/* Date of Birth Dropdowns */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                <div className="flex space-x-2">
+                <label className="block text-sm font-medium text-gray-700">Date of Birth (Optional)</label>
+                <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
                 <select
                   value={editingMember ? editDateComponents.day : dateComponents.day}
                   onChange={(e) => {
@@ -813,7 +918,7 @@ const Dashboard = () => {
                       setFormData({...formData, dateOfBirth: combinedDate});
                     }
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
                 >
                   <option value="">Day</option>
                   {generateDateOptions()}
@@ -835,7 +940,7 @@ const Dashboard = () => {
                       setFormData({...formData, dateOfBirth: combinedDate});
                     }
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
                 >
                   <option value="">Month</option>
                   {generateMonthOptions()}
@@ -857,78 +962,129 @@ const Dashboard = () => {
                       setFormData({...formData, dateOfBirth: combinedDate});
                     }
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
                 >
                   <option value="">Year</option>
                   {generateYearOptions()}
                 </select>
                 </div>
               </div>
-              <select
-                value={editingMember ? editFormData.gender : formData.gender}
-                onChange={(e) => editingMember 
-                  ? setEditFormData({...editFormData, gender: e.target.value})
-                  : setFormData({...formData, gender: e.target.value})
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-                <option value="prefer_not_to_say">Prefer not to say</option>
-              </select>
-              <select
-                value={editingMember ? editFormData.bloodGroup : formData.bloodGroup}
-                onChange={(e) => editingMember 
-                  ? setEditFormData({...editFormData, bloodGroup: e.target.value})
-                  : setFormData({...formData, bloodGroup: e.target.value})
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="">Select Blood Group</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-              <input
-                type="tel"
-                placeholder="Mobile Number"
-                value={editingMember ? editFormData.mobileNumber : formData.mobileNumber}
-                onChange={(e) => editingMember 
-                  ? setEditFormData({...editFormData, mobileNumber: e.target.value})
-                  : setFormData({...formData, mobileNumber: e.target.value})
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={editingMember ? editFormData.email : formData.email}
-                onChange={(e) => editingMember 
-                  ? setEditFormData({...editFormData, email: e.target.value})
-                  : setFormData({...formData, email: e.target.value})
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required={!editingMember}
-              />
-              <input
-                type="password"
-                placeholder={editingMember ? "New Password (leave blank to keep current)" : "Password"}
-                value={editingMember ? editFormData.password : formData.password}
-                onChange={(e) => editingMember 
-                  ? setEditFormData({...editFormData, password: e.target.value})
-                  : setFormData({...formData, password: e.target.value})
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                required={!editingMember}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={editingMember ? editFormData.gender : formData.gender}
+                  onChange={(e) => editingMember 
+                    ? setEditFormData({...editFormData, gender: e.target.value})
+                    : setFormData({...formData, gender: e.target.value})
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                  <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Blood Group (Optional)
+                </label>
+                <select
+                  value={editingMember ? editFormData.bloodGroup : formData.bloodGroup}
+                  onChange={(e) => editingMember 
+                    ? setEditFormData({...editFormData, bloodGroup: e.target.value})
+                    : setFormData({...formData, bloodGroup: e.target.value})
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">Select Blood Group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mobile Number (Optional)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Enter 10-digit mobile number"
+                  value={editingMember ? editFormData.mobileNumber : formData.mobileNumber}
+                  onChange={(e) => {
+                    // Only allow numeric input and limit to 10 digits
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    if (editingMember) {
+                      setEditFormData({...editFormData, mobileNumber: value});
+                    } else {
+                      setFormData({...formData, mobileNumber: value});
+                    }
+                  }}
+                  pattern="[0-9]{10}"
+                  title="Please enter a 10-digit mobile number"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Enter 10 digits only (e.g., 9876543210)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={editingMember ? editFormData.email : formData.email}
+                  onChange={(e) => editingMember 
+                    ? setEditFormData({...editFormData, email: e.target.value})
+                    : setFormData({...formData, email: e.target.value})
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required={!editingMember}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password {!editingMember && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="password"
+                  placeholder={editingMember ? "New Password (leave blank to keep current)" : "Enter password"}
+                  value={editingMember ? editFormData.password : formData.password}
+                  onChange={(e) => editingMember 
+                    ? setEditFormData({...editFormData, password: e.target.value})
+                    : setFormData({...formData, password: e.target.value})
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required={!editingMember}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={editingMember ? editFormData.role : formData.role}
+                  onChange={(e) => editingMember 
+                    ? setEditFormData({...editFormData, role: e.target.value})
+                    : setFormData({...formData, role: e.target.value})
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required
+                >
+                  <option value="">Select Role</option>
+                  <option value="non_admin">Family Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
             </div>
 
             {/* Profile Picture Upload Section - Only show when editing */}

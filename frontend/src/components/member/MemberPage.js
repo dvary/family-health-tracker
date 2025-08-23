@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import Confetti from 'react-confetti';
 import { useAuth } from '../../contexts/AuthContext';
 import ProfilePicture from '../common/ProfilePicture';
 import ProfilePictureUpload from '../common/ProfilePictureUpload';
@@ -58,6 +59,25 @@ const PlusIcon = () => (
 	<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
 	</svg>
+);
+
+// Thumbs up/down icons for vital status
+const ThumbsUpIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M2.76 20.2a2.76 2.76 0 0 0 2.74 2.74h13.8a2.76 2.76 0 0 0 2.74-2.74V13.5a2.76 2.76 0 0 0-2.74-2.74h-3.93l1.81-8.57a.69.69 0 0 0-.67-.84.7.7 0 0 0-.66.47L15.49 10.8H4.5a2.76 2.76 0 0 0-2.74 2.74v6.66Z"/>
+  </svg>
+);
+
+const ThumbsDownIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M21.24 3.8a2.76 2.76 0 0 0-2.74-2.74H4.7a2.76 2.76 0 0 0-2.74 2.74v6.66a2.76 2.76 0 0 0 2.74 2.74h3.93l-1.81 8.57a.69.69 0 0 0 .67.84.7.7 0 0 0 .66-.47L8.51 13.2h10.99a2.76 2.76 0 0 0 2.74-2.74V3.8Z"/>
+  </svg>
+);
+
+const NeutralIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM12 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+  </svg>
 );
 
 // Vital types configuration with units and reference ranges
@@ -307,11 +327,25 @@ const MemberPage = () => {
     bloodGroup: '',
     mobileNumber: '',
     email: '',
-    password: ''
+    password: '',
+    role: ''
   });
   
   // Date component states for edit form
   const [editDateComponents, setEditDateComponents] = useState({ day: '', month: '', year: '' });
+  
+  // Date component states for vitals
+  const [vitalDateComponents, setVitalDateComponents] = useState({ day: '', month: '', year: '' });
+  const [editVitalDateComponents, setEditVitalDateComponents] = useState({ day: '', month: '', year: '' });
+  
+  // Date component states for reports
+  const [reportDateComponents, setReportDateComponents] = useState({ day: '', month: '', year: '' });
+  const [editReportDateComponents, setEditReportDateComponents] = useState({ day: '', month: '', year: '' });
+  
+  // Date component states for documents
+  const [documentDateComponents, setDocumentDateComponents] = useState({ day: '', month: '', year: '' });
+  const [editDocumentDateComponents, setEditDocumentDateComponents] = useState({ day: '', month: '', year: '' });
+  
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
     value: '',
@@ -596,47 +630,18 @@ const MemberPage = () => {
 
   // Get report status based on report type and sub-type
   const getReportStatus = (report) => {
-    // For medical reports, we'll use a simple status system based on report date
-    const reportDate = new Date(report.report_date);
-    const currentDate = new Date();
-    const daysDiff = Math.floor((currentDate - reportDate) / (1000 * 60 * 60 * 24));
-    
-    // Recent reports (within 30 days) are considered "Normal" - no status tag
-    if (daysDiff <= 30) {
-      return { color: 'text-gray-600', bgColor: 'bg-gray-100', status: '', level: 'normal', priority: 0 };
-    }
-    // Reports between 30-90 days are "Borderline"
-    else if (daysDiff <= 90) {
-      return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Borderline', level: 'warning', priority: 1 };
-    }
-    // Older reports are "Outdated"
-    else {
-      return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Outdated', level: 'high', priority: 2 };
-    }
+    // For medical reports, always use orange color with no status tags
+    return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
   };
 
   // Get document status based on document type and upload date
   const getDocumentStatus = (document) => {
-    const uploadDate = new Date(document.upload_date);
-    const currentDate = new Date();
-    const daysDiff = Math.floor((currentDate - uploadDate) / (1000 * 60 * 60 * 24));
-    
-    // Recent documents (within 60 days) are considered "Normal"
-    if (daysDiff <= 60) {
-      return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
-    }
-    // Documents between 60-180 days are "Borderline"
-    else if (daysDiff <= 180) {
-      return { color: 'text-amber-600', bgColor: 'bg-amber-100', status: 'Borderline', level: 'warning', priority: 1 };
-    }
-    // Older documents are "Outdated"
-    else {
-      return { color: 'text-rose-600', bgColor: 'bg-rose-100', status: 'Outdated', level: 'high', priority: 2 };
-    }
+    // For documents, always use orange color with no status tags
+    return { color: 'text-orange-600', bgColor: 'bg-orange-100', status: '', level: 'normal', priority: 0 };
   };
 
-  // Get gradient class based on status level
-  const getGradientClass = (status) => {
+  // Get gradient class based on status level (for vitals - keep original colors)
+  const getVitalGradientClass = (status) => {
     switch (status.level) {
       case 'high':
       case 'low':
@@ -645,6 +650,21 @@ const MemberPage = () => {
         return 'bg-gradient-to-br from-amber-50 via-amber-25 to-white';
       case 'normal':
         return 'bg-gradient-to-br from-green-50 via-green-25 to-white';
+      default:
+        return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
+    }
+  };
+
+  // Get gradient class based on status level (for reports and documents - always orange)
+  const getGradientClass = (status) => {
+    switch (status.level) {
+      case 'high':
+      case 'low':
+        return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
+      case 'warning':
+        return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
+      case 'normal':
+        return 'bg-gradient-to-br from-orange-50 via-orange-25 to-white';
       default:
         return 'bg-gradient-to-br from-gray-50 via-gray-25 to-white';
     }
@@ -770,6 +790,14 @@ const MemberPage = () => {
   const [activeVitalSubTab, setActiveVitalSubTab] = useState('all');
   const [activeReportSubTab, setActiveReportSubTab] = useState('all');
   const [documents, setDocuments] = useState([]);
+  
+  // Confetti and animation states
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiKey, setConfettiKey] = useState(0);
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
 
   useEffect(() => {
     fetchMemberData();
@@ -803,7 +831,8 @@ const MemberPage = () => {
         bloodGroup: foundMember.blood_group || '',
         mobileNumber: foundMember.mobile_number || '',
         email: foundMember.user_email || '',
-        password: '' // Don't populate password for security
+        password: '', // Don't populate password for security
+        role: foundMember.role || 'non_admin'
       });
       
       // Populate date components for editing
@@ -849,7 +878,57 @@ const MemberPage = () => {
     }
   };
 
+  // Update window dimensions for confetti
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
 
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Function to trigger confetti animation
+  const triggerConfetti = () => {
+    setShowConfetti(true);
+    setConfettiKey(prev => prev + 1);
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 5000); // Increased to 5 seconds for better visibility
+  };
+
+  // Function to get thumbs icon based on vital status
+  const getThumbsIcon = (status) => {
+    switch (status.level) {
+      case 'normal':
+        return <ThumbsUpIcon />;
+      case 'high':
+      case 'low':
+        return <ThumbsDownIcon />;
+      case 'warning':
+        return <NeutralIcon />;
+      default:
+        return null;
+    }
+  };
+
+  // Function to get thumbs icon color based on vital status
+  const getThumbsIconColor = (status) => {
+    switch (status.level) {
+      case 'normal':
+        return 'text-green-500';
+      case 'high':
+      case 'low':
+        return 'text-red-500';
+      case 'warning':
+        return 'text-orange-500';
+      default:
+        return 'text-gray-400';
+    }
+  };
 
   const getGenderInfo = useCallback((gender) => {
     switch (gender) {
@@ -935,6 +1014,29 @@ const MemberPage = () => {
 
   const handleAddVital = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation to match backend
+    if (!vitalFormData.vitalType || vitalFormData.vitalType === '') {
+      toast.error('Vital Type is required');
+      return;
+    }
+    if (!vitalFormData.value || vitalFormData.value.trim() === '') {
+      toast.error('Value is required');
+      return;
+    }
+    if (isNaN(parseFloat(vitalFormData.value))) {
+      toast.error('Value must be a valid number');
+      return;
+    }
+    if (!vitalFormData.unit || vitalFormData.unit.trim() === '') {
+      toast.error('Unit is required');
+      return;
+    }
+    if (!vitalFormData.recordedAt || vitalFormData.recordedAt.trim() === '') {
+      toast.error('Date Recorded is required');
+      return;
+    }
+    
     try {
       await axios.post('/health/vitals', {
         memberId: member.id,
@@ -945,6 +1047,7 @@ const MemberPage = () => {
         recordedAt: vitalFormData.recordedAt
       });
       toast.success('Health vital added successfully');
+      triggerConfetti(); // Trigger confetti animation
       setShowAddVitalModal(false);
       setVitalFormData({
         vitalType: '',
@@ -968,6 +1071,15 @@ const MemberPage = () => {
       notes: vital.notes || '',
       recordedAt: vital.recorded_at ? vital.recorded_at.split('T')[0] : new Date().toISOString().split('T')[0]
     });
+    
+    // Populate date components for editing
+    if (vital.recorded_at) {
+      const components = parseDateComponents(vital.recorded_at);
+      setEditVitalDateComponents(components);
+    } else {
+      setEditVitalDateComponents({ day: '', month: '', year: '' });
+    }
+    
     setShowEditVitalModal(true);
   };
 
@@ -998,6 +1110,11 @@ const MemberPage = () => {
   };
 
   const handleDeleteVital = async (vital) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can delete health vitals');
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this health vital?')) {
       try {
         await axios.delete(`/health/vitals/${vital.id}`);
@@ -1011,6 +1128,33 @@ const MemberPage = () => {
 
   const handleUploadReport = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation to match backend
+    if (!reportFormData.reportType || reportFormData.reportType === '') {
+      toast.error('Report Type is required');
+      return;
+    }
+    if (!reportFormData.reportDate || reportFormData.reportDate.trim() === '') {
+      toast.error('Report Date is required');
+      return;
+    }
+    if (!reportFormData.file) {
+      toast.error('File is required');
+      return;
+    }
+    
+    // Check file type
+    if (reportFormData.file.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed');
+      return;
+    }
+    
+    // Check file size (20MB limit)
+    if (reportFormData.file.size > 20 * 1024 * 1024) {
+      toast.error('File size must be less than 20MB');
+      return;
+    }
+    
     try {
       const formData = new FormData();
       formData.append('memberId', member.id);
@@ -1026,6 +1170,7 @@ const MemberPage = () => {
         }
       });
       toast.success('Medical report uploaded successfully');
+      triggerConfetti(); // Trigger confetti animation
       setShowUploadReportModal(false);
       setReportFormData({
         reportType: '',
@@ -1063,6 +1208,33 @@ const MemberPage = () => {
 
   const handleUploadDocument = async (e) => {
     e.preventDefault();
+    
+    // Frontend validation to match backend
+    if (!documentFormData.title || documentFormData.title.trim() === '') {
+      toast.error('Title is required');
+      return;
+    }
+    if (!documentFormData.uploadDate || documentFormData.uploadDate.trim() === '') {
+      toast.error('Upload Date is required');
+      return;
+    }
+    if (!documentFormData.file) {
+      toast.error('File is required');
+      return;
+    }
+    
+    // Check file type
+    if (documentFormData.file.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed');
+      return;
+    }
+    
+    // Check file size (20MB limit)
+    if (documentFormData.file.size > 20 * 1024 * 1024) {
+      toast.error('File size must be less than 20MB');
+      return;
+    }
+    
     try {
       const formData = new FormData();
       formData.append('title', documentFormData.title);
@@ -1077,6 +1249,7 @@ const MemberPage = () => {
       });
 
       toast.success('Document uploaded successfully');
+      triggerConfetti(); // Trigger confetti animation
       setShowUploadDocumentModal(false);
       setDocumentFormData({
         title: '',
@@ -1127,6 +1300,15 @@ const MemberPage = () => {
       uploadDate: document.upload_date ? document.upload_date.split('T')[0] : new Date().toISOString().split('T')[0],
       file: null
     });
+    
+    // Populate date components for editing
+    if (document.upload_date) {
+      const components = parseDateComponents(document.upload_date);
+      setEditDocumentDateComponents(components);
+    } else {
+      setEditDocumentDateComponents({ day: '', month: '', year: '' });
+    }
+    
     setShowEditDocumentModal(true);
   };
 
@@ -1171,6 +1353,11 @@ const MemberPage = () => {
   };
 
   const handleDeleteDocument = async (document) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can delete documents');
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this document?')) {
       try {
         await axios.delete(`/health/documents/${document.id}`);
@@ -1193,6 +1380,15 @@ const MemberPage = () => {
       reportDate: report.report_date ? report.report_date.split('T')[0] : new Date().toISOString().split('T')[0],
       file: null
     });
+    
+    // Populate date components for editing
+    if (report.report_date) {
+      const components = parseDateComponents(report.report_date);
+      setEditReportDateComponents(components);
+    } else {
+      setEditReportDateComponents({ day: '', month: '', year: '' });
+    }
+    
     setShowEditReportModal(true);
   };
 
@@ -1256,6 +1452,11 @@ const MemberPage = () => {
 
 
   const handleDeleteReport = async (report) => {
+    if (!isAdmin()) {
+      toast.error('Only admins can delete medical reports');
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this medical report?')) {
       try {
         await axios.delete(`/health/reports/${report.id}`);
@@ -1290,9 +1491,62 @@ const MemberPage = () => {
   const genderInfo = getGenderInfo(member.gender);
 
   return (
-    <div className="space-y-6 w-full max-w-full">
+    <div className="space-y-4 w-full max-w-full mx-auto pb-24 sm:pb-4">
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <Confetti
+          key={confettiKey}
+          width={windowDimensions.width}
+          height={windowDimensions.height}
+          recycle={false}
+          numberOfPieces={300}
+          colors={['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#8B5CF6']}
+          gravity={0.3}
+          wind={0.05}
+        />
+      )}
+
+      {/* Floating Action Button for Mobile */}
+      <div className="fixed bottom-6 right-6 z-50 sm:hidden">
+        <div className="relative group">
+          {/* Pulse ring effect for empty states */}
+          {((activeTab === 'vitals' && healthVitals.length === 0) ||
+            (activeTab === 'reports' && medicalReports.length === 0) ||
+            (activeTab === 'documents' && documents.length === 0)) && (
+            <div className="absolute inset-0 rounded-full bg-teal-400 animate-ping opacity-20"></div>
+          )}
+          <button
+            onClick={() => {
+              // Show quick action menu
+              const activeTab = document.querySelector('[data-tab="active"]');
+              if (activeTab) {
+                const tabName = activeTab.getAttribute('data-tab-name');
+                switch (tabName) {
+                  case 'vitals':
+                    setShowAddVitalModal(true);
+                    break;
+                  case 'reports':
+                    setShowUploadReportModal(true);
+                    break;
+                  case 'documents':
+                    setShowUploadDocumentModal(true);
+                    break;
+                  default:
+                    setShowAddVitalModal(true);
+                }
+              } else {
+                setShowAddVitalModal(true);
+              }
+            }}
+            className="bg-teal-600 hover:bg-teal-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 transform hover:scale-110 relative z-10"
+            title="Quick Add"
+          >
+            <PlusIcon />
+          </button>
+        </div>
+      </div>
       {/* Header with Edit button prominently displayed */}
-      <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0 w-full max-w-full">
+      <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-full">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
           <div className="flex space-x-2">
@@ -1366,7 +1620,7 @@ const MemberPage = () => {
 
       {/* Edit Form */}
       {showEditForm && (
-        <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0 w-full max-w-full">
+        <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-full">
           <h2 className="text-lg font-semibold mb-4">Edit Family Member</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -1518,6 +1772,22 @@ const MemberPage = () => {
                   Password must be at least 6 characters long
                 </p>
               </div>
+              <div className="form-group">
+                <label htmlFor="role" className="form-label">
+                  Role <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="role"
+                  value={formData.role}
+                  onChange={(e) => setFormData({...formData, role: e.target.value})}
+                  className="input"
+                  required
+                >
+                  <option value="">Select Role</option>
+                  <option value="non_admin">Family Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
             </div>
 
             {/* Profile Picture Upload Section */}
@@ -1565,12 +1835,14 @@ const MemberPage = () => {
       )}
 
       {/* Main Content - Health Records and Vitals */}
-              <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0 w-full max-w-full">
+      <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 w-full max-w-full">
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
             <button
               onClick={() => setActiveTab('vitals')}
+              data-tab={activeTab === 'vitals' ? 'active' : 'inactive'}
+              data-tab-name="vitals"
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'vitals'
                   ? 'border-teal-500 text-teal-600'
@@ -1581,6 +1853,8 @@ const MemberPage = () => {
             </button>
             <button
               onClick={() => setActiveTab('reports')}
+              data-tab={activeTab === 'reports' ? 'active' : 'inactive'}
+              data-tab-name="reports"
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'reports'
                   ? 'border-teal-500 text-teal-600'
@@ -1591,6 +1865,8 @@ const MemberPage = () => {
             </button>
             <button
               onClick={() => setActiveTab('documents')}
+              data-tab={activeTab === 'documents' ? 'active' : 'inactive'}
+              data-tab-name="documents"
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'documents'
                   ? 'border-teal-500 text-teal-600'
@@ -1605,15 +1881,6 @@ const MemberPage = () => {
         {/* Tab Content */}
         {activeTab === 'vitals' && (
           <div>
-            <div className="flex justify-end mb-4">
-              <button 
-                onClick={() => setShowAddVitalModal(true)}
-                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
-              >
-                <PlusIcon />
-                <span>Add Vital</span>
-              </button>
-            </div>
 
 
             {(healthVitals.length > 0 || getBMIRecords().length > 0) ? (
@@ -1738,7 +2005,7 @@ const MemberPage = () => {
                   };
                   
                   return (
-                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height w-full max-w-full ${getGradientClass(vitalStatus)}`}>
+                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height w-full max-w-full ${getVitalGradientClass(vitalStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
                         className="p-3 cursor-pointer card-content"
@@ -1825,10 +2092,17 @@ const MemberPage = () => {
                                     <button 
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDeleteVital(vital);
+                                        if (isAdmin()) {
+                                          handleDeleteVital(vital);
+                                        }
                                       }}
-                                      className="text-red-600 hover:text-red-800 p-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors"
-                                      title="Delete"
+                                      className={`p-1.5 rounded transition-colors ${
+                                        isAdmin() 
+                                          ? 'text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100' 
+                                          : 'text-gray-400 bg-gray-50 cursor-not-allowed'
+                                      }`}
+                                      title={isAdmin() ? "Delete" : "Only admins can delete"}
+                                      disabled={!isAdmin()}
                                     >
                                       <DeleteIcon />
                                     </button>
@@ -1851,15 +2125,6 @@ const MemberPage = () => {
 
         {activeTab === 'reports' && (
           <div>
-            <div className="flex justify-end mb-4">
-              <button 
-                onClick={() => setShowUploadReportModal(true)}
-                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
-              >
-                <UploadIcon />
-                <span>Upload Report</span>
-              </button>
-            </div>
 
 
             {medicalReports.length > 0 ? (
@@ -1972,10 +2237,17 @@ const MemberPage = () => {
                                           <button 
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleDeleteReport(report);
+                                              if (isAdmin()) {
+                                                handleDeleteReport(report);
+                                              }
                                             }}
-                                            className="text-red-600 hover:text-red-800 p-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors"
-                                            title="Delete"
+                                            className={`p-1.5 rounded transition-colors ${
+                                              isAdmin() 
+                                                ? 'text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100' 
+                                                : 'text-gray-400 bg-gray-50 cursor-not-allowed'
+                                            }`}
+                                            title={isAdmin() ? "Delete" : "Only admins can delete"}
+                                            disabled={!isAdmin()}
                                           >
                                             <DeleteIcon />
                                           </button>
@@ -2000,15 +2272,6 @@ const MemberPage = () => {
 
         {activeTab === 'documents' && (
             <div>
-                        <div className="flex justify-end mb-4">
-              <button 
-                onClick={() => setShowUploadDocumentModal(true)}
-                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
-              >
-                <UploadIcon />
-                <span>Upload Document</span>
-              </button>
-            </div>
             
             {documents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-full">
@@ -2045,10 +2308,17 @@ const MemberPage = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteDocument(document);
+                                if (isAdmin()) {
+                                  handleDeleteDocument(document);
+                                }
                               }}
-                              className="text-red-600 hover:text-red-800 p-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors"
-                              title="Delete"
+                              className={`p-1.5 rounded transition-colors ${
+                                isAdmin() 
+                                  ? 'text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100' 
+                                  : 'text-gray-400 bg-gray-50 cursor-not-allowed'
+                              }`}
+                              title={isAdmin() ? "Delete" : "Only admins can delete"}
+                              disabled={!isAdmin()}
                             >
                               <DeleteIcon />
                             </button>
@@ -2090,7 +2360,7 @@ const MemberPage = () => {
               <h2 className="text-lg font-semibold mb-4">Add Health Vital</h2>
               <form onSubmit={handleAddVital} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Vital Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Vital Type <span className="text-red-500">*</span></label>
                   <select
                     value={vitalFormData.vitalType}
                     onChange={(e) => handleVitalTypeChange(e.target.value)}
@@ -2104,7 +2374,7 @@ const MemberPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Value <span className="text-red-500">*</span></label>
                   <input
                     type="number"
                     step="0.01"
@@ -2116,7 +2386,7 @@ const MemberPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={vitalFormData.unit}
@@ -2127,14 +2397,53 @@ const MemberPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
-                  <input
-                    type="date"
-                    value={vitalFormData.recordedAt}
-                    onChange={(e) => setVitalFormData({...vitalFormData, recordedAt: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
+                    <select
+                      value={vitalDateComponents.day}
+                      onChange={(e) => {
+                        const newComponents = { ...vitalDateComponents, day: e.target.value };
+                        setVitalDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setVitalFormData({...vitalFormData, recordedAt: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Day</option>
+                      {generateDateOptions()}
+                    </select>
+                    
+                    <select
+                      value={vitalDateComponents.month}
+                      onChange={(e) => {
+                        const newComponents = { ...vitalDateComponents, month: e.target.value };
+                        setVitalDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setVitalFormData({...vitalFormData, recordedAt: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Month</option>
+                      {generateMonthOptions()}
+                    </select>
+                    
+                    <select
+                      value={vitalDateComponents.year}
+                      onChange={(e) => {
+                        const newComponents = { ...vitalDateComponents, year: e.target.value };
+                        setVitalDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setVitalFormData({...vitalFormData, recordedAt: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Year</option>
+                      {generateYearOptions()}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2215,13 +2524,52 @@ const MemberPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
-                  <input
-                    type="date"
-                    value={editVitalFormData.recordedAt}
-                    onChange={(e) => setEditVitalFormData({...editVitalFormData, recordedAt: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
+                    <select
+                      value={editVitalDateComponents.day}
+                      onChange={(e) => {
+                        const newComponents = { ...editVitalDateComponents, day: e.target.value };
+                        setEditVitalDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditVitalFormData({...editVitalFormData, recordedAt: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Day</option>
+                      {generateDateOptions()}
+                    </select>
+                    
+                    <select
+                      value={editVitalDateComponents.month}
+                      onChange={(e) => {
+                        const newComponents = { ...editVitalDateComponents, month: e.target.value };
+                        setEditVitalDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditVitalFormData({...editVitalFormData, recordedAt: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Month</option>
+                      {generateMonthOptions()}
+                    </select>
+                    
+                    <select
+                      value={editVitalDateComponents.year}
+                      onChange={(e) => {
+                        const newComponents = { ...editVitalDateComponents, year: e.target.value };
+                        setEditVitalDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditVitalFormData({...editVitalFormData, recordedAt: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Year</option>
+                      {generateYearOptions()}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
@@ -2260,7 +2608,7 @@ const MemberPage = () => {
               <h2 className="text-lg font-semibold mb-4">Upload Medical Report</h2>
               <form onSubmit={handleUploadReport} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Type <span className="text-red-500">*</span></label>
                   <select
                     value={reportFormData.reportType}
                     onChange={(e) => {
@@ -2297,17 +2645,56 @@ const MemberPage = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
-                  <input
-                    type="date"
-                    value={reportFormData.reportDate}
-                    onChange={(e) => setReportFormData({...reportFormData, reportDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Date <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
+                    <select
+                      value={reportDateComponents.day}
+                      onChange={(e) => {
+                        const newComponents = { ...reportDateComponents, day: e.target.value };
+                        setReportDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setReportFormData({...reportFormData, reportDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Day</option>
+                      {generateDateOptions()}
+                    </select>
+                    
+                    <select
+                      value={reportDateComponents.month}
+                      onChange={(e) => {
+                        const newComponents = { ...reportDateComponents, month: e.target.value };
+                        setReportDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setReportFormData({...reportFormData, reportDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Month</option>
+                      {generateMonthOptions()}
+                    </select>
+                    
+                    <select
+                      value={reportDateComponents.year}
+                      onChange={(e) => {
+                        const newComponents = { ...reportDateComponents, year: e.target.value };
+                        setReportDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setReportFormData({...reportFormData, reportDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Year</option>
+                      {generateYearOptions()}
+                    </select>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">File <span className="text-red-500">*</span></label>
                   <input
                     type="file"
                     onChange={handleFileChange}
@@ -2397,13 +2784,52 @@ const MemberPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
-                  <input
-                    type="date"
-                    value={editReportFormData.reportDate}
-                    onChange={(e) => setEditReportFormData({...editReportFormData, reportDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
+                    <select
+                      value={editReportDateComponents.day}
+                      onChange={(e) => {
+                        const newComponents = { ...editReportDateComponents, day: e.target.value };
+                        setEditReportDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditReportFormData({...editReportFormData, reportDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Day</option>
+                      {generateDateOptions()}
+                    </select>
+                    
+                    <select
+                      value={editReportDateComponents.month}
+                      onChange={(e) => {
+                        const newComponents = { ...editReportDateComponents, month: e.target.value };
+                        setEditReportDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditReportFormData({...editReportFormData, reportDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Month</option>
+                      {generateMonthOptions()}
+                    </select>
+                    
+                    <select
+                      value={editReportDateComponents.year}
+                      onChange={(e) => {
+                        const newComponents = { ...editReportDateComponents, year: e.target.value };
+                        setEditReportDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditReportFormData({...editReportFormData, reportDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Year</option>
+                      {generateYearOptions()}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File (Optional - leave empty to keep current file)</label>
@@ -2461,7 +2887,7 @@ const MemberPage = () => {
               <h2 className="text-lg font-semibold mb-4">Upload Document</h2>
               <form onSubmit={handleUploadDocument} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={documentFormData.title}
@@ -2472,17 +2898,56 @@ const MemberPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Upload Date</label>
-                  <input
-                    type="date"
-                    value={documentFormData.uploadDate}
-                    onChange={(e) => setDocumentFormData({...documentFormData, uploadDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Upload Date <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
+                    <select
+                      value={documentDateComponents.day}
+                      onChange={(e) => {
+                        const newComponents = { ...documentDateComponents, day: e.target.value };
+                        setDocumentDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setDocumentFormData({...documentFormData, uploadDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Day</option>
+                      {generateDateOptions()}
+                    </select>
+                    
+                    <select
+                      value={documentDateComponents.month}
+                      onChange={(e) => {
+                        const newComponents = { ...documentDateComponents, month: e.target.value };
+                        setDocumentDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setDocumentFormData({...documentFormData, uploadDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Month</option>
+                      {generateMonthOptions()}
+                    </select>
+                    
+                    <select
+                      value={documentDateComponents.year}
+                      onChange={(e) => {
+                        const newComponents = { ...documentDateComponents, year: e.target.value };
+                        setDocumentDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setDocumentFormData({...documentFormData, uploadDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Year</option>
+                      {generateYearOptions()}
+                    </select>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">File <span className="text-red-500">*</span></label>
                   <input
                     type="file"
                     onChange={handleDocumentFileChange}
@@ -2540,13 +3005,52 @@ const MemberPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Upload Date</label>
-                  <input
-                    type="date"
-                    value={editDocumentFormData.uploadDate}
-                    onChange={(e) => setEditDocumentFormData({...editDocumentFormData, uploadDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="grid grid-cols-3 gap-2 sm:flex sm:space-x-2">
+                    <select
+                      value={editDocumentDateComponents.day}
+                      onChange={(e) => {
+                        const newComponents = { ...editDocumentDateComponents, day: e.target.value };
+                        setEditDocumentDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditDocumentFormData({...editDocumentFormData, uploadDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Day</option>
+                      {generateDateOptions()}
+                    </select>
+                    
+                    <select
+                      value={editDocumentDateComponents.month}
+                      onChange={(e) => {
+                        const newComponents = { ...editDocumentDateComponents, month: e.target.value };
+                        setEditDocumentDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditDocumentFormData({...editDocumentFormData, uploadDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Month</option>
+                      {generateMonthOptions()}
+                    </select>
+                    
+                    <select
+                      value={editDocumentDateComponents.year}
+                      onChange={(e) => {
+                        const newComponents = { ...editDocumentDateComponents, year: e.target.value };
+                        setEditDocumentDateComponents(newComponents);
+                        const combinedDate = combineDateComponents(newComponents.day, newComponents.month, newComponents.year);
+                        setEditDocumentFormData({...editDocumentFormData, uploadDate: combinedDate});
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                      required
+                    >
+                      <option value="">Year</option>
+                      {generateYearOptions()}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">File (Optional - leave empty to keep current file)</label>

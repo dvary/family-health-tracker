@@ -26,6 +26,43 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Frontend validation to match backend
+    if (!formData.familyName || formData.familyName.trim() === '') {
+      alert('Family Name is required');
+      return;
+    }
+    if (!formData.firstName || formData.firstName.trim() === '') {
+      alert('First Name is required');
+      return;
+    }
+    if (!formData.lastName || formData.lastName.trim() === '') {
+      alert('Last Name is required');
+      return;
+    }
+    if (!formData.email || formData.email.trim() === '') {
+      alert('Email Address is required');
+      return;
+    }
+    if (!formData.password || formData.password.trim() === '') {
+      alert('Password is required');
+      return;
+    }
+    if (formData.password.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+    if (!formData.confirmPassword || formData.confirmPassword.trim() === '') {
+      alert('Confirm Password is required');
+      return;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
@@ -74,7 +111,7 @@ const Register = () => {
             <div className="space-y-4">
               <div className="form-group">
                 <label htmlFor="familyName" className="form-label">
-                  Family Name
+                  Family Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="familyName"
@@ -91,7 +128,7 @@ const Register = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-group">
                   <label htmlFor="firstName" className="form-label">
-                    First Name
+                    First Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="firstName"
@@ -106,7 +143,7 @@ const Register = () => {
                 </div>
                 <div className="form-group">
                   <label htmlFor="lastName" className="form-label">
-                    Last Name
+                    Last Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="lastName"
@@ -123,7 +160,7 @@ const Register = () => {
               
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
-                  Email Address
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="email"
@@ -140,7 +177,7 @@ const Register = () => {
               
               <div className="form-group">
                 <label htmlFor="password" className="form-label">
-                  Password
+                  Password <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="password"
@@ -158,7 +195,7 @@ const Register = () => {
               
               <div className="form-group">
                 <label htmlFor="confirmPassword" className="form-label">
-                  Confirm Password
+                  Confirm Password <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="confirmPassword"

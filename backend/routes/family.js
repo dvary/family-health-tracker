@@ -5,8 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const { query } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
-const { requireAdmin } = require('../middleware/adminAuth');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -45,6 +44,7 @@ const profileUpload = multer({
 
 // Create initial family member
 router.post('/members/initial', [
+  authenticateToken,
   requireAdmin,
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
@@ -142,7 +142,7 @@ router.post('/members/initial', [
   }
 });
 
-// Get all family members
+// Get all family members (admin can see all, regular users see only themselves)
 router.get('/members', authenticateToken, async (req, res) => {
   try {
     if (!req.user || !req.user.family_id) {
@@ -151,8 +151,12 @@ router.get('/members', authenticateToken, async (req, res) => {
         message: 'User not authenticated or family not found' 
       });
     }
-    const result = await query(
-      `SELECT 
+
+    let query_text, query_params;
+
+    if (req.user.role === 'admin') {
+      // Admin can see all family members
+      query_text = `SELECT 
         fm.id, 
         fm.name, 
         fm.date_of_birth, 
@@ -167,9 +171,30 @@ router.get('/members', authenticateToken, async (req, res) => {
       FROM family_members fm 
       LEFT JOIN users u ON fm.user_id = u.id 
       WHERE fm.family_id = $1 
-      ORDER BY fm.created_at DESC`,
-      [req.user.family_id]
-    );
+      ORDER BY fm.created_at DESC`;
+      query_params = [req.user.family_id];
+    } else {
+      // Regular users can only see their own data
+      query_text = `SELECT 
+        fm.id, 
+        fm.name, 
+        fm.date_of_birth, 
+        fm.gender,
+        fm.blood_group,
+        fm.mobile_number,
+        fm.profile_picture,
+        fm.created_at,
+        COALESCE(u.original_email, u.email) as user_email,
+        u.id as user_id,
+        u.role
+      FROM family_members fm 
+      LEFT JOIN users u ON fm.user_id = u.id 
+      WHERE fm.family_id = $1 AND fm.user_id = $2 
+      ORDER BY fm.created_at DESC`;
+      query_params = [req.user.family_id, req.user.id];
+    }
+
+    const result = await query(query_text, query_params);
 
     res.json({
       members: result.rows
@@ -185,14 +210,16 @@ router.get('/members', authenticateToken, async (req, res) => {
 
 // Add new family member
 router.post('/members', [
+  authenticateToken,
   requireAdmin,
   body('name').notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
-  body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
+  body('gender').isIn(['male', 'female', 'other', 'prefer_not_to_say']),
   body('bloodGroup').optional().isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
-  body('mobileNumber').optional().isMobilePhone('any'),
+  body('mobileNumber').optional().isString(),
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 })
+  body('password').isLength({ min: 6 }),
+  body('role').optional().isIn(['non_admin', 'admin'])
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -223,9 +250,11 @@ router.post('/members', [
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
 
+    const userRole = req.body.role || 'non_admin'; // Extract role with default
+
     const userResult = await query(
       'INSERT INTO users (email, original_email, password, family_id, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName, 'non_admin']
+      [email, originalEmail, hashedPassword, req.user.family_id, firstName, lastName, userRole]
     );
 
     const userId = userResult.rows[0].id;
@@ -313,14 +342,16 @@ router.get('/members/:memberId', authenticateToken, async (req, res) => {
 
 // Update family member
 router.put('/members/:memberId', [
+  authenticateToken,
   requireAdmin,
   body('name').optional().notEmpty().trim(),
   body('dateOfBirth').optional().isISO8601(),
   body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']),
   body('bloodGroup').optional().isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
-  body('mobileNumber').optional().isMobilePhone('any'),
+  body('mobileNumber').optional().isString(),
   body('email').optional().isEmail().normalizeEmail(),
-  body('password').optional().isLength({ min: 6 })
+  body('password').optional().isLength({ min: 6 }),
+  body('role').optional().isIn(['non_admin', 'admin'])
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -332,7 +363,7 @@ router.put('/members/:memberId', [
     }
 
     const { memberId } = req.params;
-    const { name, dateOfBirth, gender, bloodGroup, mobileNumber, email, password } = req.body;
+    const { name, dateOfBirth, gender, bloodGroup, mobileNumber, email, password, role } = req.body;
 
     // Check if member exists and belongs to family, and get user info
     const checkResult = await query(
@@ -381,6 +412,14 @@ router.put('/members/:memberId', [
       await query(
         'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
         [hashedPassword, userId]
+      );
+    }
+
+    // Handle role update if provided
+    if (role !== undefined && userId) {
+      await query(
+        'UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2',
+        [role, userId]
       );
     }
 
@@ -455,7 +494,7 @@ router.put('/members/:memberId', [
 });
 
 // Delete family member
-router.delete('/members/:memberId', requireAdmin, async (req, res) => {
+router.delete('/members/:memberId', [authenticateToken, requireAdmin], async (req, res) => {
   try {
     const { memberId } = req.params;
 
@@ -496,7 +535,7 @@ router.delete('/members/:memberId', requireAdmin, async (req, res) => {
 });
 
 // Upload profile picture for family member
-router.post('/members/:memberId/profile-picture', requireAdmin, profileUpload.single('profilePicture'), async (req, res) => {
+router.post('/members/:memberId/profile-picture', [authenticateToken, requireAdmin], profileUpload.single('profilePicture'), async (req, res) => {
   try {
     const { memberId } = req.params;
 
