@@ -2097,8 +2097,8 @@ const MemberPage = () => {
 
         {/* Add Vital Modal */}
         {showAddVitalModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Add Health Vital</h2>
               <form onSubmit={handleAddVital} className="space-y-4">
                 <div>
@@ -2177,8 +2177,8 @@ const MemberPage = () => {
 
         {/* Edit Vital Modal */}
         {showEditVitalModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Edit Health Vital</h2>
               <form onSubmit={handleUpdateVital} className="space-y-4">
                 <div>
@@ -2267,8 +2267,8 @@ const MemberPage = () => {
 
         {/* Upload Report Modal */}
         {showUploadReportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Upload Medical Report</h2>
               <form onSubmit={handleUploadReport} className="space-y-4">
                 <div>
@@ -2358,8 +2358,8 @@ const MemberPage = () => {
 
         {/* Edit Report Modal */}
         {showEditReportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Edit Medical Report</h2>
               <form onSubmit={handleUpdateReport} className="space-y-4">
                 <div>
@@ -2468,8 +2468,8 @@ const MemberPage = () => {
 
         {/* Upload Document Modal */}
         {showUploadDocumentModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Upload Document</h2>
               <form onSubmit={handleUploadDocument} className="space-y-4">
                 <div>
@@ -2535,8 +2535,8 @@ const MemberPage = () => {
 
         {/* Edit Document Modal */}
         {showEditDocumentModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] overflow-y-auto">
               <h2 className="text-lg font-semibold mb-4">Edit Document</h2>
               <form onSubmit={handleUpdateDocument} className="space-y-4">
                 <div>

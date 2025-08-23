@@ -99,6 +99,25 @@
       -ms-user-select: none;
       user-select: none;
     }
+    
+    /* Date picker mobile fixes */
+    input[type="date"] {
+      min-height: 44px;
+      font-size: 16px; /* Prevent zoom on iOS */
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* Modal mobile improvements */
+    .modal-container {
+      padding: 0.5rem;
+    }
+    
+    @media (max-width: 640px) {
+      .modal-container {
+        padding: 0.25rem;
+      }
+    }
   }
 }
 
