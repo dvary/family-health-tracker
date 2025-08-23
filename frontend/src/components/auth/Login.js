@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import Confetti from 'react-confetti';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,8 @@ const Login = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiKey, setConfettiKey] = useState(0);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -48,18 +51,35 @@ const Login = () => {
     
     if (result.success) {
       console.log('Navigating to dashboard...');
-      // Add a small delay to ensure state is updated
+      // Trigger confetti on successful login
+      setShowConfetti(true);
+      setConfettiKey(prev => prev + 1);
       setTimeout(() => {
+        setShowConfetti(false);
+        // Add a small delay to ensure state is updated
         navigate('/dashboard', { replace: true });
-      }, 100);
+      }, 2000);
     }
     
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background-primary py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 animate-fade-in">
+    <>
+      {showConfetti && (
+        <Confetti
+          key={confettiKey}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={200}
+          colors={['#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5']}
+          gravity={0.3}
+          wind={0.05}
+        />
+      )}
+      <div className="min-h-screen flex items-center justify-center bg-background-primary py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 animate-fade-in">
         {/* Header */}
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-soft mb-6">
@@ -149,8 +169,9 @@ const Login = () => {
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-full opacity-20"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-secondary-100 to-accent-100 rounded-full opacity-20"></div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

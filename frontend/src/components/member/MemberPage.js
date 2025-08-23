@@ -798,6 +798,8 @@ const MemberPage = () => {
     width: window.innerWidth,
     height: window.innerHeight
   });
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchMemberData();
@@ -897,7 +899,7 @@ const MemberPage = () => {
     setConfettiKey(prev => prev + 1);
     setTimeout(() => {
       setShowConfetti(false);
-    }, 5000); // Increased to 5 seconds for better visibility
+    }, 8000); // Increased to 8 seconds for better visibility
   };
 
   // Function to get thumbs icon based on vital status
@@ -1156,10 +1158,12 @@ const MemberPage = () => {
     }
     
     try {
+      setIsUploading(true);
+      setUploadProgress(0);
+      
       const formData = new FormData();
       formData.append('memberId', member.id);
       formData.append('reportType', reportFormData.reportType);
-
       formData.append('description', reportFormData.description);
       formData.append('reportDate', reportFormData.reportDate);
       formData.append('file', reportFormData.file);
@@ -1167,8 +1171,13 @@ const MemberPage = () => {
       await axios.post('/health/reports', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
         }
       });
+      
       toast.success('Medical report uploaded successfully');
       triggerConfetti(); // Trigger confetti animation
       setShowUploadReportModal(false);
@@ -1181,6 +1190,9 @@ const MemberPage = () => {
       fetchMemberData();
     } catch (error) {
       toast.error('Failed to upload medical report');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -1236,6 +1248,9 @@ const MemberPage = () => {
     }
     
     try {
+      setIsUploading(true);
+      setUploadProgress(0);
+      
       const formData = new FormData();
       formData.append('title', documentFormData.title);
       formData.append('description', documentFormData.description);
@@ -1245,6 +1260,10 @@ const MemberPage = () => {
       await axios.post(`/health/documents/${member.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
         }
       });
 
@@ -1261,6 +1280,9 @@ const MemberPage = () => {
     } catch (error) {
       console.error('Error uploading document:', error);
       toast.error('Failed to upload document');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -2715,13 +2737,28 @@ const MemberPage = () => {
                   />
                 </div>
                 <div className="flex space-x-3">
-                  <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
-                    Upload Report
+                  <button 
+                    type="submit" 
+                    disabled={isUploading}
+                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium relative overflow-hidden"
+                  >
+                    {isUploading ? (
+                      <>
+                        <span className="relative z-10">Uploading...</span>
+                        <div 
+                          className="absolute inset-0 bg-teal-500 transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </>
+                    ) : (
+                      'Upload Report'
+                    )}
                   </button>
                   <button
                     type="button"
+                    disabled={isUploading}
                     onClick={() => setShowUploadReportModal(false)}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -2968,13 +3005,28 @@ const MemberPage = () => {
                   />
                 </div>
                 <div className="flex space-x-3">
-                  <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
-                    Upload Document
+                  <button 
+                    type="submit" 
+                    disabled={isUploading}
+                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium relative overflow-hidden"
+                  >
+                    {isUploading ? (
+                      <>
+                        <span className="relative z-10">Uploading...</span>
+                        <div 
+                          className="absolute inset-0 bg-teal-500 transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </>
+                    ) : (
+                      'Upload Document'
+                    )}
                   </button>
                   <button
                     type="button"
+                    disabled={isUploading}
                     onClick={() => setShowUploadDocumentModal(false)}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
                   >
                     Cancel
                   </button>
