@@ -1033,31 +1033,25 @@ const Dashboard = () => {
                            
                            {/* Content on the Right */}
                            <div className="flex-1 min-w-0">
-                             {/* Name with enhanced typography */}
-                             <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors truncate mb-2">
+                             {/* Line 1: Name */}
+                             <div className="font-bold text-gray-900 text-base sm:text-lg group-hover:text-primary-700 transition-colors truncate mb-1">
                                {member.name}
                              </div>
                              
-                             {/* Age Display */}
-                             {member.date_of_birth && (
-                               <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded-full font-medium inline-block mb-1">
-                                 {calculateAge(member.date_of_birth)?.display || 'Age not specified'}
-                               </div>
-                             )}
+                             {/* Line 2: Age */}
+                             <div className="text-xs text-gray-600 mb-1">
+                               {member.date_of_birth ? calculateAge(member.date_of_birth)?.display || 'Age not specified' : 'Age not specified'}
+                             </div>
                              
-                             {/* Blood Group Display */}
-                             {member.blood_group && (
-                               <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full font-medium inline-block mb-1">
-                                 🩸 {member.blood_group}
-                               </div>
-                             )}
+                             {/* Line 3: Mobile Number */}
+                             <div className="text-xs text-blue-600 mb-1">
+                               📱 {member.mobile_number || 'No mobile'}
+                             </div>
                              
-                             {/* Mobile Number Display */}
-                             {member.mobile_number && (
-                               <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full font-medium inline-block">
-                                 📱 {member.mobile_number}
-                               </div>
-                             )}
+                             {/* Line 4: Blood Group */}
+                             <div className="text-xs text-red-600">
+                               🩸 {member.blood_group || 'No blood group'}
+                             </div>
                            </div>
                            
                            {/* Right side indicators */}

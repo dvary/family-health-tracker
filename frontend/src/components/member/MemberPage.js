@@ -1344,25 +1344,22 @@ const MemberPage = () => {
             />
           </div>
           <div className="text-center sm:text-left space-y-1 sm:space-y-2">
+            {/* Line 1: Age */}
             <p className="text-gray-600 text-sm sm:text-base">
               {age ? `Age ${age}` : 'Age not specified'}
             </p>
-            <p className="text-gray-600 text-sm sm:text-base">
-              {member.date_of_birth ? `Born ${formatDate(member.date_of_birth)}` : 'Birth date not specified'}
+            {/* Line 2: Mobile Number */}
+            <p className="text-blue-600 text-sm sm:text-base font-medium">
+              📱 {member.mobile_number || 'No mobile'}
             </p>
+            {/* Line 3: Blood Group */}
+            <p className="text-red-600 text-sm sm:text-base font-medium">
+              🩸 {member.blood_group || 'No blood group'}
+            </p>
+            {/* Line 4: Gender */}
             <p className="text-gray-600 capitalize text-sm sm:text-base">
               {member.gender || 'Gender not specified'}
             </p>
-            {member.blood_group && (
-              <p className="text-red-600 text-sm sm:text-base font-medium">
-                🩸 Blood Group: {member.blood_group}
-              </p>
-            )}
-            {member.mobile_number && (
-              <p className="text-blue-600 text-sm sm:text-base font-medium">
-                📱 Mobile: {member.mobile_number}
-              </p>
-            )}
           </div>
         </div>
       </div>
