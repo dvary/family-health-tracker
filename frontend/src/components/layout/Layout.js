@@ -54,6 +54,13 @@ const Layout = () => {
                 </svg>
               </Link>
 
+              {/* Life Vault Title */}
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
+                  Life Vault
+                </h1>
+              </div>
+
               {/* Mobile Menu Button */}
               {isMobile && (
                 <button
@@ -120,6 +127,12 @@ const Layout = () => {
           {isMobile && isMobileMenuOpen && (
             <div className="sm:hidden border-t border-neutral-200 bg-white mobile-responsive-nav">
               <div className="px-2 pt-2 pb-3 space-y-1">
+                {/* Mobile Life Vault Title */}
+                <div className="px-3 py-2 border-b border-neutral-100">
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent">
+                    Life Vault
+                  </h1>
+                </div>
                 <Link
                   to="/dashboard"
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-colors mobile-touch ${
