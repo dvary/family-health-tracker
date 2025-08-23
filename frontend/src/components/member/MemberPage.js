@@ -1290,9 +1290,9 @@ const MemberPage = () => {
   const genderInfo = getGenderInfo(member.gender);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       {/* Header with Edit button prominently displayed */}
-      <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
+      <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0 w-full max-w-full">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{member.name}</h1>
           <div className="flex space-x-2">
@@ -1335,7 +1335,7 @@ const MemberPage = () => {
         </div>
 
         {/* Member basic info */}
-        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full max-w-full">
           <div className="relative flex justify-center sm:justify-start">
             <ProfilePicture
               member={member}
@@ -1366,7 +1366,7 @@ const MemberPage = () => {
 
       {/* Edit Form */}
       {showEditForm && (
-        <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
+        <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0 w-full max-w-full">
           <h2 className="text-lg font-semibold mb-4">Edit Family Member</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
@@ -1565,7 +1565,7 @@ const MemberPage = () => {
       )}
 
       {/* Main Content - Health Records and Vitals */}
-              <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0">
+              <div className="bg-white shadow rounded-lg p-3 sm:p-4 md:p-6 mx-2 sm:mx-0 w-full max-w-full">
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
@@ -1617,7 +1617,7 @@ const MemberPage = () => {
 
 
             {(healthVitals.length > 0 || getBMIRecords().length > 0) ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start w-full max-w-full">
                 {/* BMI Card - Always show if there are height and weight records */}
                 {getBMIRecords().length > 0 && (
                   (() => {
@@ -1643,7 +1643,7 @@ const MemberPage = () => {
                     };
                     
                     return (
-                      <div className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow ${getBMIGradientClass(vitalStatus)}`}>
+                      <div className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow w-full max-w-full ${getBMIGradientClass(vitalStatus)}`}>
                         {/* BMI Card - Always Visible */}
                         <div 
                           className="p-3 cursor-pointer"
@@ -1738,7 +1738,7 @@ const MemberPage = () => {
                   };
                   
                   return (
-                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height ${getGradientClass(vitalStatus)}`}>
+                    <div key={vitalType} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height w-full max-w-full ${getGradientClass(vitalStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
                         className="p-3 cursor-pointer card-content"
@@ -1863,7 +1863,7 @@ const MemberPage = () => {
 
 
             {medicalReports.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start w-full max-w-full">
                 {Object.entries(groupReportsByType(medicalReports)).map(([reportKey, reports]) => {
                   const latestReport = reports[0]; // First one is the latest due to sorting
                   const isExpanded = expandedReportTypes.has(reportKey);
@@ -1879,7 +1879,7 @@ const MemberPage = () => {
                   const mainCardStatus = getMainCardStatus(reports, getReportStatus);
                   
                   return (
-                    <div key={reportKey} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height ${getGradientClass(mainCardStatus)}`}>
+                    <div key={reportKey} className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height w-full max-w-full ${getGradientClass(mainCardStatus)}`}>
                       {/* Main Card - Always Visible */}
                       <div 
                         className="p-3 cursor-pointer card-content"
@@ -2011,13 +2011,13 @@ const MemberPage = () => {
             </div>
             
             {documents.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-full">
                 {documents.map((document) => {
                   const documentStatus = getDocumentStatus(document);
                   return (
                     <div 
                       key={document.id} 
-                      className={`rounded-lg border border-gray-200 hover:shadow-md transition-shadow card-consistent-height flex flex-col ${getGradientClass(documentStatus)} cursor-pointer`}
+                      className={`rounded-lg border border-gray-200 hover:shadow-md transition-shadow card-consistent-height flex flex-col w-full max-w-full ${getGradientClass(documentStatus)} cursor-pointer`}
                       onClick={() => handleViewDocument(document)}
                     >
                       <div className="p-3 card-content">
