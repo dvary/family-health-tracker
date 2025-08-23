@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import ProfilePicture from '../common/ProfilePicture';
 import ProfilePictureUpload from '../common/ProfilePictureUpload';
-import { VITAL_ICONS } from './VitalIcons';
+
 
 // Icon components
 const EyeIcon = () => (
@@ -1746,31 +1746,27 @@ const MemberPage = () => {
                               </p>
                             )}
                           </div>
-                          <div className="flex items-center space-x-2">
-                            {/* Vital Icon */}
-                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                              {VITAL_ICONS[vitalType] && React.createElement(VITAL_ICONS[vitalType])}
-                            </div>
-								{/* Add Vital inside this type */}
-								<button
-									onClick={(e) => { e.stopPropagation(); openAddVitalForType(vitalType); }}
-									className="text-teal-600 hover:text-teal-800 p-2 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
-									title={`Add ${vitalConfig.label}`}
-								>
-									<PlusIcon />
-								</button>
-                              {vitals.length > 1 && (
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleVitalTypeExpansion(vitalType);
-                                  }}
-                                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                  {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                                </button>
-                              )}
-                            </div>
+                                                     <div className="flex items-center space-x-2">
+         								{/* Add Vital inside this type */}
+         								<button
+         									onClick={(e) => { e.stopPropagation(); openAddVitalForType(vitalType); }}
+         									className="text-teal-600 hover:text-teal-800 p-2 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+         									title={`Add ${vitalConfig.label}`}
+         								>
+         									<PlusIcon />
+         								</button>
+                               {vitals.length > 1 && (
+                                 <button
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     toggleVitalTypeExpansion(vitalType);
+                                   }}
+                                   className="text-gray-400 hover:text-gray-600 transition-colors"
+                                 >
+                                   {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                                 </button>
+                               )}
+                             </div>
                           </div>
                           </div>
 
