@@ -307,7 +307,7 @@ const MemberPage = () => {
   const { memberName } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin, updateUser } = useAuth();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -960,6 +960,16 @@ const MemberPage = () => {
       toast.success('Member updated successfully');
       setShowEditForm(false);
       fetchMemberData();
+      
+      // If the updated member is the current user, refresh user profile data
+      if (user && member && user.email === member.user_email) {
+        try {
+          const response = await axios.get('/auth/profile');
+          updateUser(response.data.user);
+        } catch (error) {
+          console.error('Failed to refresh user profile:', error);
+        }
+      }
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to update member';
       toast.error(errorMessage);
