@@ -248,6 +248,8 @@ const Dashboard = () => {
   const [showUploadDocumentModal, setShowUploadDocumentModal] = useState(false);
   const [isSubmittingVital, setIsSubmittingVital] = useState(false);
   const [isSubmittingMember, setIsSubmittingMember] = useState(false);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [isSubmittingDocument, setIsSubmittingDocument] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -806,6 +808,14 @@ const Dashboard = () => {
 
   const handleUploadReport = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmittingReport) {
+      return;
+    }
+    
+    setIsSubmittingReport(true);
+    
     try {
       const formData = new FormData();
       formData.append('memberId', selectedMember.id);
@@ -836,11 +846,21 @@ const Dashboard = () => {
       });
     } catch (error) {
       toast.error('Failed to upload medical report');
+    } finally {
+      setIsSubmittingReport(false);
     }
   };
 
   const handleUploadDocument = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmittingDocument) {
+      return;
+    }
+    
+    setIsSubmittingDocument(true);
+    
     try {
       const formData = new FormData();
       formData.append('title', documentFormData.title);
@@ -864,6 +884,8 @@ const Dashboard = () => {
       });
     } catch (error) {
       toast.error('Failed to upload document');
+    } finally {
+      setIsSubmittingDocument(false);
     }
   };
 
@@ -1497,11 +1519,20 @@ const Dashboard = () => {
                 />
               </div>
               <div className="flex space-x-3">
-                <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
-                  Upload Report
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingReport}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    isSubmittingReport 
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-teal-600 hover:bg-teal-700 text-white'
+                  }`}
+                >
+                  {isSubmittingReport ? 'Uploading...' : 'Upload Report'}
                 </button>
                 <button
                   type="button"
+                  disabled={isSubmittingReport}
                   onClick={() => {
                     setShowUploadReportModal(false);
                     setSelectedMember(null);
@@ -1513,7 +1544,11 @@ const Dashboard = () => {
                       file: null
                     });
                   }}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    isSubmittingReport 
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-gray-500 hover:bg-gray-600 text-white'
+                  }`}
                 >
                   Cancel
                 </button>
@@ -1579,11 +1614,20 @@ const Dashboard = () => {
                 />
               </div>
               <div className="flex space-x-3">
-                <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
-                  Upload Document
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingDocument}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    isSubmittingDocument 
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-teal-600 hover:bg-teal-700 text-white'
+                  }`}
+                >
+                  {isSubmittingDocument ? 'Uploading...' : 'Upload Document'}
                 </button>
                 <button
                   type="button"
+                  disabled={isSubmittingDocument}
                   onClick={() => {
                     setShowUploadDocumentModal(false);
                     setSelectedMember(null);
@@ -1594,7 +1638,11 @@ const Dashboard = () => {
                       file: null
                     });
                   }}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    isSubmittingDocument 
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-gray-500 hover:bg-gray-600 text-white'
+                  }`}
                 >
                   Cancel
                 </button>

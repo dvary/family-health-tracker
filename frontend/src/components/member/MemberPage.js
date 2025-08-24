@@ -326,6 +326,8 @@ const MemberPage = () => {
   const [editingVital, setEditingVital] = useState(null);
   const [isSubmittingVital, setIsSubmittingVital] = useState(false);
   const [isSubmittingMember, setIsSubmittingMember] = useState(false);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [isSubmittingDocument, setIsSubmittingDocument] = useState(false);
   const [expandedVitalTypes, setExpandedVitalTypes] = useState(new Set());
   const [expandedReportTypes, setExpandedReportTypes] = useState(new Set());
   const [showUploadReportModal, setShowUploadReportModal] = useState(false);
@@ -1176,6 +1178,11 @@ const MemberPage = () => {
   const handleUploadReport = async (e) => {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    if (isSubmittingReport) {
+      return;
+    }
+    
     // Frontend validation to match backend
     if (!reportFormData.reportType || reportFormData.reportType === '') {
       toast.error('Report Type is required');
@@ -1201,6 +1208,8 @@ const MemberPage = () => {
       toast.error('File size must be less than 20MB');
       return;
     }
+    
+    setIsSubmittingReport(true);
     
     try {
       setIsUploading(true);
@@ -1239,6 +1248,7 @@ const MemberPage = () => {
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
+      setIsSubmittingReport(false);
     }
   };
 
@@ -1267,6 +1277,11 @@ const MemberPage = () => {
   const handleUploadDocument = async (e) => {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    if (isSubmittingDocument) {
+      return;
+    }
+    
     // Frontend validation to match backend
     if (!documentFormData.title || documentFormData.title.trim() === '') {
       toast.error('Title is required');
@@ -1292,6 +1307,8 @@ const MemberPage = () => {
       toast.error('File size must be less than 20MB');
       return;
     }
+    
+    setIsSubmittingDocument(true);
     
     try {
       setIsUploading(true);
@@ -1330,6 +1347,7 @@ const MemberPage = () => {
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
+      setIsSubmittingDocument(false);
     }
   };
 
@@ -2812,8 +2830,12 @@ const MemberPage = () => {
                 <div className="flex space-x-3">
                   <button 
                     type="submit" 
-                    disabled={isUploading}
-                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium relative overflow-hidden"
+                    disabled={isUploading || isSubmittingReport}
+                    className={`px-4 py-2 rounded-lg font-medium relative overflow-hidden transition-colors duration-200 ${
+                      (isUploading || isSubmittingReport) 
+                        ? 'bg-gray-400 cursor-not-allowed text-white' 
+                        : 'bg-teal-600 hover:bg-teal-700 text-white'
+                    }`}
                   >
                     {isUploading ? (
                       <>
@@ -2823,17 +2845,23 @@ const MemberPage = () => {
                           style={{ width: `${uploadProgress}%` }}
                         ></div>
                       </>
+                    ) : isSubmittingReport ? (
+                      'Uploading...'
                     ) : (
                       'Upload Report'
                     )}
                   </button>
                   <button
                     type="button"
-                    disabled={isUploading}
+                    disabled={isUploading || isSubmittingReport}
                     onClick={() => setShowUploadReportModal(false)}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                      (isUploading || isSubmittingReport) 
+                        ? 'bg-gray-400 cursor-not-allowed text-white' 
+                        : 'bg-gray-500 hover:bg-gray-600 text-white'
+                    }`}
                   >
-                    {isUploading ? 'Please wait...' : 'Cancel'}
+                    {(isUploading || isSubmittingReport) ? 'Please wait...' : 'Cancel'}
                   </button>
                 </div>
               </form>
@@ -3080,8 +3108,12 @@ const MemberPage = () => {
                 <div className="flex space-x-3">
                   <button 
                     type="submit" 
-                    disabled={isUploading}
-                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium relative overflow-hidden"
+                    disabled={isUploading || isSubmittingDocument}
+                    className={`px-4 py-2 rounded-lg font-medium relative overflow-hidden transition-colors duration-200 ${
+                      (isUploading || isSubmittingDocument) 
+                        ? 'bg-gray-400 cursor-not-allowed text-white' 
+                        : 'bg-teal-600 hover:bg-teal-700 text-white'
+                    }`}
                   >
                     {isUploading ? (
                       <>
@@ -3091,17 +3123,23 @@ const MemberPage = () => {
                           style={{ width: `${uploadProgress}%` }}
                         ></div>
                       </>
+                    ) : isSubmittingDocument ? (
+                      'Uploading...'
                     ) : (
                       'Upload Document'
                     )}
                   </button>
                   <button
                     type="button"
-                    disabled={isUploading}
+                    disabled={isUploading || isSubmittingDocument}
                     onClick={() => setShowUploadDocumentModal(false)}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                      (isUploading || isSubmittingDocument) 
+                        ? 'bg-gray-400 cursor-not-allowed text-white' 
+                        : 'bg-gray-500 hover:bg-gray-600 text-white'
+                    }`}
                   >
-                    {isUploading ? 'Please wait...' : 'Cancel'}
+                    {(isUploading || isSubmittingDocument) ? 'Please wait...' : 'Cancel'}
                   </button>
                 </div>
               </form>
