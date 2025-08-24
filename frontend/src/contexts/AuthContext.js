@@ -24,7 +24,16 @@ export const AuthProvider = ({ children }) => {
     }
     
     // Set base URL for axios
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    let apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    
+    // Fix double http:// issue
+    if (apiUrl.includes('http://http://')) {
+      apiUrl = apiUrl.replace('http://http://', 'http://');
+    }
+    if (apiUrl.includes('https://https://')) {
+      apiUrl = apiUrl.replace('https://https://', 'https://');
+    }
+    
     // Ensure no trailing slash to prevent double slashes
     const cleanApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
     axios.defaults.baseURL = cleanApiUrl;

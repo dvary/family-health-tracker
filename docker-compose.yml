@@ -37,7 +37,7 @@ services:
       PORT: 5000
       MAX_FILE_SIZE: 20971520
       UPLOAD_PATH: /app/uploads
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://192.168.0.170:3000}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://family.labratindia.org}
       TZ: Asia/Kolkata
     volumes:
       - uploads_data:/app/uploads
@@ -64,10 +64,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-/api}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-https://family.labratindia.org/api}
     container_name: life-vault-frontend
     environment:
-      REACT_APP_API_URL: ${REACT_APP_API_URL:-/api}
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-https://family.labratindia.org/api}
       TZ: Asia/Kolkata
     depends_on:
       backend:
