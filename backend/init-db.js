@@ -6,6 +6,27 @@ const initDatabase = async () => {
   try {
     console.log('🔄 Initializing database...');
     
+    // Wait for database to be ready
+    let retries = 0;
+    const maxRetries = 30;
+    
+    while (retries < maxRetries) {
+      try {
+        await query('SELECT 1');
+        console.log('✅ Database connection established');
+        break;
+      } catch (error) {
+        retries++;
+        console.log(`⏳ Waiting for database... (${retries}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+      }
+    }
+    
+    if (retries >= maxRetries) {
+      console.error('❌ Database connection failed after maximum retries');
+      return;
+    }
+    
     // SQL statements for database initialization
     const sqlStatements = [
       // Enable UUID extension
