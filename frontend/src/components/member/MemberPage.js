@@ -1172,6 +1172,7 @@ const MemberPage = () => {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
+        timeout: 120000, // 2 minutes timeout
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           setUploadProgress(percentCompleted);
@@ -1261,6 +1262,7 @@ const MemberPage = () => {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
+        timeout: 120000, // 2 minutes timeout
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           setUploadProgress(percentCompleted);
@@ -2760,7 +2762,7 @@ const MemberPage = () => {
                     onClick={() => setShowUploadReportModal(false)}
                     className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
                   >
-                    Cancel
+                    {isUploading ? 'Please wait...' : 'Cancel'}
                   </button>
                 </div>
               </form>
@@ -3028,7 +3030,7 @@ const MemberPage = () => {
                     onClick={() => setShowUploadDocumentModal(false)}
                     className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
                   >
-                    Cancel
+                    {isUploading ? 'Please wait...' : 'Cancel'}
                   </button>
                 </div>
               </form>

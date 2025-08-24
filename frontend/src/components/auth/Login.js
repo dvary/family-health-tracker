@@ -54,12 +54,12 @@ const Login = () => {
       // Trigger confetti on successful login
       setShowConfetti(true);
       setConfettiKey(prev => prev + 1);
-      console.log('Confetti triggered, will navigate in 2 seconds...');
+      console.log('Confetti triggered, will navigate in 3 seconds...');
       setTimeout(() => {
         setShowConfetti(false);
         // Add a small delay to ensure state is updated
         navigate('/dashboard', { replace: true });
-      }, 2000);
+      }, 3000);
     }
     
     setLoading(false);
