@@ -27,18 +27,28 @@ const initDatabase = async () => {
       return;
     }
     
+    // Check if database is already initialized
+    const checkResult = await query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'families'
+      );
+    `);
+    
+    const isInitialized = checkResult.rows[0].exists;
+    
+    if (isInitialized) {
+      console.log('✅ Database already initialized, skipping initialization');
+      return;
+    }
+    
+    console.log('🔄 Database not initialized, creating tables...');
+    
     // SQL statements for database initialization
     const sqlStatements = [
       // Enable UUID extension
       "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"",
-      
-      // Drop existing tables if they exist (for clean initialization)
-      "DROP TABLE IF EXISTS documents CASCADE",
-      "DROP TABLE IF EXISTS medical_reports CASCADE", 
-      "DROP TABLE IF EXISTS health_vitals CASCADE",
-      "DROP TABLE IF EXISTS family_members CASCADE",
-      "DROP TABLE IF EXISTS users CASCADE",
-      "DROP TABLE IF EXISTS families CASCADE",
       
       // Create families table
       `CREATE TABLE families (
