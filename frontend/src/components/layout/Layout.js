@@ -40,10 +40,16 @@ const Layout = () => {
             <div className="flex items-center space-x-3">
               {/* Mobile User Info */}
               <div className="flex sm:hidden items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
-                    {user?.firstName ? user.firstName.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
-                  </span>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-neutral-900">
+                    Welcome Back
+                  </p>
+                  <p className="text-xs text-neutral-600">
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName.charAt(0).toUpperCase() + user.firstName.slice(1)} ${user.lastName.charAt(0).toUpperCase() + user.lastName.slice(1)}`
+                      : user?.email
+                    }
+                  </p>
                 </div>
               </div>
 
@@ -59,11 +65,6 @@ const Layout = () => {
                       : user?.email
                     }
                   </p>
-                </div>
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
-                    {user?.firstName ? user.firstName.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
-                  </span>
                 </div>
               </div>
               
