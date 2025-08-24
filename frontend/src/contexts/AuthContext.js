@@ -23,8 +23,8 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
     
-    // Set base URL for axios - hardcoded to local IP
-    const apiUrl = 'http://192.168.0.170:3000/api';
+    // Set base URL for axios - use relative URL to work with Cloudflare tunnel
+    const apiUrl = '/api';
     axios.defaults.baseURL = apiUrl;
     console.log('API Base URL set to:', apiUrl);
   }, []);
