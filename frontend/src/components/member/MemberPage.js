@@ -308,6 +308,16 @@ const MemberPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAdmin, updateUser } = useAuth();
+  
+  // Get current date components
+  const getCurrentDateComponents = () => {
+    const now = new Date();
+    return {
+      day: now.getDate().toString().padStart(2, '0'),
+      month: (now.getMonth() + 1).toString().padStart(2, '0'),
+      year: now.getFullYear().toString()
+    };
+  };
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -486,16 +496,6 @@ const MemberPage = () => {
   const combineDateComponents = (day, month, year) => {
     if (!day || !month || !year) return '';
     return `${year}-${month}-${day}`;
-  };
-
-  // Get current date components
-  const getCurrentDateComponents = () => {
-    const now = new Date();
-    return {
-      day: now.getDate().toString().padStart(2, '0'),
-      month: (now.getMonth() + 1).toString().padStart(2, '0'),
-      year: now.getFullYear().toString()
-    };
   };
 
   // Get vital status color and label based on value and ranges
