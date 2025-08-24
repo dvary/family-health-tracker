@@ -98,7 +98,7 @@ const ProfilePictureUpload = ({ member, onUploadSuccess, onClose }) => {
             <div className="w-20 h-20 rounded-full mx-auto overflow-hidden border-2 border-gray-200">
               {member.profile_picture ? (
                 <img
-                  src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${member.profile_picture}`}
+                  src={member.profile_picture}
                   alt="Current profile picture"
                   className="w-full h-full object-cover"
                 />

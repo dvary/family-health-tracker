@@ -1244,7 +1244,7 @@ const Dashboard = () => {
                            <div className="flex-shrink-0">
                              {member.profile_picture ? (
                                <img
-                                 src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${member.profile_picture}`}
+                                 src={member.profile_picture}
                                  alt={`${member.name}'s profile`}
                                  className="w-16 h-16 rounded-lg object-cover border-2 border-gray-200"
                                />

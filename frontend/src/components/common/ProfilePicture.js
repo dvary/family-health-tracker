@@ -51,7 +51,7 @@ const ProfilePicture = ({
     return (
       <div className="relative group">
         <img
-          src={`${process.env.REACT_APP_API_URL?.replace('/api', '')}${member.profile_picture}`}
+          src={member.profile_picture}
           alt={`${member.name}'s profile picture`}
           className={`${baseClasses} object-cover cursor-pointer hover:scale-105`}
           style={{ borderColor: colors.color }}
