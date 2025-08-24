@@ -2,12 +2,12 @@ name: life-vault
 
 services:
   postgres:
-    image: postgres:15-alpine
     container_name: life-vault-db
+    image: postgres:15-alpine
     environment:
       POSTGRES_DB: family_health_tracker
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
+      POSTGRES_PASSWORD: postgres
       TZ: Asia/Kolkata
     ports:
       - "5432:5432"
@@ -24,16 +24,19 @@ services:
 
   backend:
     container_name: life-vault-backend
-    image: life-vault-backend:${LIFE_VAULT_VERSION:-latest}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:password123@postgres:5432/family_health_tracker
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_EXPIRES_IN: 7d
       PORT: 5000
-      MAX_FILE_SIZE: 20971520
-      UPLOAD_PATH: /app/uploads
-      CORS_ORIGIN: https://family.labratindia.org
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: family_health_tracker
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      API_URL: https://family.labratindia.org/api
       TZ: Asia/Kolkata
     volumes:
       - life-vault_uploads_data:/app/uploads
@@ -51,20 +54,21 @@ services:
 
   frontend:
     container_name: life-vault-frontend
-    image: life-vault-frontend:${LIFE_VAULT_VERSION:-latest}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     environment:
       REACT_APP_API_URL: /api
       TZ: Asia/Kolkata
-    depends_on:
-      backend:
-        condition: service_healthy
     networks:
       - life_vault
     restart: unless-stopped
 
   nginx:
     container_name: life-vault-nginx
-    image: life-vault-nginx:${LIFE_VAULT_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
     ports:
       - "3000:80"
     depends_on:
