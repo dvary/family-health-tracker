@@ -131,6 +131,22 @@ router.post('/vitals', [
       });
     }
 
+    // Check for duplicate submission (same vital type for same member within 5 seconds)
+    const fiveSecondsAgo = new Date(Date.now() - 5000);
+    const duplicateCheck = await query(
+      `SELECT id FROM health_vitals 
+       WHERE member_id = $1 AND vital_type = $2 AND value = $3 AND unit = $4 
+       AND created_at > $5`,
+      [memberId, vitalType, value, unit, fiveSecondsAgo]
+    );
+
+    if (duplicateCheck.rows.length > 0) {
+      return res.status(409).json({ 
+        error: 'Duplicate submission', 
+        message: 'This vital has already been added recently. Please wait a moment before trying again.' 
+      });
+    }
+
     const result = await query(
       `INSERT INTO health_vitals 
         (member_id, vital_type, value, unit, notes, recorded_at) 

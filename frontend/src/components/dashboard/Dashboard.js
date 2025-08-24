@@ -246,6 +246,7 @@ const Dashboard = () => {
   const [showAddVitalModal, setShowAddVitalModal] = useState(false);
   const [showUploadReportModal, setShowUploadReportModal] = useState(false);
   const [showUploadDocumentModal, setShowUploadDocumentModal] = useState(false);
+  const [isSubmittingVital, setIsSubmittingVital] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -755,6 +756,14 @@ const Dashboard = () => {
 
   const handleAddVital = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmittingVital) {
+      return;
+    }
+    
+    setIsSubmittingVital(true);
+    
     try {
       await axios.post('/health/vitals', {
         memberId: selectedMember.id,
@@ -775,7 +784,13 @@ const Dashboard = () => {
         recordedAt: new Date().toISOString().split('T')[0]
       });
     } catch (error) {
-      toast.error('Failed to add health vital');
+      if (error.response && error.response.status === 409) {
+        toast.error('This vital has already been added recently. Please wait a moment before trying again.');
+      } else {
+        toast.error('Failed to add health vital');
+      }
+    } finally {
+      setIsSubmittingVital(false);
     }
   };
 
@@ -1338,11 +1353,20 @@ const Dashboard = () => {
                 />
               </div>
               <div className="flex space-x-3">
-                <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
-                  Add Vital
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingVital}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    isSubmittingVital 
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-teal-600 hover:bg-teal-700 text-white'
+                  }`}
+                >
+                  {isSubmittingVital ? 'Adding Vital...' : 'Add Vital'}
                 </button>
                 <button
                   type="button"
+                  disabled={isSubmittingVital}
                   onClick={() => {
                     setShowAddVitalModal(false);
                     setSelectedMember(null);
@@ -1354,7 +1378,11 @@ const Dashboard = () => {
                       recordedAt: new Date().toISOString().split('T')[0]
                     });
                   }}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    isSubmittingVital 
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
+                      : 'bg-gray-500 hover:bg-gray-600 text-white'
+                  }`}
                 >
                   Cancel
                 </button>
