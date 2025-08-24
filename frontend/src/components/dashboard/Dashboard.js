@@ -259,8 +259,8 @@ const Dashboard = () => {
   });
   
   // Date component states
-  const [dateComponents, setDateComponents] = useState({ day: '', month: '', year: '' });
-  const [editDateComponents, setEditDateComponents] = useState({ day: '', month: '', year: '' });
+  const [dateComponents, setDateComponents] = useState(getCurrentDateComponents());
+  const [editDateComponents, setEditDateComponents] = useState(getCurrentDateComponents());
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
     value: '',
@@ -466,6 +466,16 @@ const Dashboard = () => {
   const combineDateComponents = (day, month, year) => {
     if (!day || !month || !year) return '';
     return `${year}-${month}-${day}`;
+  };
+
+  // Get current date components
+  const getCurrentDateComponents = () => {
+    const now = new Date();
+    return {
+      day: now.getDate().toString().padStart(2, '0'),
+      month: (now.getMonth() + 1).toString().padStart(2, '0'),
+      year: now.getFullYear().toString()
+    };
   };
 
   // Vital type change handler
@@ -687,9 +697,9 @@ const Dashboard = () => {
     if (member.date_of_birth) {
       const components = parseDateComponents(member.date_of_birth);
       setEditDateComponents(components);
-    } else {
-      setEditDateComponents({ day: '', month: '', year: '' });
-    }
+          } else {
+        setEditDateComponents(getCurrentDateComponents());
+      }
   };
 
   const handleCancel = () => {
@@ -697,8 +707,8 @@ const Dashboard = () => {
     setEditingMember(null);
     setFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '', role: 'non_admin' });
     setEditFormData({ name: '', dateOfBirth: '', gender: '', bloodGroup: '', mobileNumber: '', email: '', password: '', role: 'non_admin' });
-    setDateComponents({ day: '', month: '', year: '' });
-    setEditDateComponents({ day: '', month: '', year: '' });
+    setDateComponents(getCurrentDateComponents());
+    setEditDateComponents(getCurrentDateComponents());
   };
 
   const handleMemberClick = (member) => {

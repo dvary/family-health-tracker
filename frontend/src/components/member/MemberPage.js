@@ -332,19 +332,19 @@ const MemberPage = () => {
   });
   
   // Date component states for edit form
-  const [editDateComponents, setEditDateComponents] = useState({ day: '', month: '', year: '' });
+  const [editDateComponents, setEditDateComponents] = useState(getCurrentDateComponents());
   
   // Date component states for vitals
-  const [vitalDateComponents, setVitalDateComponents] = useState({ day: '', month: '', year: '' });
-  const [editVitalDateComponents, setEditVitalDateComponents] = useState({ day: '', month: '', year: '' });
+  const [vitalDateComponents, setVitalDateComponents] = useState(getCurrentDateComponents());
+  const [editVitalDateComponents, setEditVitalDateComponents] = useState(getCurrentDateComponents());
   
   // Date component states for reports
-  const [reportDateComponents, setReportDateComponents] = useState({ day: '', month: '', year: '' });
-  const [editReportDateComponents, setEditReportDateComponents] = useState({ day: '', month: '', year: '' });
+  const [reportDateComponents, setReportDateComponents] = useState(getCurrentDateComponents());
+  const [editReportDateComponents, setEditReportDateComponents] = useState(getCurrentDateComponents());
   
   // Date component states for documents
-  const [documentDateComponents, setDocumentDateComponents] = useState({ day: '', month: '', year: '' });
-  const [editDocumentDateComponents, setEditDocumentDateComponents] = useState({ day: '', month: '', year: '' });
+  const [documentDateComponents, setDocumentDateComponents] = useState(getCurrentDateComponents());
+  const [editDocumentDateComponents, setEditDocumentDateComponents] = useState(getCurrentDateComponents());
   
   const [vitalFormData, setVitalFormData] = useState({
     vitalType: '',
@@ -486,6 +486,16 @@ const MemberPage = () => {
   const combineDateComponents = (day, month, year) => {
     if (!day || !month || !year) return '';
     return `${year}-${month}-${day}`;
+  };
+
+  // Get current date components
+  const getCurrentDateComponents = () => {
+    const now = new Date();
+    return {
+      day: now.getDate().toString().padStart(2, '0'),
+      month: (now.getMonth() + 1).toString().padStart(2, '0'),
+      year: now.getFullYear().toString()
+    };
   };
 
   // Get vital status color and label based on value and ranges
@@ -842,7 +852,7 @@ const MemberPage = () => {
         const components = parseDateComponents(foundMember.date_of_birth);
         setEditDateComponents(components);
       } else {
-        setEditDateComponents({ day: '', month: '', year: '' });
+        setEditDateComponents(getCurrentDateComponents());
       }
       
       // Fetch health vitals
@@ -996,7 +1006,7 @@ const MemberPage = () => {
       email: member.user_email || '',
       password: ''
     });
-    setEditDateComponents({ day: '', month: '', year: '' });
+    setEditDateComponents(getCurrentDateComponents());
   };
 
 
@@ -1087,10 +1097,10 @@ const MemberPage = () => {
     // Populate date components for editing
     if (vital.recorded_at) {
       const components = parseDateComponents(vital.recorded_at);
-      setEditVitalDateComponents(components);
-    } else {
-      setEditVitalDateComponents({ day: '', month: '', year: '' });
-    }
+              setEditVitalDateComponents(components);
+      } else {
+        setEditVitalDateComponents(getCurrentDateComponents());
+      }
     
     setShowEditVitalModal(true);
   };
@@ -1338,10 +1348,10 @@ const MemberPage = () => {
     // Populate date components for editing
     if (document.upload_date) {
       const components = parseDateComponents(document.upload_date);
-      setEditDocumentDateComponents(components);
-    } else {
-      setEditDocumentDateComponents({ day: '', month: '', year: '' });
-    }
+              setEditDocumentDateComponents(components);
+      } else {
+        setEditDocumentDateComponents(getCurrentDateComponents());
+      }
     
     setShowEditDocumentModal(true);
   };
@@ -1418,10 +1428,10 @@ const MemberPage = () => {
     // Populate date components for editing
     if (report.report_date) {
       const components = parseDateComponents(report.report_date);
-      setEditReportDateComponents(components);
-    } else {
-      setEditReportDateComponents({ day: '', month: '', year: '' });
-    }
+              setEditReportDateComponents(components);
+      } else {
+        setEditReportDateComponents(getCurrentDateComponents());
+      }
     
     setShowEditReportModal(true);
   };
