@@ -461,6 +461,19 @@ router.put('/members/:memberId', [
       );
     }
 
+    // If name was updated and this member has a user_id, also update the user's name
+    if (name !== undefined && userId) {
+      // Split the name into first and last name
+      const nameParts = name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      await query(
+        'UPDATE users SET first_name = $1, last_name = $2, updated_at = NOW() WHERE id = $3',
+        [firstName, lastName, userId]
+      );
+    }
+
     // Get updated member data
     const result = await query(
       `SELECT 
