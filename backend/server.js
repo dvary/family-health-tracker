@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const familyRoutes = require('./routes/family');
 const healthRoutes = require('./routes/health');
 const { errorHandler } = require('./middleware/errorHandler');
+const { initDatabase } = require('./init-db');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -96,10 +97,13 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-app.listen(PORT, () => {
-      console.log(`🚀 Life Vault API running on port ${PORT}`);
+app.listen(PORT, async () => {
+  console.log(`🚀 Life Vault API running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API URL: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}/api`);
+  
+  // Initialize database
+  await initDatabase();
 });
 
 module.exports = app;
