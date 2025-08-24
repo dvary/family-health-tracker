@@ -325,6 +325,7 @@ const MemberPage = () => {
   const [showEditVitalModal, setShowEditVitalModal] = useState(false);
   const [editingVital, setEditingVital] = useState(null);
   const [isSubmittingVital, setIsSubmittingVital] = useState(false);
+  const [isSubmittingMember, setIsSubmittingMember] = useState(false);
   const [expandedVitalTypes, setExpandedVitalTypes] = useState(new Set());
   const [expandedReportTypes, setExpandedReportTypes] = useState(new Set());
   const [showUploadReportModal, setShowUploadReportModal] = useState(false);
@@ -958,6 +959,14 @@ const MemberPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmittingMember) {
+      return;
+    }
+    
+    setIsSubmittingMember(true);
+    
     try {
       // Only send non-empty fields
       const updateData = {};
@@ -984,6 +993,8 @@ const MemberPage = () => {
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to update member';
       toast.error(errorMessage);
+    } finally {
+      setIsSubmittingMember(false);
     }
   };
 
@@ -1877,13 +1888,26 @@ const MemberPage = () => {
 
 
             <div className="flex space-x-3">
-              <button type="submit" className="btn-primary">
-                Update Member
+              <button 
+                type="submit" 
+                disabled={isSubmittingMember}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  isSubmittingMember 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : 'bg-teal-600 hover:bg-teal-700 text-white'
+                }`}
+              >
+                {isSubmittingMember ? 'Updating...' : 'Update Member'}
               </button>
               <button
                 type="button"
+                disabled={isSubmittingMember}
                 onClick={handleCancel}
-                className="btn-secondary"
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  isSubmittingMember 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : 'bg-gray-500 hover:bg-gray-600 text-white'
+                }`}
               >
                 Cancel
               </button>

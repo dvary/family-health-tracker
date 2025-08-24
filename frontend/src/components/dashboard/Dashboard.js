@@ -247,6 +247,7 @@ const Dashboard = () => {
   const [showUploadReportModal, setShowUploadReportModal] = useState(false);
   const [showUploadDocumentModal, setShowUploadDocumentModal] = useState(false);
   const [isSubmittingVital, setIsSubmittingVital] = useState(false);
+  const [isSubmittingMember, setIsSubmittingMember] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -546,6 +547,11 @@ const Dashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    if (isSubmittingMember) {
+      return;
+    }
+    
     // Frontend validation to match backend
     if (!editingMember) {
       // Validation for adding new member
@@ -621,6 +627,8 @@ const Dashboard = () => {
       }
     }
     
+    setIsSubmittingMember(true);
+    
     try {
       if (editingMember) {
         // For editing, use editFormData and only send non-empty fields
@@ -678,6 +686,8 @@ const Dashboard = () => {
       const errorMessage = error.response?.data?.message || 
         (editingMember ? 'Failed to update family member' : 'Failed to add family member');
       toast.error(errorMessage);
+    } finally {
+      setIsSubmittingMember(false);
     }
   };
 
@@ -1141,13 +1151,26 @@ const Dashboard = () => {
             )}
 
             <div className="flex space-x-3">
-              <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium">
-                {editingMember ? 'Update Member' : 'Add Member'}
+              <button 
+                type="submit" 
+                disabled={isSubmittingMember}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  isSubmittingMember 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : 'bg-teal-600 hover:bg-teal-700 text-white'
+                }`}
+              >
+                {isSubmittingMember ? (editingMember ? 'Updating...' : 'Adding...') : (editingMember ? 'Update Member' : 'Add Member')}
               </button>
               <button
                 type="button"
+                disabled={isSubmittingMember}
                 onClick={handleCancel}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  isSubmittingMember 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : 'bg-gray-500 hover:bg-gray-600 text-white'
+                }`}
               >
                 Cancel
               </button>
