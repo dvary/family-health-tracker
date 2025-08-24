@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -16,12 +14,7 @@ services:
     networks:
       - family-health-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
+
 
   backend:
     build:
@@ -41,8 +34,7 @@ services:
     volumes:
       - uploads_data:/app/uploads
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     command: >
       sh -c "
         echo 'Starting backend server...' &&
@@ -51,12 +43,7 @@ services:
     networks:
       - family-health-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health-check', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+
 
   frontend:
     build:
@@ -69,17 +56,11 @@ services:
       REACT_APP_API_URL: ${REACT_APP_API_URL:-https://family.labratindia.org/api}
       TZ: Asia/Kolkata
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - family-health-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+
 
   nginx:
     build:
