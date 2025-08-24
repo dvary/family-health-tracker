@@ -13,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - family-health-network
     restart: unless-stopped
@@ -83,15 +82,12 @@ services:
       start_period: 60s
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
     container_name: life-vault-nginx
     ports:
       - "3000:80"
-    command: >
-      sh -c "
-        echo 'events { worker_connections 1024; } http { upstream frontend { server life-vault-frontend:3000; } upstream backend { server life-vault-backend:5000; } server { listen 80; server_name localhost; client_max_body_size 20M; location /api/ { proxy_pass http://backend; proxy_set_header Host $$host; proxy_set_header X-Real-IP $$remote_addr; proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $$scheme; proxy_connect_timeout 300s; proxy_send_timeout 300s; proxy_read_timeout 300s; } location /uploads/ { proxy_pass http://backend; proxy_set_header Host $$host; proxy_set_header X-Real-IP $$remote_addr; proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $$scheme; } location / { proxy_pass http://frontend; proxy_set_header Host $$host; proxy_set_header X-Real-IP $$remote_addr; proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $$scheme; } } }' > /etc/nginx/nginx.conf &&
-        nginx -g 'daemon off;'
-      "
     depends_on:
       - frontend
       - backend
