@@ -72,21 +72,3 @@ jobs:
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-nginx:${{ steps.meta.outputs.version }}
         labels: ${{ steps.meta.outputs.labels }}
-
-    - name: Create Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
-        body: |
-          Docker images have been built and pushed to GitHub Container Registry.
-          
-          Images:
-          - `ghcr.io/dvary/life-vault-backend:v${{ github.run_number }}`
-          - `ghcr.io/dvary/life-vault-frontend:v${{ github.run_number }}`
-          - `ghcr.io/dvary/life-vault-nginx:v${{ github.run_number }}`
-        draft: false
-        prerelease: false
