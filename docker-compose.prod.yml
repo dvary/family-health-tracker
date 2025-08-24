@@ -24,9 +24,7 @@ services:
 
   backend:
     container_name: life-vault-backend
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/dvary/life-vault-backend:latest
     environment:
       NODE_ENV: production
       PORT: 5000
@@ -54,9 +52,7 @@ services:
 
   frontend:
     container_name: life-vault-frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/dvary/life-vault-frontend:latest
     environment:
       REACT_APP_API_URL: /api
       TZ: Asia/Kolkata
@@ -66,9 +62,7 @@ services:
 
   nginx:
     container_name: life-vault-nginx
-    build:
-      context: .
-      dockerfile: nginx.Dockerfile
+    image: ghcr.io/dvary/life-vault-nginx:latest
     ports:
       - "3000:80"
     depends_on:
