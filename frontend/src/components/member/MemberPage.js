@@ -793,6 +793,32 @@ const MemberPage = () => {
     }
   };
 
+  // Calculate age of a record (how old the record is)
+  const calculateRecordAge = (recordDate) => {
+    if (!recordDate) return null;
+    const today = new Date();
+    const recordDateTime = new Date(recordDate);
+    const diffTime = Math.abs(today - recordDateTime);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} week${weeks !== 1 ? 's' : ''} ago`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months !== 1 ? 's' : ''} ago`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years !== 1 ? 's' : ''} ago`;
+    }
+  };
+
   const [allMembers, setAllMembers] = useState([]);
   const [healthVitals, setHealthVitals] = useState([]);
   const [medicalReports, setMedicalReports] = useState([]);
@@ -2031,6 +2057,9 @@ const MemberPage = () => {
                                   {vitalStatus.status}
                                 </span>
                               )}
+                              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                {calculateRecordAge(latestBMI.recorded_at)}
+                              </span>
                             </div>
                             <div className="flex items-center space-x-2">
                               <p className={`text-lg font-bold ${vitalStatus.color}`}>
@@ -2121,6 +2150,9 @@ const MemberPage = () => {
                                   {vitalStatus.status}
                                 </span>
                               )}
+                              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                {calculateRecordAge(latestVital.recorded_at)}
+                              </span>
                             </div>
                             <div className="flex items-center space-x-2">
                               <p className={`text-lg font-bold ${vitalStatus.color}`}>
