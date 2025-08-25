@@ -2022,30 +2022,28 @@ const MemberPage = () => {
                           className="p-3 cursor-pointer card-content"
                           onClick={() => toggleVitalTypeExpansion('bmi')}
                         >
-                          <div className="flex justify-between items-start card-body">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <h4 className="text-lg font-semibold text-gray-900">BMI</h4>
-                                {vitalStatus.status && (
-                                  <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
-                                    {vitalStatus.status}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="mb-2">
-                                <p className={`text-xl font-bold ${vitalStatus.color}`}>
-                                  {latestBMI.value} {latestBMI.unit}
-                                </p>
-                              </div>
+                                                  <div className="flex justify-between items-center card-body">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <h4 className="text-lg font-semibold text-gray-900">BMI</h4>
+                              {vitalStatus.status && (
+                                <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
+                                  {vitalStatus.status}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <p className={`text-lg font-bold ${vitalStatus.color}`}>
+                                {latestBMI.value} {latestBMI.unit}
+                              </p>
                               {vitalConfig.ranges && (
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                    {vitalConfig.ranges.display}
-                                  </span>
-                                </div>
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                  {vitalConfig.ranges.display}
+                                </span>
                               )}
                             </div>
                           </div>
+                        </div>
                         </div>
 
                         {/* Expanded BMI Records */}
@@ -2114,9 +2112,9 @@ const MemberPage = () => {
                         className="p-3 cursor-pointer card-content"
                         onClick={() => toggleVitalTypeExpansion(vitalType)}
                       >
-                        <div className="flex justify-between items-start card-body">
+                        <div className="flex justify-between items-center card-body">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
+                            <div className="flex items-center space-x-2 mb-1">
                               <h4 className="text-lg font-semibold text-gray-900">{vitalConfig.label}</h4>
                               {vitalStatus.status && (
                                 <span className={`text-xs px-2 py-1 rounded-full ${vitalStatus.bgColor} ${vitalStatus.color}`}>
@@ -2124,33 +2122,28 @@ const MemberPage = () => {
                                 </span>
                               )}
                             </div>
-                            <div className="mb-2">
-                              <p className={`text-xl font-bold ${vitalStatus.color}`}>
+                            <div className="flex items-center space-x-2">
+                              <p className={`text-lg font-bold ${vitalStatus.color}`}>
                                 {latestVital.value} {latestVital.unit}
                               </p>
-                            </div>
-                            {vitalConfig.ranges && (
-                              <div className="flex items-center space-x-2 mb-1">
+                              {vitalConfig.ranges && (
                                 <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                                   {vitalConfig.ranges.display}
                                 </span>
-                              </div>
-                            )}
-
-
+                              )}
+                            </div>
                           </div>
-                                                     <div className="flex items-center space-x-2">
-         								{/* Add Vital inside this type */}
-         								<button
-         									onClick={(e) => { e.stopPropagation(); openAddVitalForType(vitalType); }}
-         									className="text-teal-600 hover:text-teal-800 p-2 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
-         									title={`Add ${vitalConfig.label}`}
-         								>
-         									<PlusIcon />
-         								</button>
-
-                             </div>
+                          <div className="flex items-center space-x-2">
+                            {/* Add Vital inside this type */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); openAddVitalForType(vitalType); }}
+                              className="text-teal-600 hover:text-teal-800 p-2 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                              title={`Add ${vitalConfig.label}`}
+                            >
+                              <PlusIcon />
+                            </button>
                           </div>
+                        </div>
                           </div>
 
                           {/* Expanded Content - Show All Records */}
