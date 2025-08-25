@@ -87,8 +87,8 @@ const VITAL_TYPES = {
     unit: 'cm', 
     placeholder: '170',
     ranges: {
-      normal: { min: 140, max: 200 },
-      display: '140-200'
+      normal: { min: 0, max: 200 },
+      display: '0-200'
     }
   },
   weight: { 
@@ -96,8 +96,8 @@ const VITAL_TYPES = {
     unit: 'kg', 
     placeholder: '70',
     ranges: {
-      normal: { min: 40, max: 120 },
-      display: '40-120'
+      normal: { min: 0, max: 120 },
+      display: '0-120'
     }
   },
   bmi: { 
@@ -714,13 +714,11 @@ const MemberPage = () => {
     });
   };
 
-  // Group reports by type and sub-type for stacked view
+  // Group reports by type for stacked view
   const groupReportsByType = (reports) => {
     const grouped = {};
     reports.forEach(report => {
-      // Create a unique key that includes both report_type and report_sub_type
-      const subType = report.report_sub_type || '';
-      const key = subType ? `${report.report_type}_${subType}` : report.report_type;
+      const key = report.report_type;
       
       if (!grouped[key]) {
         grouped[key] = [];
@@ -1189,6 +1187,10 @@ const MemberPage = () => {
     // Frontend validation to match backend
     if (!reportFormData.reportType || reportFormData.reportType === '') {
       toast.error('Report Type is required');
+      return;
+    }
+    if (!reportFormData.reportSubType || reportFormData.reportSubType === '') {
+      toast.error('Report Sub-Type is required');
       return;
     }
     if (!reportFormData.reportDate || reportFormData.reportDate.trim() === '') {
@@ -2269,11 +2271,6 @@ const MemberPage = () => {
                             <div className="flex items-center space-x-2 mb-2">
                               <h4 className="text-lg font-semibold text-gray-900">
                                 {reportConfig.label}
-                                {groupSubTypeLabel && (
-                                  <span className="text-sm font-normal text-gray-600 ml-2">
-                                    - {groupSubTypeLabel}
-                                  </span>
-                                )}
                               </h4>
                               {mainCardStatus.status && (
                                 <span className={`text-xs px-2 py-1 rounded-full ${mainCardStatus.bgColor} ${mainCardStatus.color}`}>
@@ -2774,22 +2771,28 @@ const MemberPage = () => {
                     ))}
                   </select>
                 </div>
-                {reportFormData.reportType && REPORT_TYPES[reportFormData.reportType]?.subTypes && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Report Sub-Type</label>
-                    <select
-                      value={reportFormData.reportSubType}
-                      onChange={(e) => setReportFormData({...reportFormData, reportSubType: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      required
-                    >
-                      <option value="">Select Sub-Type</option>
-                      {REPORT_TYPES[reportFormData.reportType].subTypes.map((subType) => (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Sub-Type <span className="text-red-500">*</span></label>
+                  <select
+                    value={reportFormData.reportSubType}
+                    onChange={(e) => setReportFormData({...reportFormData, reportSubType: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    required
+                  >
+                    <option value="">Select Sub-Type</option>
+                    {reportFormData.reportType && REPORT_TYPES[reportFormData.reportType]?.subTypes ? (
+                      REPORT_TYPES[reportFormData.reportType].subTypes.map((subType) => (
                         <option key={subType.value} value={subType.value}>{subType.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                      ))
+                    ) : (
+                      Object.values(REPORT_TYPES).flatMap(config => 
+                        config.subTypes ? config.subTypes.map((subType) => (
+                          <option key={subType.value} value={subType.value}>{subType.label}</option>
+                        )) : []
+                      )
+                    )}
+                  </select>
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Report Date <span className="text-red-500">*</span></label>

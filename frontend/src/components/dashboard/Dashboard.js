@@ -8,13 +8,13 @@ import ProfilePictureUpload from '../common/ProfilePictureUpload';
 
 // Vital types configuration with units and reference ranges
 const VITAL_TYPES = {
-  height: { 
+    height: { 
     label: 'Height', 
-    unit: 'cm', 
+    unit: 'cm',
     placeholder: '170',
     ranges: {
-      normal: { min: 140, max: 200 },
-      display: '140-200'
+      normal: { min: 0, max: 200 },
+      display: '0-200'
     }
   },
   weight: { 
@@ -22,8 +22,8 @@ const VITAL_TYPES = {
     unit: 'kg', 
     placeholder: '70',
     ranges: {
-      normal: { min: 40, max: 120 },
-      display: '40-120'
+      normal: { min: 0, max: 120 },
+      display: '0-120'
     }
   },
   bmi: { 
@@ -820,10 +820,7 @@ const Dashboard = () => {
       const formData = new FormData();
       formData.append('memberId', selectedMember.id);
       formData.append('reportType', reportFormData.reportType);
-      if (reportFormData.reportSubType) {
-        formData.append('reportSubType', reportFormData.reportSubType);
-      }
-
+      formData.append('reportSubType', reportFormData.reportSubType || '');
       formData.append('description', reportFormData.description);
       formData.append('reportDate', reportFormData.reportDate);
       formData.append('file', reportFormData.file);
@@ -1463,22 +1460,28 @@ const Dashboard = () => {
                   ))}
                 </select>
               </div>
-              {reportFormData.reportType && REPORT_TYPES[reportFormData.reportType]?.subTypes && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Report Sub-Type</label>
-                  <select
-                    value={reportFormData.reportSubType}
-                    onChange={(e) => setReportFormData({...reportFormData, reportSubType: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    required
-                  >
-                    <option value="">Select Sub-Type</option>
-                    {REPORT_TYPES[reportFormData.reportType].subTypes.map((subType) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Report Sub-Type <span className="text-red-500">*</span></label>
+                <select
+                  value={reportFormData.reportSubType}
+                  onChange={(e) => setReportFormData({...reportFormData, reportSubType: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  required
+                >
+                  <option value="">Select Sub-Type</option>
+                  {reportFormData.reportType && REPORT_TYPES[reportFormData.reportType]?.subTypes ? (
+                    REPORT_TYPES[reportFormData.reportType].subTypes.map((subType) => (
                       <option key={subType.value} value={subType.value}>{subType.label}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
+                    ))
+                  ) : (
+                    Object.values(REPORT_TYPES).flatMap(config => 
+                      config.subTypes ? config.subTypes.map((subType) => (
+                        <option key={subType.value} value={subType.value}>{subType.label}</option>
+                      )) : []
+                    )
+                  )}
+                </select>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Report Date</label>
