@@ -714,11 +714,14 @@ const MemberPage = () => {
     });
   };
 
-  // Group reports by type for stacked view
+  // Group reports by type and sub-type for stacked view
   const groupReportsByType = (reports) => {
     const grouped = {};
     reports.forEach(report => {
-      const key = report.report_type;
+      // Create a unique key that includes both report_type and report_sub_type
+      const subType = report.report_sub_type || '';
+      const key = subType ? `${report.report_type}_${subType}` : report.report_type;
+      
       if (!grouped[key]) {
         grouped[key] = [];
       }
@@ -1218,6 +1221,7 @@ const MemberPage = () => {
       const formData = new FormData();
       formData.append('memberId', member.id);
       formData.append('reportType', reportFormData.reportType);
+      formData.append('reportSubType', reportFormData.reportSubType || '');
       formData.append('description', reportFormData.description);
       formData.append('reportDate', reportFormData.reportDate);
       formData.append('file', reportFormData.file);
@@ -2266,7 +2270,14 @@ const MemberPage = () => {
                         <div className="flex justify-between items-start card-body">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
-                              <h4 className="text-lg font-semibold text-gray-900">{reportConfig.label}</h4>
+                              <h4 className="text-lg font-semibold text-gray-900">
+                                {reportConfig.label}
+                                {groupSubTypeLabel && (
+                                  <span className="text-sm font-normal text-gray-600 ml-2">
+                                    - {groupSubTypeLabel}
+                                  </span>
+                                )}
+                              </h4>
                               {mainCardStatus.status && (
                                 <span className={`text-xs px-2 py-1 rounded-full ${mainCardStatus.bgColor} ${mainCardStatus.color}`}>
                                   {mainCardStatus.status}
@@ -2285,7 +2296,7 @@ const MemberPage = () => {
                           <div className="flex items-center space-x-2">
 								{/* Upload inside this report type */}
 								<button 
-									onClick={(e) => { e.stopPropagation(); openUploadForReportType(latestReport.report_type); }}
+									onClick={(e) => { e.stopPropagation(); openUploadForReportType(latestReport.report_type, latestReport.report_sub_type); }}
 									className="text-teal-600 hover:text-teal-800 p-2 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
 									title={`Upload ${reportConfig.label}`}
 								>
