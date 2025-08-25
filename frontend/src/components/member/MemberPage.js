@@ -2014,13 +2014,13 @@ const MemberPage = () => {
                     };
                     
                     return (
-                      <div className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow w-full max-w-full ${getBMIGradientClass(vitalStatus)}`}>
+                      <div className={`rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col card-consistent-height w-full max-w-full ${getBMIGradientClass(vitalStatus)}`}>
                         {/* BMI Card - Always Visible */}
                         <div 
-                          className="p-3 cursor-pointer"
+                          className="p-3 cursor-pointer card-content"
                           onClick={() => toggleVitalTypeExpansion('bmi')}
                         >
-                          <div className="flex justify-between items-start">
+                          <div className="flex justify-between items-start card-body">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
                                 <h4 className="text-lg font-semibold text-gray-900">BMI</h4>
@@ -2042,10 +2042,7 @@ const MemberPage = () => {
                                   </span>
                                 </div>
                               )}
-
-
                             </div>
-                            
                           </div>
                         </div>
 
