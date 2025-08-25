@@ -669,6 +669,21 @@ const MemberPage = () => {
     }
   };
 
+  // Get age tag color based on vital status
+  const getAgeTagColor = (status) => {
+    switch (status.level) {
+      case 'high':
+      case 'low':
+        return 'bg-rose-100 text-rose-700';
+      case 'warning':
+        return 'bg-amber-100 text-amber-700';
+      case 'normal':
+        return 'bg-green-100 text-green-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
+
   // Get gradient class based on status level (for reports and documents - always orange)
   const getGradientClass = (status) => {
     switch (status.level) {
@@ -701,13 +716,11 @@ const MemberPage = () => {
     return statusFunction(latestRecord);
   };
 
-  // Toggle expanded state for vital types
+  // Toggle expanded state for vital types - only one can be expanded at a time
   const toggleVitalTypeExpansion = (vitalType) => {
     setExpandedVitalTypes(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(vitalType)) {
-        newSet.delete(vitalType);
-      } else {
+      const newSet = new Set();
+      if (!prev.has(vitalType)) {
         newSet.add(vitalType);
       }
       return newSet;
@@ -734,13 +747,11 @@ const MemberPage = () => {
     return grouped;
   };
 
-  // Toggle expanded state for report types
+  // Toggle expanded state for report types - only one can be expanded at a time
   const toggleReportTypeExpansion = (reportKey) => {
     setExpandedReportTypes(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(reportKey)) {
-        newSet.delete(reportKey);
-      } else {
+      const newSet = new Set();
+      if (!prev.has(reportKey)) {
         newSet.add(reportKey);
       }
       return newSet;
@@ -2057,7 +2068,7 @@ const MemberPage = () => {
                                   {vitalStatus.status}
                                 </span>
                               )}
-                              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                              <span className={`text-xs px-2 py-1 rounded-full ${getAgeTagColor(vitalStatus)}`}>
                                 {calculateRecordAge(latestBMI.recorded_at)}
                               </span>
                             </div>
@@ -2150,7 +2161,7 @@ const MemberPage = () => {
                                   {vitalStatus.status}
                                 </span>
                               )}
-                              <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                              <span className={`text-xs px-2 py-1 rounded-full ${getAgeTagColor(vitalStatus)}`}>
                                 {calculateRecordAge(latestVital.recorded_at)}
                               </span>
                             </div>
