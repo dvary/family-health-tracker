@@ -642,6 +642,35 @@ const MemberPage = () => {
     return grouped;
   };
 
+  // Sort grouped vitals by latest record status priority
+  const sortGroupedVitalsByStatus = (groupedVitals) => {
+    const vitalTypes = Object.keys(groupedVitals);
+    
+    return vitalTypes.sort((a, b) => {
+      const aVitals = groupedVitals[a];
+      const bVitals = groupedVitals[b];
+      
+      // BMI always comes first
+      if (a === 'bmi') return -1;
+      if (b === 'bmi') return 1;
+      
+      // Get the latest record status for each vital type
+      const aLatestVital = aVitals[0]; // First one is the latest due to sorting
+      const bLatestVital = bVitals[0];
+      
+      const aStatus = getVitalStatus(a, aLatestVital.value, member?.gender);
+      const bStatus = getVitalStatus(b, bLatestVital.value, member?.gender);
+      
+      // Sort by priority (high to low)
+      if (aStatus.priority !== bStatus.priority) {
+        return bStatus.priority - aStatus.priority;
+      }
+      
+      // If same priority, sort alphabetically
+      return a.localeCompare(b);
+    });
+  };
+
   // Get report status based on report type and sub-type
   const getReportStatus = (report) => {
     // For medical reports, always use orange color with no status tags
@@ -2124,7 +2153,12 @@ const MemberPage = () => {
                 )}
 
                 {/* Regular Vital Cards */}
-                {Object.entries(groupVitalsByType(sortVitalsByPriority(healthVitals))).map(([vitalType, vitals]) => {
+                {(() => {
+                  const groupedVitals = groupVitalsByType(healthVitals);
+                  const sortedVitalTypes = sortGroupedVitalsByStatus(groupedVitals);
+                  
+                  return sortedVitalTypes.map(vitalType => {
+                    const vitals = groupedVitals[vitalType];
                   const vitalConfig = VITAL_TYPES[vitalType] || { label: vitalType.replace('_', ' ').toUpperCase() };
                   const latestVital = vitals[0]; // First one is the latest due to sorting
                   const isExpanded = expandedVitalTypes.has(vitalType);
@@ -2254,7 +2288,8 @@ const MemberPage = () => {
                           )}
                     </div>
                   );
-                })}
+                });
+                })()}
               </div>
             ) : (
               <div className="text-center py-12">
