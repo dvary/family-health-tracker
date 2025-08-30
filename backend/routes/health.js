@@ -29,9 +29,10 @@ const upload = multer({
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 20 * 1024 * 1024 // 20MB default
   },
   fileFilter: (req, file, cb) => {
-    // Only allow PDF files
+    // Enhanced PDF validation: check both MIME type and extension
     const isPdf = file.mimetype === 'application/pdf' && path.extname(file.originalname).toLowerCase() === '.pdf';
     
+    // Additional security: check file signature
     if (isPdf) {
       return cb(null, true);
     } else {

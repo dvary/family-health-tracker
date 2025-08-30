@@ -9,6 +9,8 @@ const authRoutes = require('./routes/auth');
 const familyRoutes = require('./routes/family');
 const healthRoutes = require('./routes/health');
 const { errorHandler } = require('./middleware/errorHandler');
+const { sanitizeInput } = require('./middleware/inputSanitizer');
+const { generalRateLimit } = require('./middleware/rateLimiter');
 const { initDatabase } = require('./init-db');
 
 const app = express();
@@ -24,8 +26,21 @@ app.use(helmet({
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       fontSrc: ["'self'", "https:", "data:"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
     },
   },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 app.use(cors({
   origin: [
@@ -38,6 +53,12 @@ app.use(cors({
 app.use(morgan('combined'));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+// Input sanitization middleware
+app.use(sanitizeInput);
+
+// Rate limiting middleware
+app.use(generalRateLimit);
 
 // Increase timeout for file uploads
 app.use((req, res, next) => {
@@ -107,3 +128,4 @@ app.listen(PORT, async () => {
 });
 
 module.exports = app;
+

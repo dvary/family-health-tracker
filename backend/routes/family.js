@@ -34,6 +34,7 @@ const profileUpload = multer({
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
+    // Enhanced validation: check both extension and MIME type
     if (mimetype && extname) {
       return cb(null, true);
     } else {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Confetti from 'react-confetti';
@@ -11,9 +11,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiKey, setConfettiKey] = useState(0);
+  const timeoutRef = useRef(null);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Cleanup timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -55,7 +65,14 @@ const Login = () => {
       setShowConfetti(true);
       setConfettiKey(prev => prev + 1);
       console.log('Confetti triggered, will navigate in 3 seconds...');
-      setTimeout(() => {
+      
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // Set new timeout with proper cleanup
+      timeoutRef.current = setTimeout(() => {
         setShowConfetti(false);
         // Add a small delay to ensure state is updated
         navigate('/dashboard', { replace: true });

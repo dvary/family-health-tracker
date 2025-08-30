@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { query } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const { authRateLimit } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -87,6 +88,7 @@ router.post('/register', [
 
 // Login
 router.post('/login', [
+  authRateLimit,
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
 ], async (req, res) => {
